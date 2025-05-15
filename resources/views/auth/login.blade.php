@@ -6,7 +6,7 @@
         @csrf
         <br>
         <div class="headerLogin">
-            <h2>SISTEMA CONTROL DE INVENTARIO</h2>
+            <h2>INVENTARIO TIENDAS OLIMPIA</h2>
         </div>
         <br>
         <br>

@@ -1,8 +1,9 @@
+
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import 'bootstrap/dist/css/bootstrap.min.css';
-
 
 
 
@@ -19,3 +20,53 @@
     color: #000000;
     opacity: 1;
   }
+  .btnNuevoUsuario{
+    top: 170px;
+    left: 1571px;
+    width: 158px;
+    height: 31px;
+    background: transparent url('/public/img/svg/BotonNuevoUsuario.svg')0% 0% no-repeat padding-box;
+    opacity: 1;
+    color: #fff;
+  }
+  .titleTUser1{
+    top: 0px;
+    left: 0px;
+    width: 161px;
+    height: 41px;
+    text-align: right;
+    font: normal normal normal 30px/41px Galano Grotesque;
+    letter-spacing: 0px;
+    color: #435871;
+    text-transform: uppercase;
+  }
+  .titleTUser2{
+    top: 0px;
+    left: 161px;
+    width: 214px;
+    height: 41px;
+    text-align: left;
+    font: normal normal 600 30px/41px Galano Grotesque;
+    letter-spacing: 0px;
+    color: #435871;
+    text-transform: uppercase;
+  }
+  .tUser{
+    background: #1D3755 0% 0% no-repeat padding-box;
+    opacity: 1;
+  }
+  .pagination {
+    text-align: center;
+    margin-top: 20px;
+  }
+  .captionTbl{
+    top: 200px;
+    left: 477px;
+    width: 1046px;
+    height: 70px;
+    background: transparent url('/public/img/svg/trazado1.svg') 0% 0% no-repeat padding-box;
+    opacity: 1;
+    margin-bottom: 20px;
+    caption-side: top;
+  }
+  
