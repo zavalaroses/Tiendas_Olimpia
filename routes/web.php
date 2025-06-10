@@ -7,6 +7,7 @@ use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\GarantiasController;
 use App\Http\Controllers\ApartadosController;
 use App\Http\Controllers\VentasController;
+use App\Http\Controllers\CatalogoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,13 +41,17 @@ Route::middleware('auth')->group(function(){
     Route::get('/get-inventario',[InventarioController::class,'getInventario'])->name('getInventario');
 });
 Route::middleware('auth')->group(function(){
-    Route::get('/get-garantias',[InventarioController::class,'getGarantias'])->name('getGarantias');
+    Route::get('/get-garantias',[GarantiasController::class,'getGarantias'])->name('getGarantias');
 });
 Route::middleware('auth')->group(function(){
-    Route::get('/get-apartados',[InventarioController::class,'getApartados'])->name('getApartados');
+    Route::get('/get-apartados',[ApartadosController::class,'getApartados'])->name('getApartados');
 });
 Route::middleware('auth')->group(function(){
-    Route::get('/get-ventas',[InventarioController::class,'getVentas'])->name('getVentas');
+    Route::get('/get-ventas',[VentasController::class,'getVentas'])->name('getVentas');
+});
+Route::middleware('auth')->group(function(){
+    Route::get('/get-cat-choferes',[CatalogoController::class,'getChoferes'])->name('getChoferes');
+    Route::get('/get-cat-tiendas',[CatalogoController::class,'getTiendas'])->name('getTiendas');
 });
 
 require __DIR__.'/auth.php';

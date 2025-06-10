@@ -1,6 +1,10 @@
 
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+@import '@fortawesome/fontawesome-free/css/fontawesome.css';
+@import '@fortawesome/fontawesome-free/css/regular.css';
+@import '@fortawesome/fontawesome-free/css/solid.css';
+@import '@fortawesome/fontawesome-free/css/brands.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,65 +12,107 @@
 
 
 .headerLogin {
-    font: normal normal  18px Galano Grotesque;
-    text-align: center;
-    letter-spacing: 0px;
-    color: #000000;
-    opacity: 1;
-  }
-  .labelSesion{
-    font: normal normal  18px Galano Grotesque;
-    letter-spacing: 0px;
-    color: #000000;
-    opacity: 1;
-  }
-  .btnNuevoUsuario{
-    top: 170px;
-    left: 1571px;
-    width: 158px;
-    height: 31px;
-    background: transparent url('/public/img/svg/BotonNuevoUsuario.svg')0% 0% no-repeat padding-box;
-    opacity: 1;
-    color: #fff;
-  }
-  .titleTUser1{
-    top: 0px;
-    left: 0px;
-    width: 161px;
-    height: 41px;
-    text-align: right;
-    font: normal normal normal 30px/41px Galano Grotesque;
-    letter-spacing: 0px;
-    color: #435871;
-    text-transform: uppercase;
-  }
-  .titleTUser2{
-    top: 0px;
-    left: 161px;
-    width: 214px;
-    height: 41px;
-    text-align: left;
-    font: normal normal 600 30px/41px Galano Grotesque;
-    letter-spacing: 0px;
-    color: #435871;
-    text-transform: uppercase;
-  }
-  .tUser{
-    background: #1D3755 0% 0% no-repeat padding-box;
-    opacity: 1;
-  }
-  .pagination {
-    text-align: center;
-    margin-top: 20px;
-  }
-  .captionTbl{
-    top: 200px;
-    left: 477px;
-    width: 1046px;
-    height: 70px;
-    background: transparent url('/public/img/svg/trazado1.svg') 0% 0% no-repeat padding-box;
-    opacity: 1;
-    margin-bottom: 20px;
-    caption-side: top;
-  }
+  font: normal normal  18px Galano Grotesque;
+  text-align: center;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}
+.labelSesion{
+  font: normal normal  18px Galano Grotesque;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}
+.btnNuevoUsuario{
+  top: 170px;
+  left: 1571px;
+  width: 158px;
+  height: 31px;
+  background: transparent url('/public/img/svg/BotonNuevoUsuario.svg')0% 0% no-repeat padding-box;
+  background-color: transparent;
+  opacity: 1;
+  color: #fff;
+}
+.titleTUser1{
+  top: 0px;
+  left: 0px;
+  width: 161px;
+  height: 41px;
+  text-align: right;
+  font: normal normal normal 30px/41px Galano Grotesque;
+  letter-spacing: 0px;
+  color: #435871;
+  text-transform: uppercase;
+}
+.titleCenter{
+  top: 0px;
+  left: 0px;
+  width: 161px;
+  height: 41px;
+  text-align:center;
+  font: normal normal normal 30px/41px Galano Grotesque;
+  letter-spacing: 0px;
+  color: #000000;
+  text-transform: uppercase;
+}
+.titleTUser2{
+  top: 0px;
+  left: 161px;
+  width: 214px;
+  height: 41px;
+  text-align: left;
+  font: normal normal 600 30px/41px Galano Grotesque;
+  letter-spacing: 0px;
+  color: #435871;
+  text-transform: uppercase;
+}
+.tUser{
+  background: #1D3755 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+.pagination {
+  text-align: center;
+  margin-top: 20px;
+}
+.captionTbl{
+  top: 200px;
+  left: 477px;
+  width: 1046px;
+  height: 70px;
+  background: transparent url('/public/img/svg/trazado1.svg') 0% 0% no-repeat padding-box;
+  opacity: 1;
+  margin-bottom: 20px;
+  caption-side: top;
+}
+.captionModal{
+  background: transparent url('/public/img/svg/trazado1.svg') 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+.btnAgregar{
+  background: #D48D8D 0% 0% no-repeat padding-box !important;
+  border-radius: 8px !important;
+  /* opacity: 1 !important; */
+  margin-right: auto !important;
+  color: #fff !important;
+}
+.btnCancel{
+  background: #dea9a9fd 0% 0% no-repeat padding-box !important;
+  border-radius: 8px !important;
+  opacity: 1 !important;
+  margin-right: auto !important;
+  color: #fff !important;
+}
+.btAdd{
+  background: #77c080 0% 0% no-repeat padding-box !important;
+  border-radius: 8px !important;
+  opacity: 1 !important;
+  text-align: center !important;
+  font: normal normal bold 18px/24px Galano Grotesque !important;
+  letter-spacing: 0px !important;
+  color: #FFFFFF !important;
+}
+.mini-br {
+  height: 0.8em; 
+}
   

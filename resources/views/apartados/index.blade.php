@@ -9,28 +9,28 @@
      <div class="row">
          <div class="col-md-10"></div>
          <div class="col-md-2">
-             <button id="btnAddUser" type="button" name="btnAddUser" class="btnNuevoUsuario">Nuevo Usuario</button>
+             <button id="btnAddApartado" type="button" name="btnAddApartado" class="btnNuevoUsuario">Nuevo Apartado</button>
          </div>
      </div>
      <br>
     <div class="row">
         <div class="table-responsive">
-            <table id="tbl_users" style="width: 100%;">
+            <table id="tbl_apartados" style="width: 100%;">
                 <caption class="captionTbl">
                     <br>
                     <div class="row" style="align-items: center; justify-content: center;">
-                        <div class="col-md-6 titleTUser1">USUARIOS</div>
-                        <div class="col-md-6 titleTUser2">REGISTRADOS</div>
+                        <div class="col-md-6 titleCenter">APARTADOS</div>
                     </div>
                 </caption>
                 <thead>
                     <tr>
                         <th scope="col">ID</th>
-                        <th scope="col">Usuario</th>
-                        <th scope="col">Tienda</th>
-                        <th scope="col">Teléfono</th>
-                        <th scope="col">Rol</th>
-                        <th scope="col">Fecha de ingreso</th>
+                        <th scope="col">Cliente</th>
+                        <th scope="col">Mueble</th>
+                        <th scope="col">Cantidad</th>
+                        <th scope="col">Anticipo</th>
+                        <th scope="col">Restante</th>
+                        <th scope="col">Fecha Apartado</th>
                         <th scope="col">Acciones</th>
                     </tr>
                 </thead>
@@ -41,6 +41,6 @@
     </div>
 </div>
 <script src="/js/utilerias.js"></script>
-<script src="/js/usuarios/init.js"></script>
-@include('usuarios.modalAddUsuario')
+<script src="/js/apartados/init.js"></script>
+@include('apartados.modalAddApartados')
 @endsection

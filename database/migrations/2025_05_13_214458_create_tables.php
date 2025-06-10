@@ -139,8 +139,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('mueble_id')->constrained('muebles');
             $table->foreignId('tienda_id')->constrained('tiendas');
-            $table->foreignId('cliente_id')->constrained('clientes');
+            $table->integer('cliente_id')->nullable();
             $table->text('motivo');
+            $table->integer('cantidad');
             $table->foreignId('usuario_id')->constrained('users');
             $table->date('fecha');
             $table->timestamps();
