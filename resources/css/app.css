@@ -115,4 +115,11 @@
 .mini-br {
   height: 0.8em; 
 }
-  
+.has-error{
+  color: red;
+  border-color: #a94442;
+}
+.has-error .sd-CustomSelect {
+  color: #a94442;
+  border-color: #a94442;
+}

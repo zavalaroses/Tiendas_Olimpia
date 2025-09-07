@@ -470,33 +470,28 @@ var _gen = {
         height = height || 600;
         pagination = 50;
         order = order || [];
-
-        var responsiveHelper_datatable_tabletools = undefined;
-        var breakpointDefinition = {
-            tablet: 640,
-            phone: 480,
-        };
+    
         if ($.fn.DataTable.isDataTable(tabla)) {
-            tabla.DataTable().clear().rows.add(datelist);
+            tabla.DataTable().clear().rows.add(datelist).draw();
         } else {
             tabla.DataTable({
-                //  dom: "<'dt-toolbar'<'col-xs-12 col-sm-6'f><'col-sm-6 col-xs-6 hidden-xs text-right'T>r>"+
                 dom:
-                    "<'dt-toolbar'<'col-xs-3 col-sm-3'f><'col-sm-6 col-xs-6 hidden-xs text-left'>r>" +
+                    "<'dt-toolbar'<'col-xs-3 col-sm-3'f><'col-sm-6 col-xs-6 hidden-xs text-left'B>r>" +
                     't' +
                     "<'dt-toolbar-footer'<'col-sm-3 col-xs-12 hidden-xs'i><'col-sm-7 col-xs-12'p>>",
-                
-                tableTools: {
-                    aButtons: [
-                        {
-                            sExtends: 'xls',
-                            sButtonText: 'Descargar a Excel',
-                            sFileName: '*.xls',
-                        },
-                    ],
-                    sSwfPath:
-                        'assets/js/plugin/datatables/swf/copy_csv_xls_pdf.swf',
-                },
+    
+                buttons: [
+                    {
+                        extend: 'excel',
+                        text: 'Descargar a Excel',
+                        filename: 'reporte',
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Imprimir',
+                    },
+                ],
+    
                 language: {
                     info: 'Página _PAGE_ de _PAGES_',
                     infoEmpty: 'No hay registros disponibles',
@@ -505,7 +500,6 @@ var _gen = {
                     search: "Búsqueda:",
                     infoThousands: ",",
                     loadingRecords: "Cargando...",
-                    buttonText: "Imprimir",
                     paginate: {
                         first: "Primero",
                         last: "Último",
@@ -513,38 +507,37 @@ var _gen = {
                         previous: "Anterior",
                     },
                 },
+    
                 pageLength: pagination,
-                // scrollX: true,
                 order: order,
-                // scrollY: height + 'px',
                 data: datelist,
                 columnDefs: columnDefs,
-                preDrawCallback: function () {
-                    if (!responsiveHelper_datatable_tabletools) {
-                        responsiveHelper_datatable_tabletools = new ResponsiveDatatablesHelper(
-                            tabla,
-                            breakpointDefinition
-                        );
-                    }
-                },
-                rowCallback: function (nRow) {
-                    responsiveHelper_datatable_tabletools.createExpandIcon(
-                        nRow
-                    );
-                },
-                drawCallback: function (oSettings) {
-                    responsiveHelper_datatable_tabletools.respond();
-                    tabla.$('[data-toggle="popover"]').popover();
-                    tabla.$('[data-toggle="tooltip"]').tooltip();
-                },
+    
+                // lo nuevo 👇
+                responsive: true,
+                scrollX: true,
+    
                 initComplete: function () {
-                    otable = tabla.DataTable().columns.adjust().draw();
+                    let otable = tabla.DataTable().columns.adjust().draw();
+                    // otable.$('[data-toggle="popover"]').popover();
+                    // otable.$('[data-toggle="tooltip"]').tooltip();
+                    // Popovers
+                    otable.$('[data-bs-toggle="popover"]').each(function () {
+                        new Popover(this);
+                    });
+
+                    // Tooltips
+                    otable.$('[data-bs-toggle="tooltip"]').each(function () {
+                        new Tooltip(this);
+                    });
                 },
             });
         }
-        otable = tabla.DataTable().columns.adjust().draw();
-        otable.$('[data-toggle="popover"]').popover();
+    
+        // let otable = tabla.DataTable().columns.adjust().draw();
+        // otable.$('[data-toggle="popover"]').popover();
     },
+    
     setTableDetallesM: function (
         tabla,
         columnDefs,

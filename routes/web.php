@@ -34,24 +34,35 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-Route::middleware('auth')->group(function(){
-    Route::get('/get-users',[UsuariosController::class,'getUsuarios'])->name('getUsuarios');
+// rutas de usuarios
+Route::middleware('auth')->controller(UsuariosController::class)->group(function () {
+    Route::get('/get-users', 'getUsuarios')->name('getUsuarios');
+    Route::get('/get-data-usuarios', 'getDataUsuarios')->name('getDataUsuarios');
 });
+// rutas de inventarios
 Route::middleware('auth')->group(function(){
     Route::get('/get-inventario',[InventarioController::class,'getInventario'])->name('getInventario');
 });
+// rutas de garantias
 Route::middleware('auth')->group(function(){
     Route::get('/get-garantias',[GarantiasController::class,'getGarantias'])->name('getGarantias');
 });
+// rutas de apartados
 Route::middleware('auth')->group(function(){
     Route::get('/get-apartados',[ApartadosController::class,'getApartados'])->name('getApartados');
 });
+// rutas de ventas
 Route::middleware('auth')->group(function(){
     Route::get('/get-ventas',[VentasController::class,'getVentas'])->name('getVentas');
 });
-Route::middleware('auth')->group(function(){
-    Route::get('/get-cat-choferes',[CatalogoController::class,'getChoferes'])->name('getChoferes');
-    Route::get('/get-cat-tiendas',[CatalogoController::class,'getTiendas'])->name('getTiendas');
+// rutas de catalogos
+Route::middleware('auth')->controller(CatalogoController::class)->group(function(){
+    Route::get('/get-cat-choferes','getChoferes')->name('getChoferes');
+    Route::get('/get-cat-tiendas','getTiendas')->name('getTiendas');
+    Route::post('/post-add-cat-tienda','postAddTienda')->name('postAddTienda');
+    Route::get('/get-data-cat-tiendas','getDataTiendas')->name('getDataTiendas');
+
+    
 });
 
 require __DIR__.'/auth.php';
