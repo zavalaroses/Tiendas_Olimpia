@@ -12,8 +12,15 @@ dao = {
             cache:false,
             headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
-            
+            Swal.fire({
+                icon:response.icon,
+                title:response.title,
+                text:response.text
+            });
+            if (response.icon == 'success') {
+                dao.getDataTiendas();
+                closeModal('modalAddtienda','frm_add_tienda');
+            }
         });
     },
     getDataTiendas:function () {
@@ -23,7 +30,6 @@ dao = {
             dataType:'json',
             headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
             const table = $('#tbl_tiendas');
             const columns = [
                 {"targets": [0],"mData":'id'},
@@ -41,7 +47,7 @@ dao = {
             ];
             _gen.setTableScrollEspecial2(table,columns,response)
         })
-    }
+    },
 };
 
 init = {
@@ -59,7 +65,6 @@ init = {
     }
 };
 $(document).ready(function () {
-    console.log('init.js tiendas');
     $('#btnAddTienda').on('click', function (e) {
         e.preventDefault();
         const modalAddtienda = new bootstrap.Modal(document.getElementById('modalAddtienda'));

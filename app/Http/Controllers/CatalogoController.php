@@ -28,9 +28,9 @@ class CatalogoController extends Controller
                 'nombre' => $request->nombre,
                 'ubicacion' => $request->direccion,
             ]);
-            if ($tienda) {
-                DB::commit();
-            }
+           
+            DB::commit();
+        
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::debug('exp '.$th->getMessage());
@@ -45,7 +45,6 @@ class CatalogoController extends Controller
             'icon'=>'success',
             'title'=>'Exito',
             'text'=>'Tienda agregada con exito.',
-            'area'=> $request->area
         ];
         return response()->json($response,200);
 
@@ -55,7 +54,20 @@ class CatalogoController extends Controller
             $tiendas = Tiendas::All();
             return response()->json($tiendas,200);
         } catch (\Throwable $th) {
-            DB::rollBack();
+            Log::debug('exp '.$th->getMessage());
+            $response = [
+                'icon'=>'error',
+                'title'=>'Oops.',
+                'text'=>'A ocurrido un error al registrar.',
+            ];
+            return response()->json($response,200);
+        }
+    }
+    public function getCatalgoTiendas(){
+        try {
+            $tiendas = Tiendas::All();
+            return response()->json($tiendas,200);
+        } catch (\Throwable $th) {
             Log::debug('exp '.$th->getMessage());
             $response = [
                 'icon'=>'error',

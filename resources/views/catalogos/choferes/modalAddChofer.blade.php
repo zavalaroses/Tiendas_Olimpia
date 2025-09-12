@@ -36,7 +36,7 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label for="tienda" >Correo</label>
+                            <label for="correo">Correo</label>
                             <input type="email" name="correo" id="correo" class="form-control">
                         </div>
                         <div class="col-md-4">

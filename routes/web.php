@@ -61,6 +61,7 @@ Route::middleware('auth')->controller(CatalogoController::class)->group(function
     Route::get('/get-cat-tiendas','getTiendas')->name('getTiendas');
     Route::post('/post-add-cat-tienda','postAddTienda')->name('postAddTienda');
     Route::get('/get-data-cat-tiendas','getDataTiendas')->name('getDataTiendas');
+    Route::get('/get-catalogo-tiendas','getCatalgoTiendas')->name('getCatalgoTiendas');
 
     
 });

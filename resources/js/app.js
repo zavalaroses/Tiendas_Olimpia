@@ -1,4 +1,6 @@
 import './bootstrap';
+import Swal from 'sweetalert2';
+window.Swal = Swal;
 
 import Alpine from 'alpinejs';
 import 'bootstrap/dist/css/bootstrap.min.css'; 

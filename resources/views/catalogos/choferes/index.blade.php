@@ -40,7 +40,8 @@
         </div>
     </div>
 </div>
+@include('catalogos.choferes.modalAddChofer')
 <script src="/js/utilerias.js"></script>
 <script src="/js/catalogos/choferes/init.js"></script>
-@include('catalogos.choferes.modalAddChofer')
+
 @endsection
