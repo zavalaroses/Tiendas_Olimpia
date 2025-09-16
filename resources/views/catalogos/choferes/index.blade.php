@@ -41,7 +41,13 @@
     </div>
 </div>
 @include('catalogos.choferes.modalAddChofer')
+@include('catalogos.choferes.modalUpdateChofer')
 <script src="/js/utilerias.js"></script>
 <script src="/js/catalogos/choferes/init.js"></script>
+<script>
+    $(document).ready( function () {
+        dao.gatData();
+    });
+</script>
 
 @endsection

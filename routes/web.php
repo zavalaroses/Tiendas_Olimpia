@@ -62,7 +62,11 @@ Route::middleware('auth')->controller(CatalogoController::class)->group(function
     Route::post('/post-add-cat-tienda','postAddTienda')->name('postAddTienda');
     Route::get('/get-data-cat-tiendas','getDataTiendas')->name('getDataTiendas');
     Route::get('/get-catalogo-tiendas','getCatalgoTiendas')->name('getCatalgoTiendas');
-
+    Route::post('/post-add-chofer','postAddChofer')->name('postAddChofer');
+    Route::get('/get-data-choferes','getDataChoferes')->name('getDataChoferes');
+    Route::get('/get-chofer-to-edit','getChoferById')->name('getChoferById');
+    Route::post('/post-update-chofer','postAddChofer')->name('postAddChofer');
+    Route::post('/delete-cat-chofer','postDeleteCatChofer')->name('postDeleteCatChofer');
     
 });
 

@@ -896,9 +896,9 @@ window.onload = DisableBackButton;
 window.onpageshow = function (evt) {
     if (evt.persisted) DisableBackButton();
 };
-window.onunload = function () {
-    void 0;
-};
+// window.onunload = function () {
+//     void 0;
+// };
 //Formato Texto
 $.formatText = function (input) {
     var text = input.val();
@@ -1254,5 +1254,10 @@ function closeModal(modal,form) {
     if (form) {
         document.getElementById(form).reset();
     }
-    $('#'+modal).modal('hide');
+    const modalToClose = document.getElementById(modal);
+    const modalInstance = bootstrap.Modal.getInstance(modalToClose);
+    if (modalInstance) {
+        modalInstance.hide();
+    }
+    // $('#'+modal).modal('hide');
 }
