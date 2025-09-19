@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\catalogos\Tiendas;
 use App\Models\catalogos\Chofer;
+use App\Models\catalogos\Mueble;
 use Log;
 
 class CatalogoController extends Controller
@@ -16,6 +17,9 @@ class CatalogoController extends Controller
     }
     public function getTiendas(){
         return view('catalogos.tiendas.index');
+    }
+    public function getMuebles(){
+        return view('catalogos.muebles.index');
     }
     public function postAddTienda(Request $request){
         try {
@@ -61,7 +65,7 @@ class CatalogoController extends Controller
                 'title'=>'Oops.',
                 'text'=>'A ocurrido un error al registrar.',
             ];
-            return response()->json($response,200);
+            return response()->json($response,500);
         }
     }
     public function getCatalgoTiendas(){
@@ -202,5 +206,123 @@ class CatalogoController extends Controller
             'text'=>'Conductor eliminado con exito.',
         ];
         return response()->json($response,200);
+    }
+    public function postAddMuble(Request $request){
+        try {
+            DB::beginTransaction();
+            $request->validate([
+                'nombre'=>['required','string','max:255'],
+                'codigo'=>['required','string','max:255'],
+                'descripcion'=>['required','string','max:255'],
+                'precio'=>['required']
+            ]);
+            $mueble = Mueble::create([
+                'nombre'=>$request->nombre,
+                'codigo'=>$request->codigo,
+                'descripcion'=>$request->descripcion,
+                'precio'=>$request->precio
+            ]);
+            DB::commit();
+            $response = [
+                'icon'=>'success',
+                'title'=>'Exito',
+                'text'=>'Mueble agregado con exito.',
+            ];
+            return response()->json($response,200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::debug('exp '. $th->getMessage());
+            $response = [
+                'icon'=>'error',
+                'title'=>'Oops',
+                'text'=>'A ocurrido un error al registrar.',
+            ];
+            return response()->json($response,500);
+        }
+    }
+    public function getDataMuebles(){
+        try {
+            $muebles = Mueble::All();
+            return response()->json($muebles,200);
+        } catch (\Throwable $th) {
+            Log::debug('exp '.$th->getMessage());
+            $response = [
+                'icon'=>'error',
+                'title'=>'Oops.',
+                'text'=>'A ocurrido un error al registrar.',
+            ];
+            return response()->json($response,500);
+        }
+    }
+    public function getMuebleByid($id){
+        try {
+            $mueble = Mueble::where('id',$id)->first();
+            return response()->json($mueble,200);
+        } catch (\Throwable $th) {
+            Log::debug('exp '.$th->getMessage());
+            $response = [
+                'icon'=>'error',
+                'title'=>'Oops.',
+                'text'=>'A ocurrido un error al registrar.',
+            ];
+            return response()->json($response,500);
+        }
+    }
+    public function postUpdateMueble(Request $request){
+        try {
+            DB::beginTransaction();
+            $request->validate([
+                'id'=>['required'],
+                'nombre'=>['required','string','max:255'],
+                'codigo'=>['required','string','max:255'],
+                'descripcion'=>['required','string','max:255'],
+                'precio'=>['required'],
+            ]);
+            Mueble::where('id',$request->id)->update([
+                'nombre'=>$request->nombre,
+                'codigo'=>$request->codigo,
+                'descripcion'=>$request->descripcion,
+                'precio'=>$request->precio
+            ]);
+            DB::commit();
+            $response = [
+                'icon'=>'success',
+                'title'=>'Exito',
+                'text'=>'Mueble modificado con exito.',
+            ];
+            return response()->json($response,200);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::debug('exp '. $th->getMessage());
+            $response = [
+                'icon'=>'error',
+                'title'=>'Oops',
+                'text'=>'A ocurrido un error al registrar.',
+            ];
+            return response()->json($response,500);
+        }
+    }
+    public function postDeleteMueble(Request $request){
+        try {
+            DB::beginTransaction();
+            Mueble::where('id',$request->id)->delete();  
+            DB::commit();
+            $response = [
+                'icon'=>'success',
+                'title'=>'Exito',
+                'text'=>'Mueble eliminado con exito.',
+            ];
+            return response()->json($response,200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::debug('exp '.$th->getMessage());
+            $response = [
+                'icon'=>'error',
+                'title'=>'Oops.',
+                'text'=>'A ocurrido un error al registrar.',
+            ];
+            return response()->json($response,500);
+        }
     }
 }

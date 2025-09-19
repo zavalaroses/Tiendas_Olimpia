@@ -50,7 +50,7 @@
                         <div x-show="openDropdown" @click.outside="openDropdown = false"
                             x-transition
                             class="absolute z-50 mt-2 w-48 bg-white rounded-md shadow-lg">
-                            <a href="{{ route('getVentas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <a href="{{ route('getMuebles') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Muebles
                             </a>
                             <a href="{{ route('getChoferes') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
