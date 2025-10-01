@@ -29,11 +29,11 @@
                   </div>
                   <div class="col-md-6">
                     <label for="producto" class="form-label">Producto</label>
-                    <select name="productoT" id="productoT" class="form-control"></select>
+                    <select name="producto" id="producto" class="form-control"></select>
                   </div>
                   <div class="col-md-4">
                     <label for="cantidad" class="form-label">Cantidad</label>
-                    <input type="number" class="form-control" id="cantidad" name="cantidad" oninput="validateInputs()">
+                    <input type="number" class="form-control" id="cantidad" name="cantidad" step="1">
                   </div>
                   <div class="col-md-2">
                     <label for="agregar_entrada" class="form-label">Agregar</label>

@@ -40,8 +40,10 @@ Route::middleware('auth')->controller(UsuariosController::class)->group(function
     Route::get('/get-data-usuarios', 'getDataUsuarios')->name('getDataUsuarios');
 });
 // rutas de inventarios
-Route::middleware('auth')->group(function(){
-    Route::get('/get-inventario',[InventarioController::class,'getInventario'])->name('getInventario');
+Route::middleware('auth')->controller(InventarioController::class)->group(function(){
+    Route::get('/get-inventario','getInventario')->name('getInventario');
+    Route::get('/get-catalogo-muebles','getCatmuebles')->name('getCatmuebles');
+    
 });
 // rutas de garantias
 Route::middleware('auth')->group(function(){
