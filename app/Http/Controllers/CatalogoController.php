@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use App\Models\catalogos\Tiendas;
 use App\Models\catalogos\Chofer;
 use App\Models\catalogos\Mueble;
+use App\Models\catalogos\Proveedor;
 use Log;
 
 class CatalogoController extends Controller
@@ -20,6 +21,9 @@ class CatalogoController extends Controller
     }
     public function getMuebles(){
         return view('catalogos.muebles.index');
+    }
+    public function getProveedores(){
+        return view('catalogos.proveedores.index');
     }
     public function postAddTienda(Request $request){
         try {
@@ -325,4 +329,128 @@ class CatalogoController extends Controller
             return response()->json($response,500);
         }
     }
+    public function postAddProveedor(Request $request){
+        try {
+            DB::beginTransaction();
+            $request->validate([
+                'nombre'=>['required','string','max:255'],
+                'contacto'=>['required','string','max:255'],
+                'telefono'=>['required'],
+                
+            ]);
+            Proveedor::create([
+                'nombre'=>$request->nombre,
+                'contacto'=>$request->contacto,
+                'telefono'=>$request->telefono,
+            ]);
+            DB::commit();
+            $response = [
+                'icon'=>'success',
+                'title'=>'Exito',
+                'text'=>'Registro realizado con exito.',
+            ];
+            return response()->json($response,200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::debug('exp '. $th->getMessage());
+            $response = [
+                'icon'=>'error',
+                'title'=>'Oops',
+                'text'=>'A ocurrido un error al registrar.',
+            ];
+            return response()->json($response,500);
+        }
+    }
+    public function getDataProveedores(){
+        try {
+            $proveedores = Proveedor::All();
+            return response()->json($proveedores,200);
+        } catch (\Throwable $th) {
+            Log::debug('exp '.$th->getMessage());
+            $response = [
+                'icon'=>'error',
+                'title'=>'Oops.',
+                'text'=>'A ocurrido un error al registrar.',
+            ];
+            return response()->json($response,500);
+        }
+    }
+    public function getProveedorById(Request $request){
+        try {
+            $proveedor = Proveedor::where('id',$request->id)->first();
+            return response()->json($proveedor,200);
+        } catch (\Throwable $th) {
+            Log::debug('exp '.$th->getMessage());
+            $response = [
+                'icon'=>'error',
+                'title'=>'Oops.',
+                'text'=>'A ocurrido un error al registrar.',
+            ];
+            return response()->json($response,500);
+        }
+    }
+    public function postUpdateProveedor(Request $request){
+        try {
+            DB::beginTransaction();
+            $request->validate([
+                'nombre'=>['required','string','max:255'],
+                'contacto'=>['required','string','max:255'],
+                'telefono'=>['required'],
+                
+            ]);
+            Proveedor::where('id',$request->id)->update([
+                'nombre'=>$request->nombre,
+                'contacto'=>$request->contacto,
+                'telefono'=>$request->telefono,
+            ]);
+            DB::commit();
+            $response = [
+                'icon'=>'success',
+                'title'=>'Exito',
+                'text'=>'Registro realizado con exito.',
+            ];
+            return response()->json($response,200);
+            
+        } catch (\Throwable $th) {
+            Log::debug('exp '.$th->getMessage());
+            $response = [
+                'icon'=>'error',
+                'title'=>'Oops.',
+                'text'=>'A ocurrido un error al registrar.',
+            ];
+            return response()->json($response,500);
+        }
+    }
+    public function postDeleteProveedor(Request $request){
+        try {
+            DB::beginTransaction();
+            $afectedRow = Proveedor::where('id',$request->id)->delete();
+            if ($afectedRow) {
+                DB::commit();
+                $response = [
+                    'icon'=>'success',
+                    'title'=>'Exito',
+                    'text'=>'Registro eliminado con exito.',
+                ];
+                return response()->json($response,200);
+            }
+            else {
+                $response = [
+                    'icon'=>'error',
+                    'title'=>'Oops.',
+                    'text'=>'A ocurrido un error al registrar.',
+                ];
+                return response()->json($response,500);
+            }
+        } catch (\Throwable $th) {
+            Log::debug('exp '.$th->getMessage());
+            $response = [
+                'icon'=>'error',
+                'title'=>'Oops.',
+                'text'=>'A ocurrido un error intentelo mas tarde.',
+            ];
+            return response()->json($response,500);
+        }
+    }
+
 }

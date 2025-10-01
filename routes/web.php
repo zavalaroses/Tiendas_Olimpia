@@ -73,6 +73,12 @@ Route::middleware('auth')->controller(CatalogoController::class)->group(function
     Route::get('/get-mueble-by-id/{id?}','getMuebleByid')->name('getMuebleByid');
     Route::post('/post-update-mueble','postUpdateMueble')->name('postUpdateMueble');
     Route::post('/delete-cat-mueble','postDeleteMueble')->name('postDeleteMueble');
+    Route::get('/get-index-proveedores','getProveedores')->name('getProveedores');
+    Route::post('/post-add-cat-proveedores','postAddProveedor')->name('postAddProveedor');
+    Route::get('/get-data-cat-proveedores','getDataProveedores')->name('getDataProveedores');
+    Route::get('/get-proveedor-to-edit','getProveedorById')->name('getProveedorById');
+    Route::post('/post-edit-proveedor','postUpdateProveedor')->name('postUpdateProveedor');
+    Route::post('/delete-cat-proveedor','postDeleteProveedor')->name('postDeleteProveedor');
 });
 
 require __DIR__.'/auth.php';

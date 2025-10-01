@@ -59,7 +59,7 @@
                             <a href="{{ route('getTiendas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Tiendas
                             </a>
-                            <a href="{{ route('getVentas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <a href="{{ route('getProveedores') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Proveedores
                             </a>
                         </div>

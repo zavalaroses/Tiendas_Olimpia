@@ -475,23 +475,25 @@ var _gen = {
             tabla.DataTable().clear().rows.add(datelist).draw();
         } else {
             tabla.DataTable({
-                dom:
-                    "<'dt-toolbar'<'col-xs-3 col-sm-3'f><'col-sm-6 col-xs-6 hidden-xs text-left'B>r>" +
-                    't' +
-                    "<'dt-toolbar-footer'<'col-sm-3 col-xs-12 hidden-xs'i><'col-sm-7 col-xs-12'p>>",
-    
+                dom:"<'row'<'col-md-6'B><'col-md-6'f>>" + // botones a la izquierda, search a la derecha
+                    "<'row'<'col-12'tr>>" +               // tabla
+                    "<'row'<'col-12 d-flex justify-content-between' i p>>",
+            
                 buttons: [
                     {
                         extend: 'excel',
-                        text: 'Descargar a Excel',
+                        text: '<i class="fa fa-file-excel"></i> Excel',
+                        className: 'btn btn-success btn-sm', // verde
                         filename: 'reporte',
                     },
                     {
-                        extend: 'print',
-                        text: 'Imprimir',
+                        extend: 'pdf',
+                        text: '<i class="fa fa-file-pdf"></i> PDF',
+                        className: 'btn btn-danger btn-sm', // rojo
+                        filename: 'reporte',
                     },
                 ],
-    
+            
                 language: {
                     info: 'Página _PAGE_ de _PAGES_',
                     infoEmpty: 'No hay registros disponibles',
@@ -507,31 +509,30 @@ var _gen = {
                         previous: "Anterior",
                     },
                 },
-    
+            
                 pageLength: pagination,
                 order: order,
                 data: datelist,
                 columnDefs: columnDefs,
-    
-                // lo nuevo 👇
+            
                 responsive: true,
                 scrollX: true,
-    
+            
                 initComplete: function () {
                     let otable = tabla.DataTable().columns.adjust().draw();
-                    // otable.$('[data-toggle="popover"]').popover();
-                    // otable.$('[data-toggle="tooltip"]').tooltip();
+            
                     // Popovers
                     otable.$('[data-bs-toggle="popover"]').each(function () {
                         new Popover(this);
                     });
-
+            
                     // Tooltips
                     otable.$('[data-bs-toggle="tooltip"]').each(function () {
                         new Tooltip(this);
                     });
                 },
             });
+            
         }
     
         // let otable = tabla.DataTable().columns.adjust().draw();

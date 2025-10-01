@@ -15,7 +15,7 @@
      <br>
     <div class="row">
         <div class="table-responsive">
-            <table id="tbl_muebles" style="width: 100%;">
+            <table id="tbl_muebles" style="width: 100%;" class="table table-borderless table-centered">
                 <caption class="captionTbl">
                     <br>
                     <div class="row" style="align-items: center; justify-content: center;">
