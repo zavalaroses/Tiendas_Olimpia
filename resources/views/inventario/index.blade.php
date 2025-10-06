@@ -15,7 +15,7 @@
      <br>
     <div class="row">
         <div class="table-responsive">
-            <table id="tbl_users" style="width: 100%;">
+            <table id="tbl_inventarios" style="width: 100%;">
                 <caption class="captionTbl">
                     <br>
                     <div class="row" style="align-items: center; justify-content: center;">

@@ -4,7 +4,7 @@
             <div class="modal-header captionModal">
               <div class="row" style="width: 100%">
                 <div class="col-md-12" style="display: flex; justify-content:right; margin-top:0%; margin-bottom:0%;">
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('modalAddEntrada');">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('modalAddEntrada','frm_add_entrada');">
                     <h5><span aria-hidden="true">&times;</span></h5>
                   </button>
                 </div>
@@ -18,7 +18,7 @@
             </div>
             <br>
             <div class="modal-body">
-                <form class="row g-3" id="frm_add_venta" name="frm_add_venta">
+                <form class="row g-3" id="frm_add_entrada" name="frm_add_entrada">
                   <div class="col-md-6">
                     <label for="proveedor" class="form-label">Proveedor</label>
                     <select name="proveedor" id="proveedor" class="form-control"></select>
@@ -44,9 +44,9 @@
                   <div class="col-md-12">
                     <table id="tbl_lista_entrada" name= "tbl_lista_entrada" style="width: 100%; display:none">
                       <thead>
+                        <th>ID</th>
                         <th>Producto</th>
                         <th>Cantidad</th>
-                        <th>Acciones</th>
                       </thead>
                       <tbody></tbody>
                     </table>
@@ -57,11 +57,11 @@
                   <div class="col-md-6">
                     <div class="input-group">
                       <div class="col-md-5">
-                        <button type="reset" class="form-control btnCancel" onclick="closeModal('modalAddEntrada');">CANCELAR</button>
+                        <button type="reset" class="form-control btnCancel" onclick="closeModal('modalAddEntrada','frm_add_entrada');">CANCELAR</button>
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-5">
-                        <button type="button" class="form-control btnAgregar" id="btn_add_user">AGREGAR</button>
+                        <button type="button" class="form-control btnAgregar" id="btn_add_entrada">AGREGAR</button>
                       </div>
                     </div>
                   </div>

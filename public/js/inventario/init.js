@@ -36,12 +36,102 @@ dao = {
                 }
             });
         })
+    },
+    registrarEntrada: function () {
+        var form = $('#frm_add_entrada')[0];
+        var data = new FormData(form);
+        var tabla = document.getElementById('tbl_lista_entrada');
+        // obtener el cuerpo de la tabla...
+        var tbody = tabla.querySelector("tbody");
+        // obtener todas las filas del cuerpo de la tabla...
+        var filas = tbody.querySelectorAll("tr");
+        // Validar que haya al menos un registro
+        if (filas.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Advertencia',
+                text: 'Debes agregar al menos una entrada antes de guardar.',
+            });
+            return;
+        }
+        // recorrer todas las filas de la tabla...
+        filas.forEach(function (fila) {
+            var celdas = fila.querySelectorAll("td");
+            console.log('celdas',celdas);
+            // obtener los valores de las celdas
+            var id = celdas[0].textContent;
+            var nombre = celdas[1].textContent;
+            var cantidad = celdas[2].textContent;
+            // agregar los valores al formData...
+            data.append("id[]",id);
+            data.append("nombre[]",nombre);
+            data.append("cantidad[]",cantidad);
+        });
+        $.ajax({
+            url:'/post-add-entrada',
+            type:'post',
+            data:data,
+            enctype:'multipart/form-data',
+            processData:false,
+            contentType:false,
+            cache:false,
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function name(response) {
+            Swal.fire({
+                icon:response.icon,
+                title:response.title,
+                text:response.text,
+            });
+            if (response.icon == 'success') {
+                closeModal('modalAddEntrada','frm_add_entrada');
+                // dao.gatData();
+            }
+        });
+    },
+    getData: function () {
+        $.ajax({
+            url:'get-data-inventario',
+            type:'get',
+            dataType:'json',
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-tiken"]').attr('content')},
+        }).done(function (response) {
+            console.log("🚀 ~ response:", response)
+            const table = $('#tbl_inventarios');
+            const columns = [
+                {"targets": [0],"mData":'id'},
+                {"targets": [1],"mData":'tienda'},
+                {"targets": [2],"mData":'mueble'},
+                {"targets": [3],"mData":'estatus'},
+                {"targets": [4],"mData":'cantidad'},
+                {"aTargets": [5], "mData" : function(o){
+                    return '<div class="dropdown">'+
+                    '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
+                        '<ul class="dropdown-menu" aria-labelledby="dropdownMenu2">'+
+                            '<li onclick="dao.editar(' + o.id + ')"><button class="dropdown-item"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i>&nbsp;Editar</button></li>'+
+                            '<li onclick="dao.eliminar(' + o.id +','+o.area+')"><button class="dropdown-item"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Eliminar</button></li>'+
+                        '</ul>'+
+                    '</div>';
+                }},
+            ];
+            _gen.setTableScrollEspecial2(table,columns,response)
+        })
     }
 
 };
 
 init = {
-
+    validateEntrada: function(form){
+        _gen.validate(form,{
+          rules:{
+            proveedor : {required: true},
+            fecha_ingreso : {required: true},
+          },
+          messages: {
+            proveedor : {required: 'Este campo es requerido'},
+            fecha_ingreso : {required: 'Este campo es requerido'},
+          }
+        })
+    },
 };
 function addListaMubles() {
     
@@ -116,6 +206,13 @@ $(document).ready(function () {
          });
         }
         
+     });
+     $('#btn_add_entrada').on('click',function (e) {
+        e.preventDefault();
+        init.validateEntrada($('#frm_add_entrada'));
+        if ($('#frm_add_entrada').valid()) {
+            dao.registrarEntrada();   
+        }
      });
     
 });
