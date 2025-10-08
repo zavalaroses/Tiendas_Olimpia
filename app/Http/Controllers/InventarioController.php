@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Entrada;
 use App\Models\DetalleInv;
+use App\Models\InventarioTienda;
+use Carbon\Carbon;
 use Log;
 
 class InventarioController extends Controller
@@ -30,8 +32,9 @@ class InventarioController extends Controller
                 'fecha_ingreso'=>'required',
             ]);
             $proveedor = DB::table('proveedores')->where('id',$request->proveedor)->whereNull('deleted_at')->value('nombre');
+            $horaMx = Carbon::now('America/Mexico_City')->format('H:i:s');
             $c1 = $proveedor ? $proveedor : 'NP'; 
-            $codigo = $request->fecha_ingreso.'-'.$c1;
+            $codigo = $request->fecha_ingreso.'-'.$horaMx.'-'.$c1;
             $entrada = Entrada::create([
                 'tienda_id'=> Auth::user()->tienda_id,
                 'proveedor_id'=>$request->proveedor,
@@ -46,6 +49,20 @@ class InventarioController extends Controller
                     'mueble_id' => $muebleId,
                     'cantidad' => $request->cantidad[$index],
                 ]);
+                $inventarioExist = InventarioTienda::where('tienda_id',Auth::user()->tienda_id)->where('mueble_id',$muebleId)->exists();
+                if ($inventarioExist) {
+                    $afectedRow = InventarioTienda::where([
+                        'tienda_id'=>Auth::user()->tienda_id,
+                        'mueble_id'=>$muebleId,
+                    ])->increment('cantidad',$request->cantidad[$index],['updated_at'=>now()]);
+                }else {
+                    InventarioTienda::create([
+                        'tienda_id'=>Auth::user()->tienda_id,
+                        'mueble_id'=>$muebleId,
+                        'estatus_id'=>1,
+                        'cantidad'=>$request->cantidad[$index]
+                    ]);
+                }
             }
             DB::commit();
 
@@ -66,10 +83,25 @@ class InventarioController extends Controller
         ];
         return response()->json($response,200);
     }
-    public function getData(){
+    public function getData($id = null){
         try {
-            // $inventario = Entrada::leftJoin('detalle_ingresos as d','d.ingreso_id','=','ingresos_inventario.id')
-            //     ->select('')
+            $inventario = InventarioTienda::select(
+                'inventario_tienda.id',
+                't.nombre as tienda',
+                'm.nombre as mueble',
+                'e.estatus as estatus',
+                'inventario_tienda.cantidad',
+            )
+            ->leftJoin('muebles as m','m.id','=','inventario_tienda.mueble_id')
+            ->leftJoin('tiendas as t','t.id','=','inventario_tienda.tienda_id')
+            ->leftJoin('estatus_inventario as e','e.id','=','inventario_tienda.estatus_id')
+            ->when($id, function($q)use($id){
+                $q->where('tienda_id',$id);
+            })
+            ->orderBy('inventario_tienda.id')
+            ->orderBy('t.nombre')
+            ->get();
+            return response()->json($inventario,200);
         } catch (\Throwable $th) {
             throw $th;
         }

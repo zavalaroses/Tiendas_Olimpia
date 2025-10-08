@@ -29,7 +29,7 @@
                         <th scope="col">Mueble</th>
                         <th scope="col">Estatus</th>
                         <th scope="col">Cantidad</th>
-                        <th scope="col">Acciones</th>
+                        {{-- <th scope="col">Acciones</th> --}}
                     </tr>
                 </thead>
                 <tbody>

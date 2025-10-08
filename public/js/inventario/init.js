@@ -57,7 +57,6 @@ dao = {
         // recorrer todas las filas de la tabla...
         filas.forEach(function (fila) {
             var celdas = fila.querySelectorAll("td");
-            console.log('celdas',celdas);
             // obtener los valores de las celdas
             var id = celdas[0].textContent;
             var nombre = celdas[1].textContent;
@@ -84,18 +83,17 @@ dao = {
             });
             if (response.icon == 'success') {
                 closeModal('modalAddEntrada','frm_add_entrada');
-                // dao.gatData();
+                dao.gatData();
             }
         });
     },
-    getData: function () {
+    getData: function ($tiendaId) {
         $.ajax({
-            url:'get-data-inventario',
+            url:'/get-data-inventario/'+$tiendaId,
             type:'get',
             dataType:'json',
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-tiken"]').attr('content')},
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
             const table = $('#tbl_inventarios');
             const columns = [
                 {"targets": [0],"mData":'id'},
@@ -103,15 +101,15 @@ dao = {
                 {"targets": [2],"mData":'mueble'},
                 {"targets": [3],"mData":'estatus'},
                 {"targets": [4],"mData":'cantidad'},
-                {"aTargets": [5], "mData" : function(o){
-                    return '<div class="dropdown">'+
-                    '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
-                        '<ul class="dropdown-menu" aria-labelledby="dropdownMenu2">'+
-                            '<li onclick="dao.editar(' + o.id + ')"><button class="dropdown-item"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i>&nbsp;Editar</button></li>'+
-                            '<li onclick="dao.eliminar(' + o.id +','+o.area+')"><button class="dropdown-item"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Eliminar</button></li>'+
-                        '</ul>'+
-                    '</div>';
-                }},
+                // {"aTargets": [5], "mData" : function(o){
+                //     return '<div class="dropdown">'+
+                //     '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
+                //         '<ul class="dropdown-menu" aria-labelledby="dropdownMenu2">'+
+                //             '<li onclick="dao.editar(' + o.id + ')"><button class="dropdown-item"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i>&nbsp;Editar</button></li>'+
+                //             '<li onclick="dao.eliminar(' + o.id +','+o.area+')"><button class="dropdown-item"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Eliminar</button></li>'+
+                //         '</ul>'+
+                //     '</div>';
+                // }},
             ];
             _gen.setTableScrollEspecial2(table,columns,response)
         })
@@ -183,7 +181,7 @@ function addListaMubles() {
 
 }
 $(document).ready(function () {
-    
+    dao.getData('');
     $('#btnAddInventario').on('click', function (e) {
         e.preventDefault();
         dao.getCatProveedores('proveedor','');

@@ -44,7 +44,7 @@ Route::middleware('auth')->controller(InventarioController::class)->group(functi
     Route::get('/get-inventario','getInventario')->name('getInventario');
     Route::get('/get-catalogo-muebles','getCatmuebles')->name('getCatmuebles');
     Route::post('/post-add-entrada','postAddEntrada')->name('postAddEntrada');
-    Route::get('get-data-inventario','getData')->name('getData');
+    Route::get('/get-data-inventario/{tiendaId?}','getData')->name('getData');
     
 });
 // rutas de garantias
