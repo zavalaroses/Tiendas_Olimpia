@@ -4,7 +4,7 @@
             <div class="modal-header captionModal">
               <div class="row" style="width: 100%">
                 <div class="col-md-12" style="display: flex; justify-content:right; margin-top:0%; margin-bottom:0%;">
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('modalAddApartados','frm_add_garantia');">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('modalAddApartados','frm_add_apartado');">
                     <h5><span aria-hidden="true">&times;</span></h5>
                   </button>
                 </div>
@@ -18,7 +18,7 @@
             </div>
             <br>
             <div class="modal-body">
-                <form class="row g-3" id="frm_add_garantia" name="frm_add_garantia">
+                <form class="row g-3" id="frm_add_apartado" name="frm_add_apartado">
                     <div class="row">
                         <div class="col-md-4">
                             <label for="cliente" for="nombre">Nombre(s)</label>
@@ -53,7 +53,7 @@
                     </div>
                     <div class="row">
                     <div class="mini-br"></div>
-                      <div class="col-md-8">
+                      <div class="col-md-6">
                         <label for="nombre" for="mueble">Mueble</label>
                         <select name="mueble" id="mueble" class="form-select">
                           <option value="">Seleccione una opcion</option>
@@ -62,6 +62,11 @@
                       <div class="col-md-2">
                         <label for="cantidad" for="cantidad">Cantidad</label>
                         <input type="number" class="form-control" id="cantidad" name="cantidad">
+                      </div>
+                      <div class="col-md-2">
+                        <label for="precioUnit" class="form-label">Precio unitaro</label>
+                        <p id="precioUnit"></p>
+                        <input type="hidden" name="inpPrecioUnit" id="inpPrecioUnit">
                       </div>
                       
                       <div class="col-md-2">
@@ -74,9 +79,11 @@
                     <div class="col-md-12">
                     <table id="tbl_add_list_apartados" name= "tbl_add_list_apartados" style="width: 100%; display:none">
                       <thead>
+                        <th>ID</th>
                         <th>Producto</th>
                         <th>Cantidad</th>
-                        <th>Cliente</th>
+                        <th>Precio</th>
+                        <th>total</th>
                         <th>Acciones</th>
                       </thead>
                       <tbody></tbody>
@@ -88,11 +95,11 @@
                   <div class="col-md-6">
                     <div class="input-group">
                       <div class="col-md-5">
-                        <button type="reset" class="form-control btnCancel" onclick="closeModal('modalAddApartados','frm_add_garantia');">CANCELAR</button>
+                        <button type="reset" class="form-control btnCancel" onclick="closeModal('modalAddApartados','frm_add_apartado');">CANCELAR</button>
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-5">
-                        <button type="button" class="form-control btnAgregar" id="btn_add_user">AGREGAR</button>
+                        <button type="button" class="form-control btnAgregar" id="btn_add_apartado">AGREGAR</button>
                       </div>
                     </div>
                   </div>

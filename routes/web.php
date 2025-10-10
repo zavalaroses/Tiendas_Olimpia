@@ -52,8 +52,11 @@ Route::middleware('auth')->group(function(){
     Route::get('/get-garantias',[GarantiasController::class,'getGarantias'])->name('getGarantias');
 });
 // rutas de apartados
-Route::middleware('auth')->group(function(){
-    Route::get('/get-apartados',[ApartadosController::class,'getApartados'])->name('getApartados');
+Route::middleware('auth')->controller(ApartadosController::class)->group(function(){
+    Route::get('/get-apartados','getApartados')->name('getApartados');
+    Route::get('/get-precio-by-idMueble/{id?}','getPreciosById')->name('getPreciosById');
+    Route::post('/post-add-apartado','postAddPartido')->name('postAddPartido');
+    
 });
 // rutas de ventas
 Route::middleware('auth')->group(function(){

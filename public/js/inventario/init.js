@@ -27,7 +27,7 @@ dao = {
         }).done(function (response) {
             var select = $('#'+field);
             select.html('');
-            select.append(new Option('Selecciona una opcion',''));
+            select.append(new Option('Selecciona una opción',''));
             response.map(function (val,i) {
                 if (id !='' && id == val.id) {
                     select.append(new Option(response[i].nombre,response[i].id, true, true));
