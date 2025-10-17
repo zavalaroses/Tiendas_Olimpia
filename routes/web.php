@@ -56,7 +56,8 @@ Route::middleware('auth')->controller(ApartadosController::class)->group(functio
     Route::get('/get-apartados','getApartados')->name('getApartados');
     Route::get('/get-precio-by-idMueble/{id?}','getPreciosById')->name('getPreciosById');
     Route::post('/post-add-apartado','postAddPartido')->name('postAddPartido');
-    
+    Route::get('/get-data-apartados','getDataApartados')->name('getDataApartados');
+    Route::get('/get-cantidad-restante/{id}','getMontoRestante')->name('getMontoRestante');
 });
 // rutas de ventas
 Route::middleware('auth')->group(function(){

@@ -92,7 +92,7 @@ dao = {
             url:'/get-data-inventario/'+$tiendaId,
             type:'get',
             dataType:'json',
-            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-tiken"]').attr('content')},
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
             const table = $('#tbl_inventarios');
             const columns = [

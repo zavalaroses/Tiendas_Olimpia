@@ -9,6 +9,7 @@ use App\Models\catalogos\Mueble;
 use App\Models\Apartado;
 use App\Models\Cliente;
 use App\Models\ApartadoMueble;
+use App\Models\InventarioTienda;
 use Log;
 use Carbon\Carbon;
 
@@ -45,10 +46,13 @@ class ApartadosController extends Controller
             ]);
             DB::beginTransaction();
             $idCliente = null;
-            $oldCliente = Cliente::select('*')
-                ->where(['nombre'=>$request->nombre,'apellidos'=>$request->apellidos])->first();
+            $oldCliente = Cliente::where([
+                'nombre'=>$request->nombre,
+                'apellidos'=>$request->apellidos
+            ])->first();
+
             if ($oldCliente) {
-                $idCliente = $OldCliente->id;
+                $idCliente = $oldCliente->id;
             }else {
                 $newCliente = Cliente::create([
                     'tienda_id'=>Auth::user()->tienda_id,
@@ -76,6 +80,17 @@ class ApartadosController extends Controller
                     'cantidad'=>$request->cantidad[$i],
                     'estatus'=>'Apartado',
                 ]);
+                $inventario = InventarioTienda::where([
+                    'tienda_id'=>Auth::user()->tienda_id,
+                    'mueble_id'=>$request->id[$i],
+                ])->first();
+
+                if ($inventario && $inventario->cantidad >= $request->cantidad[$i]) {
+                    # restamos inventario...
+                    $inventario->decrement('cantidad',$request->cantidad[$i]);
+                }else {
+                    throw new \Exception("Inventarios insuficiente para el mueble", 1);
+                }
             }
             DB::commit();
             $response = [
@@ -93,6 +108,36 @@ class ApartadosController extends Controller
                 'text'=>'A ocurrido un error al registrar.',
             ];
             return response()->json($response,500);
+        }
+    }
+    public function getDataApartados(){
+        try {
+            $apartados = DB::table('apartados as a')
+                ->leftJoin('clientes as c','c.id','=','a.cliente_id')
+                ->leftJoin('apartado_muebles as am','am.id_apartado','=','a.id')
+                ->leftJoin('muebles as m','m.id','=','am.id_mueble')
+                ->select(
+                    DB::raw("CONCAT(c.nombre,' ',c.apellidos) as cliente"),
+                    'm.nombre as mueble',
+                    'am.cantidad as cantidad',
+                    'a.monto_anticipo as anticipo',
+                    'a.monto_restante as restante',
+                    'a.fecha_apartado',
+                    'a.id as id'
+                )
+            ->get();
+            return response()->json($apartados,200);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        
+    }
+    public function getMontoRestante($id){
+        try {
+            $restante = Apartado::where('id',$id)->first();
+            return response()->json($restante,200);
+        } catch (\Throwable $th) {
+            throw $th;
         }
     }
 }

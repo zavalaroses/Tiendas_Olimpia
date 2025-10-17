@@ -43,4 +43,5 @@
 <script src="/js/utilerias.js"></script>
 <script src="/js/apartados/init.js"></script>
 @include('apartados.modalAddApartados')
+@include('apartados.modalPagarAdelanto')
 @endsection

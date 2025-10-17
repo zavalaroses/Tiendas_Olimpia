@@ -63,7 +63,6 @@ dao = {
             cache:false,
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
             Swal.fire({
                 icon:response.icon,
                 title:response.title,
@@ -71,10 +70,54 @@ dao = {
             });
             if (response.icon == 'success') {
                 closeModal('modalAddApartados','frm_add_apartado');
-                // dao.getData();
+                dao.getData();
             }
         });
+    },
+    getData: function () {
+        $.ajax({
+            url:'/get-data-apartados',
+            type:'get',
+            dataType:'json',
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            console.log("🚀 ~ response:", response)
+            const table = $('#tbl_apartados');
+            const columns = [
+                {"targets":[0],"mData":'id'},
+                {"targets":[1],"mData":'cliente'},
+                {"targets":[2],"mData":'mueble'},
+                {"targets":[3],"mData":'cantidad'},
+                {"targets":[4],"mData":'anticipo'},
+                {"targets":[5],"mData":'restante'},
+                {"targets":[6],"mData":'fecha_apartado'},
+                {"aTargets": [7], "mData" : function(o){
+                    return '<div class="dropdown">'+
+                    '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
+                        '<ul class="dropdown-menu" aria-labelledby="dropdownMenu2">'+
+                            '<li onclick="dao.pagar(' + o.id + ')"><button class="dropdown-item"><i class="fa-solid fa-cash-register" style="color: #1C85AA"></i>&nbsp;Abonar</button></li>'+
+                            // '<li onclick="dao.eliminar(' + o.id +','+o.area+')"><button class="dropdown-item"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Eliminar</button></li>'+
+                        '</ul>'+
+                    '</div>';
+                }},
+            ];
+            _gen.setTableScrollEspecial2(table,columns,response);
+        });
+    },
+    pagar: function (id) {
+        $.ajax({
+            url:'/get-cantidad-restante/'+id,
+            type:'get',
+            dataType:'json',
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')}
+        }).done(function (response) {
+            console.log("🚀 ~ response:", response)
+            document.getElementById('restante').value = response.monto_restante;
+            const modalPagarAdelanto = new bootstrap.Modal(document.getElementById('modalPagarAdelanto'));
+            modalPagarAdelanto.show();    
+        })
     }
+
 };
 
 init = {
@@ -157,6 +200,7 @@ function calcularTotal(subTotal) {
     document.getElementById('total').value = total;
 };
 $(document).ready(function () {
+    dao.getData();
     $('#btnAddApartado').on('click', function (e) {
         e.preventDefault();
         dao.getCatMuebles('mueble','');
