@@ -10,6 +10,8 @@ use App\Models\Apartado;
 use App\Models\Cliente;
 use App\Models\ApartadoMueble;
 use App\Models\InventarioTienda;
+use App\Models\Salida;
+use App\Models\SalidaProducto;
 use Log;
 use Carbon\Carbon;
 
@@ -27,7 +29,6 @@ class ApartadosController extends Controller
         }
     }
     public function postAddPartido(Request $request){
-        Log::debug($request);
         try {
             $request->validate([
                 'nombre' => 'required|string|max:255',
@@ -125,6 +126,8 @@ class ApartadosController extends Controller
                     'a.fecha_apartado',
                     'a.id as id'
                 )
+                ->whereNull('a.deleted_at')
+                ->orderBy('a.id')
             ->get();
             return response()->json($apartados,200);
         } catch (\Throwable $th) {
@@ -139,5 +142,84 @@ class ApartadosController extends Controller
         } catch (\Throwable $th) {
             throw $th;
         }
+    }
+    public function postAddAdelanto(Request $request){
+        try {
+            DB::beginTransaction();
+
+            $restante = Apartado::where('id',$request->id_apartado)->value('monto_restante');
+            if ((float)$request->adelanto > (float)$restante) {
+                $response = [
+                    'icon'=>'warning',
+                    'title'=>'Advertencia',
+                    'text'=>'El monto del adelanto es mayor al monto restante.',
+                ];
+                return response()->json($response,200);
+            }
+            Apartado::where('id',$request->id_apartado)->decrement('monto_restante',floatval($request->adelanto));
+            Apartado::where('id', $request->id_apartado)->increment('monto_anticipo', floatval($request->adelanto));
+
+            $newRestante = Apartado::where('id',$request->id_apartado)->value('monto_restante');
+
+            if ((float)$newRestante == 0) {
+                $apartadoOld = Apartado::leftJoin('apartado_muebles as am','am.id_apartado','=','apartados.id')
+                    ->select(
+                        'apartados.id as id',
+                        'apartados.cliente_id',
+                        'apartados.tienda_id',
+                        'apartados.usuario_id',
+                        'am.id as id_am',
+                        'am.id_mueble',
+                        'am.cantidad',
+                    )
+                    ->where('apartados.id',$request->id_apartado)
+                ->get(); 
+              
+                Apartado::where('id')->update(['liquidado_at'=>Carbon::now()->toDateString()]);
+                Apartado::where('id',$request->id_apartado)->delete();
+
+                $salida = Salida::create([
+                    'cliente_id'=>$apartadoOld[0]->cliente_id,
+                    'apartado_id'=>$apartadoOld[0]->id,
+                    'chofer_id'=>null,
+                    'usuario_id'=>Auth::user()->id,
+                    'fecha_entrega'=>Carbon::now()->toDateString(),
+                    'pdf_entrega'=>null,
+                    'estatus'=>'Por entregar'
+                ]);
+                foreach ($apartadoOld as  $apartado) {
+                    SalidaProducto::create([
+                        'id_salida'=>$salida->id,
+                        'id_mueble'=>$apartado->id_mueble,
+                        'id_tienda'=>Auth::user()->tienda_id,
+                        'cantidad'=>$apartado->cantidad,
+                        'id_usuario'=>Auth::user()->id
+                    ]);
+                }
+                
+                $response = [
+                    'icon' =>'success',
+                    'title' =>'Exito',
+                    'text' => 'Monto liquidado, salida registrada.',
+                ];
+                DB::commit();
+                return response()->json($response,200);
+            }
+            
+            
+            $response = [
+                'icon' =>'success',
+                'title' =>'Exito',
+                'text' => 'Monto actualizado con exito.',
+            ];
+            DB::commit();
+            return response()->json($response,200);
+            
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+        
+
     }
 }

@@ -81,7 +81,6 @@ dao = {
             dataType:'json',
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
             const table = $('#tbl_apartados');
             const columns = [
                 {"targets":[0],"mData":'id'},
@@ -111,12 +110,36 @@ dao = {
             dataType:'json',
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')}
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
             document.getElementById('restante').value = response.monto_restante;
+            document.getElementById('id_apartado').value = id;
             const modalPagarAdelanto = new bootstrap.Modal(document.getElementById('modalPagarAdelanto'));
             modalPagarAdelanto.show();    
-        })
-    }
+        });
+    },
+    postAbonar: function () {
+      var form = $('#frm_pagar_adelanto')[0];
+      var data = new FormData(form);
+      $.ajax({
+        url:'/post-pagar-adelanto',
+        type:'post',
+        data:data,
+        enctype:"multipart/form-data",
+        processData:false,
+        contentType:false,
+        cache:false,
+        headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
+      }).done(function (response) {
+        Swal.fire({
+            icon:response.icon,
+            title:response.title,
+            text:response.text,
+        });
+        if (response.icon == 'success') {
+            closeModal('modalPagarAdelanto','frm_pagar_adelanto');
+            dao.getData();
+        }
+      })
+    },
 
 };
 
@@ -141,6 +164,16 @@ init = {
             total : {required: 'Este campo es requerido'},
             fecha : {required: 'Este campo es requerido'},
           }
+        })
+    },
+    validateAdelanto: function (form) {
+        _gen.validate(form,{
+            rules:{
+                adelanto: {required:true}
+            },
+            messages: {
+                adelanto: {required:'Este campo es requerido'},
+            }
         })
     },
 };
@@ -233,6 +266,13 @@ $(document).ready(function () {
         init.validateApartado($('#frm_add_apartado'));
         if ($('#frm_add_apartado').valid()) {
             dao.postAddApartado();
+        }
+    });
+    $('#btn_add_pago').on('click',function (e) {
+        e.preventDefault();
+        init.validateAdelanto($('#frm_pagar_adelanto'));
+        if ($('#frm_pagar_adelanto').valid()) {
+            dao.postAbonar();
         }
     });
     

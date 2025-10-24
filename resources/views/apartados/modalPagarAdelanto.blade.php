@@ -20,14 +20,17 @@
             <div class="modal-body">
                 <form class="row g-3" id="frm_pagar_adelanto" name="frm_pagar_adelanto">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-8">
+                            <input type="hidden" name="id_apartado" id="id_apartado">
                             <label for="restante" for="restante">Restante</label>
                             <input type="text" class="form-control" id="restante" name="restante" disabled>
                         </div>
                         <div class="mini-br"></div>
-                        <div class="col-md-4">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-8">
                             <label for="adelanto">Adelanto</label>
-                            <input type="number" id="adelanto" name="adelanto" class="form-control" readonly>
+                            <input type="number" id="adelanto" name="adelanto" class="form-control">
                         </div>
                     </div>
                 </form>

@@ -58,10 +58,14 @@ Route::middleware('auth')->controller(ApartadosController::class)->group(functio
     Route::post('/post-add-apartado','postAddPartido')->name('postAddPartido');
     Route::get('/get-data-apartados','getDataApartados')->name('getDataApartados');
     Route::get('/get-cantidad-restante/{id}','getMontoRestante')->name('getMontoRestante');
+    Route::post('/post-pagar-adelanto','postAddAdelanto')->name('postAddAdelanto');
 });
 // rutas de ventas
-Route::middleware('auth')->group(function(){
-    Route::get('/get-ventas',[VentasController::class,'getVentas'])->name('getVentas');
+Route::middleware('auth')->controller(VentasController::class)->group(function(){
+    Route::get('/get-ventas','getVentas')->name('getVentas');
+    Route::get('/get-data-salidas-all','getDataSalidas')->name('getDataSalidas');
+    Route::get('/get-choferes-catalogo','getChoferesEnvio')->name('getChoferesEnvio');
+    
 });
 // rutas de catalogos
 Route::middleware('auth')->controller(CatalogoController::class)->group(function(){

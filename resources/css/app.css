@@ -143,3 +143,60 @@
 .dt-container .row:first-child {
   margin-bottom: 0.5rem !important;
 }
+
+.yellow{
+display: inline-block;
+border: 1px solid  #ffe3b0;
+color:  #e49d18 ;
+padding: 5px 10px;
+border-radius: 2em;
+background-color:  #ffe3b0;
+width: auto;
+}
+.red{
+display: inline-block;
+border: 1px solid  #ffc8c8;
+color:  #ff0202 ;
+padding: 5px 10px;
+border-radius: 2em;
+background-color:  #ffc8c8;
+width: auto;
+}
+.green{
+display: inline-block;
+border: 1px solid  #d9f1d9 ;
+color: #4caf50;
+padding: 5px 10px;
+border-radius: 2em;
+background-color:   #d9f1d9 ;
+width: auto;
+}
+.green2{
+display: inline-block;
+border: 1px solid  #d9f1d9 ;
+color: #4caf50;
+padding: 2px 15px;
+border-radius: 2em;
+background-color:   #d9f1d9 ;
+width: auto;
+height: 30px;
+}
+.blue{
+display: inline-block;
+border: 1px solid  #006FFF33;
+color:  #0E3395  ;
+padding: 5px 10px;
+border-radius: 2em;
+background-color:  #006FFF33;
+width: auto;
+}
+.blue2{
+display: inline-block;
+border: 1px solid  #006FFF33;
+color:  #0E3395  ;
+padding: 2px 15px;
+border-radius: 2em;
+background-color:  #006FFF33;
+width: auto;
+height: 30px;
+}

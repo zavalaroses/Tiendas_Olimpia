@@ -15,7 +15,7 @@
      <br>
     <div class="row">
         <div class="table-responsive">
-            <table id="tbl_ventas" style="width: 100%;">
+            <table id="tbl_ventas" style="width: 100%;" class="table table-borderless table-centered">
                 <caption class="captionTbl">
                     <br>
                     <div class="row" style="align-items: center; justify-content: center;">
@@ -30,6 +30,7 @@
                         <th scope="col">Estatus</th>
                         <th scope="col">Cantidad</th>
                         <th scope="col">Cliente</th>
+                        <th scope="col">Fecha entrega</th>
                         <th scope="col">Acciones</th>
                     </tr>
                 </thead>
@@ -40,6 +41,6 @@
     </div>
 </div>
 <script src="/js/utilerias.js"></script>
-<script src="/js/inventario/init.js"></script>
-@include('inventario.modalAddentrada')
+<script src="/js/salidas/init.js"></script>
+@include('ventas.modalDarSalida')
 @endsection
