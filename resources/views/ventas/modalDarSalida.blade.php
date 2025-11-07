@@ -18,22 +18,27 @@
             </div>
             <br>
             <div class="modal-body">
+              <div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-4"><p><strong>Titular: </strong></p><p id="titular"></p></div>
+                <div class="col-md-4"><p><strong>Contacto: </strong></p><p id="telefono"></p></div>
+                <div class="col-md-2"></div>
+              </div>
+              <br>
                 <form class="row g-3" id="frm_dar_salida" name="frm_dar_salida">
                     <div class="row">
-                        <div class="col-md-3"></div>
-                        <div class="col-md-6">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-4">
                             <label for="chofer" >Chofer</label>
                             <select name="chofer" id="chofer" class="form-select">
                                 <option value="">Seleccione una opcion</option>
                             </select>
                         </div>
-                        <div class="col-md-3"></div>
-                        <div class="col-md-3"></div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="fecha">Fecha de salida</label>
                             <input type="date" name="fechaSalida" id="fechaSalida" class="form-control">
                         </div>
-                        <div class="col-md-3"></div>
+                        <div class="col-md-2"></div>
                   </form>
             </div>
             <div class="modal-footer" style="display: flex; justify-content:center">
@@ -52,3 +57,14 @@
         </div>
     </div>
 </div>
+<script>
+  $(document).ready(function () {
+    const hoy = new Date();
+    const year = hoy.getFullYear();
+    const month = String(hoy.getMonth() + 1).padStart(2, '0');
+    const day = String(hoy.getDate()).padStart(2,'0');
+    const fechaMin = `${year}-${month}-${day}`; // formato yyyy-MM-dd
+    document.getElementById('fechaSalida').setAttribute('min', fechaMin);
+  });
+  
+</script>

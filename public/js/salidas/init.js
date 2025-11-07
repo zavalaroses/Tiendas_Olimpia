@@ -53,19 +53,22 @@ dao = {
             _gen.setTableScrollEspecial2(table,columns,response);
         })
     },
-    darSalida: function () {
+    darSalida: function (id) {
         $.ajax({
-            url:'/get-choferes-catalogo',
+            url:'/get-chofer-info-salida/'+id,
             type:'get',
             dataType:'json',
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
             console.log("🚀 ~ response:", response)
-            var field = $('chofer');
+            let {chofer,data} = response;
+            document.getElementById('titular').innerText = data.nombre +' '+data.apellidos;
+            document.getElementById('telefono').innerText = data.telefono;
+            var field = $('#chofer');
             field.html('');
             field.append(new Option('Selecciona una opcion'));
-            response.map(function(val,i) {
-                field.append(new Option(response[i].nombre,response[i].id,false,false));
+            chofer.map(function(val,i) {
+                field.append(new Option(chofer[i].chofer,chofer[i].id,false,false));
             });
             const modalDarSalida = new bootstrap.Modal(document.getElementById('modalDarSalida'));
             modalDarSalida.show();  

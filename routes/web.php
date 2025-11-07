@@ -65,6 +65,7 @@ Route::middleware('auth')->controller(VentasController::class)->group(function()
     Route::get('/get-ventas','getVentas')->name('getVentas');
     Route::get('/get-data-salidas-all','getDataSalidas')->name('getDataSalidas');
     Route::get('/get-choferes-catalogo','getChoferesEnvio')->name('getChoferesEnvio');
+    Route::get('/get-chofer-info-salida/{id?}','getDataToSalida')->name('getDataToSalida');
     
 });
 // rutas de catalogos

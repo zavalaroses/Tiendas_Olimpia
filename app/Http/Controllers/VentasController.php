@@ -50,4 +50,23 @@ class VentasController extends Controller
             throw $th;
         }
     }
+    public function getDataToSalida($id){
+        try {
+            $salidas = Salida::leftJoin('apartados as a','a.id','=','salidas.apartado_id')
+            ->leftJoin('clientes as c','c.id','=','salidas.cliente_id')
+            ->where('salidas.id',$id)->first();
+
+            $choferes = Chofer::select('id',DB::raw("CONCAT(nombre,' ',apellidos) as chofer"))
+            ->where('tienda_id',$salidas->tienda_id ? $salidas->tienda_id : Auth::user()->tienda_id)
+            ->get();
+            Log::debug(json_encode($salidas));
+            $response = [
+                'data'=>$salidas,
+                'chofer'=>$choferes
+            ];
+            return response()->json($response,200);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
 }
