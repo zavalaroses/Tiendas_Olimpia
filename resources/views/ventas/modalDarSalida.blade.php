@@ -40,7 +40,7 @@
                         </div>
                         <div class="col-md-2"></div>
                   </form>
-            </div>
+            </div><br>
             <div class="modal-footer" style="display: flex; justify-content:center">
                   <div class="col-md-6">
                     <div class="input-group">
@@ -49,7 +49,7 @@
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-5">
-                        <button type="button" class="form-control btnAgregar" id="btn_agendar_salida">AGREGAR</button>
+                        <button type="button" class="form-control btnAgregar" id="btn_agendar_salida">GUARDAR</button>
                       </div>
                     </div>
                   </div>

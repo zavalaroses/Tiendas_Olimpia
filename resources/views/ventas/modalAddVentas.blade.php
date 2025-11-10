@@ -1,10 +1,10 @@
-<div class="modal fade" data-bs-backdrop='static' id="modalAddApartados" role="dialog" aria-labelledby="modalAddApartados" aria-hidden="true">
+<div class="modal fade" data-bs-backdrop='static' id="modalAddVenta" role="dialog" aria-labelledby="modalAddVenta" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header captionModal">
               <div class="row" style="width: 100%">
                 <div class="col-md-12" style="display: flex; justify-content:right; margin-top:0%; margin-bottom:0%;">
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('modalAddApartados','frm_add_apartado');">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('modalAddVenta','frm_add_venta');">
                     <h5><span aria-hidden="true">&times;</span></h5>
                   </button>
                 </div>
@@ -12,13 +12,13 @@
                   <div class="col-md-6 " style="font: normal normal normal 30px/41px Galano Grotesque;
                     letter-spacing: 0px;
                     color: #000;
-                    text-transform: uppercase; text-align:center;">Nuevo Apartado</div>
+                    text-transform: uppercase; text-align:center;">Nueva venta</div>
                 </div>
               </div>
             </div>
             <br>
             <div class="modal-body">
-                <form class="row g-3" id="frm_add_apartado" name="frm_add_apartado">
+                <form class="row g-3" id="frm_add_venta" name="frm_add_venta">
                     <div class="row">
                         <div class="col-md-4">
                             <label for="cliente" for="nombre">Nombre(s)</label>
@@ -39,16 +39,16 @@
                         </div>
                         <div class="mini-br"></div>
                         <div class="col-md-4">
-                            <label for="anticipo">Anticipo</label>
-                            <input type="number" id="anticipo" name="anticipo" class="form-control">
+                            <label for="anticipo">Chofer</label>
+                            <select name="chofer" id="chofer" class="form-control"></select>
                         </div>
                         <div class="col-md-4">
                             <label for="total">Total</label>
                             <input type="text" id="total" name="total" class="form-control" readonly>
                         </div>
                         <div class="col-md-4">
-                            <label for="fecha">Fecha</label>
-                            <input type="text" id="fecha" name="fecha" class="form-control" readonly>
+                            <label for="fecha_envio">Fecha de envio</label>
+                            <input type="date" id="fecha_envio" name="fecha_envio" class="form-control">
                         </div>
                     </div>
                     <div class="row">
@@ -71,13 +71,13 @@
                       
                       <div class="col-md-2">
                         <label for="tienda" for="Agregar">Agregar</label>
-                        <button type="button" id="btn_add_garantia" name="btn_add_garantia" class="form-control btAdd" >
+                        <button type="button" id="btn_add_mueble" name="btn_add_mueble" class="form-control btAdd" >
                           <i class="fa-solid fa-plus" ></i>
                         </button>
                       </div>
                     </div>
                     <div class="col-md-12">
-                    <table id="tbl_add_list_apartados" name= "tbl_add_list_apartados" style="width: 100%; display:none">
+                    <table id="tbl_producto_venta" name= "tbl_producto_venta" style="width: 100%; display:none">
                       <thead>
                         <th>ID</th>
                         <th>Producto</th>
@@ -95,11 +95,11 @@
                   <div class="col-md-6">
                     <div class="input-group">
                       <div class="col-md-5">
-                        <button type="reset" class="form-control btnCancel" onclick="closeModal('modalAddApartados','frm_add_apartado');">CANCELAR</button>
+                        <button type="reset" class="form-control btnCancel" onclick="closeModal('modalAddVenta','frm_add_venta');">CANCELAR</button>
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-5">
-                        <button type="button" class="form-control btnAgregar" id="btn_add_apartado">AGREGAR</button>
+                        <button type="button" class="form-control btnAgregar" id="btn_add_venta">AGREGAR</button>
                       </div>
                     </div>
                   </div>
@@ -107,3 +107,11 @@
         </div>
     </div>
 </div>
+<script>
+    $(document).ready(function () {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha_envio').min = today;
+        dao.getChoferes('','chofer');
+        dao.getCatMuebles('mueble','');
+    })
+</script>

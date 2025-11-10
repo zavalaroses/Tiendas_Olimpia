@@ -25,7 +25,7 @@
                   </div>
                   <div class="col-md-6">
                     <label for="fecha_ingreso" class="form-label">Fecha de Ingreso</label>
-                    <input type="date" class="form-control" id="fecha_ingreso" name="fecha_ingreso">
+                    <input type="date" class="form-control" id="fecha_ingreso" name="fecha_ingreso" readonly>
                   </div>
                   <div class="col-md-6">
                     <label for="producto" class="form-label">Producto</label>
@@ -69,3 +69,11 @@
         </div>
     </div>
 </div>
+<script>
+  $(document).ready(function () {
+    
+    const today = new Date().toISOString().split('T')[0];
+    console.log("🚀 ~ today:", today)
+    document.getElementById('fecha_ingreso').value = today;
+  });
+</script>

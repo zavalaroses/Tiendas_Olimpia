@@ -40,7 +40,10 @@
         </div>
     </div>
 </div>
+@include('ventas.modalAddVentas')
+@include('ventas.modalDarSalida')
 <script src="/js/utilerias.js"></script>
 <script src="/js/salidas/init.js"></script>
-@include('ventas.modalDarSalida')
+
+
 @endsection
