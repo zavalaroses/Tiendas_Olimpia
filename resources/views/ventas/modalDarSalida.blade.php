@@ -25,21 +25,22 @@
                 <div class="col-md-2"></div>
               </div>
               <br>
-                <form class="row g-3" id="frm_dar_salida" name="frm_dar_salida">
-                    <div class="row">
-                        <div class="col-md-2"></div>
-                        <div class="col-md-4">
-                            <label for="chofer" >Chofer</label>
-                            <select name="chofer" id="chofer" class="form-select">
-                                <option value="">Seleccione una opcion</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="fecha">Fecha de salida</label>
-                            <input type="date" name="fechaSalida" id="fechaSalida" class="form-control">
-                        </div>
-                        <div class="col-md-2"></div>
-                  </form>
+              <form class="row g-3" id="frm_dar_salida" name="frm_dar_salida">
+                  <div class="row">
+                    <input type="hidden" name="id" id="id_salida">
+                      <div class="col-md-2"></div>
+                      <div class="col-md-4">
+                          <label for="chofer" >Chofer</label>
+                          <select name="chofer" id="chofer_salida" class="form-select">
+                          </select>
+                      </div>
+                      <div class="col-md-4">
+                          <label for="fecha">Fecha de salida</label>
+                          <input type="date" name="fechaSalida" id="fechaSalida" class="form-control">
+                      </div>
+                      <div class="col-md-2"></div>
+                  </div>
+              </form>
             </div><br>
             <div class="modal-footer" style="display: flex; justify-content:center">
                   <div class="col-md-6">
@@ -65,6 +66,7 @@
     const day = String(hoy.getDate()).padStart(2,'0');
     const fechaMin = `${year}-${month}-${day}`; // formato yyyy-MM-dd
     document.getElementById('fechaSalida').setAttribute('min', fechaMin);
+    dao.getChoferes('','chofer_salida');
   });
   
 </script>

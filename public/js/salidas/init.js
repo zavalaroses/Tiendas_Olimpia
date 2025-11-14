@@ -23,8 +23,16 @@ dao = {
                 {"targets":[4],"mData":'cantidad'},
                 {"targets":[5],"mData":'cliente'},
                 {"targets":[6],"mData":function (o) {
-                    const fecha_entrega = new Date(o.fecha_entrega);
+                    const fechaStr = o.fecha_entrega; // "2025-11-11"
+                    const [year, month, day] = fechaStr.split('-').map(Number);
+                    const fecha_entrega = new Date(year, month - 1, day); // <-- crea fecha local correctamente
+
                     const today = new Date();
+
+                    // Normalizar ambas fechas
+                    fecha_entrega.setHours(0, 0, 0, 0);
+                    today.setHours(0, 0, 0, 0);
+
                     const esMismoDia = (a,b)=>
                         a.getFullYear() === b.getFullYear() &&
                         a.getMonth() === b.getMonth() &&
@@ -61,6 +69,7 @@ dao = {
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
             let {chofer,data} = response;
+            document.getElementById('id_salida').value = id;
             document.getElementById('titular').innerText = data.nombre +' '+data.apellidos;
             document.getElementById('telefono').innerText = data.telefono;
             var field = $('#chofer');
@@ -80,7 +89,6 @@ dao = {
             dataType:'json',
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
             let select = $('#'+field);
             select.html();
             select.append(new Option('Selecciona un chofer',''));
@@ -124,8 +132,111 @@ dao = {
             document.getElementById('precioUnit').innerHTML = '$ '+response;
         });
     },
+    postDarSalida: function () {
+        var form = $('#frm_dar_salida')[0];
+        var data = new FormData(form);
+        $.ajax({
+            url:'/post-agendar-salida',
+            type:'post',
+            data:data,
+            enctype:"multipart/form-data",
+            processData:false,
+            contentType:false,
+            cache:false,
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            Swal.fire({
+                icon:response.icon,
+                title:response.title,
+                text:response.text,
+            });
+            if (response.icon == 'success') {
+                closeModal('modalPagarAdelanto','frm_pagar_adelanto');
+                dao.getDataSalidas();
+            }
+        })
+    },
+    addVenta: function () {
+        var form = $('#frm_add_venta')[0];
+        var data = new FormData(form);
+        var tabla = document.getElementById('tbl_producto_venta');
+        var tbody = tabla.querySelector('tbody');
+        var filas = tbody.querySelectorAll('tr');
+        if (filas.length === 0) {
+            Swal.fire({
+                icon:'warning',
+                title:'Advertencia',
+                text:'Debes agregar al menos un mueble antes de guardar.',
+            });
+            return
+        }
+        filas.forEach(function (fila) {
+            var celdas = fila.querySelectorAll('td');
+            var id = celdas[0].textContent;
+            var nombre = celdas[1].textContent;
+            var cantidad = celdas[2].textContent;
+
+            data.append("id[]",id);
+            data.append("producto[]",nombre);
+            data.append("cantidad[]",cantidad);
+        });
+        $.ajax({
+            url:'/post-agregar-venta',
+            type:'post',
+            data:data,
+            enctype:"multipart/form-data",
+            processData:false,
+            contentType:false,
+            cache:false,
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            Swal.fire({
+                icon:response.icon,
+                title:response.title,
+                text:response.text,
+            });
+            if (response.icon == 'success') {
+                closeModal('modalAddVenta','frm_add_venta');
+                dao.getDataSalidas();
+            }
+        })
+    }
 };
 init = {
+    validateDarSalida: function(form){
+        _gen.validate(form,{
+          rules:{
+            chofer : {required: true},
+            fechaSalida : {required: true},
+          },
+          messages: {
+            chofer : {required: 'Este campo es requerido'},
+            fechaSalida : {required: 'Este campo es requerido'},
+          }
+        })
+    },
+    validateVenta: function (form) {
+        _gen.validate(form,{
+          rules:{
+            nombre : {required: true},
+            apellidos : {required: true},
+            telefono : {required:true},
+            direccion : {required:true},
+            chofer : {required:true},
+            total : {required:true},
+            fecha_envio : {required:true},
+          },
+          messages: {
+            nombre : {required: 'Este campo es requerido'},
+            apellidos : {required: 'Este campo es requerido'},
+            telefono: {required:'Este campo es requerido'},
+            direccion: {required:'Este campo es requerido'},
+            chofer: {required:'Este campo es requerido'},
+            total: {required:'Este campo es requerido'},
+            fecha_envio: {required:'Este campo es requerido'},
+          }
+        })
+    }
 
 };
 function addListaMuebles() {
@@ -216,6 +327,13 @@ $(document).ready(function () {
     $('#mueble').on('change',function (e) {
         e.preventDefault();
         dao.getPreciosMuebles($(this).val())
+    });
+    $('#btn_add_venta').on('click', function (e) {
+        e.preventDefault();
+        init.validateVenta($('#frm_add_venta'));
+        if ($('#frm_add_venta').valid()) {
+            dao.addVenta();
+        }
     });
 
 });
