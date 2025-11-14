@@ -16,7 +16,6 @@ class Apartado extends Model
         'cliente_id',
         'mueble_id',
         'tienda_id',
-        'cantidad',
         'monto_anticipo',
         'monto_restante',
         'usuario_id',

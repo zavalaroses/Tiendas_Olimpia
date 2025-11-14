@@ -99,8 +99,8 @@ dao = {
                 {"targets": [0],"mData":'id'},
                 {"targets": [1],"mData":'tienda'},
                 {"targets": [2],"mData":'mueble'},
-                {"targets": [3],"mData":'estatus'},
-                {"targets": [4],"mData":'cantidad'},
+                {"targets": [3],"mData":'cantidad_stock'},
+                {"targets": [4],"mData":'cantidad_apartados'},
                 // {"aTargets": [5], "mData" : function(o){
                 //     return '<div class="dropdown">'+
                 //     '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
@@ -113,7 +113,26 @@ dao = {
             ];
             _gen.setTableScrollEspecial2(table,columns,response)
         })
-    }
+    },
+    getCatTiendas: function (field,id) {
+        $.ajax({
+            url:'/get-catalogo-tiendas',
+            type:'get',
+            dataType:'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            var select = $('#'+field);
+            select.html('');
+            select.append(new Option('Selecciona una tienda',''));
+            response.map(function (val,i) {
+                if (id !='' && id == val.id) {
+                    select.append(new Option(response[i].nombre,response[i].id, true, true));
+                }else{
+                    select.append(new Option(response[i].nombre,response[i].id, false,false));
+                }
+            });
+        })
+    },
 
 };
 
@@ -182,6 +201,7 @@ function addListaMubles() {
 }
 $(document).ready(function () {
     dao.getData('');
+    dao.getCatTiendas('tiendas','');
     $('#btnAddInventario').on('click', function (e) {
         e.preventDefault();
         dao.getCatProveedores('proveedor','');

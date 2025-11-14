@@ -88,7 +88,8 @@ class ApartadosController extends Controller
 
                 if ($inventario && $inventario->cantidad >= $request->cantidad[$i]) {
                     # restamos inventario...
-                    $inventario->decrement('cantidad',$request->cantidad[$i]);
+                    $inventario->decrement('cantidad_stock',$request->cantidad[$i]);
+                    $inventario->increment('cantidad_apartados',$request->cantidad[$i]);
                 }else {
                     throw new \Exception("Inventarios insuficiente para el mueble", 1);
                 }
