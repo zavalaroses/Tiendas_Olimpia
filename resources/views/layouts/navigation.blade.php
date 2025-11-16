@@ -12,6 +12,11 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('getCajas')" :active="request()->routeIs('getCajas')">
+                        {{ 'Caja' }}
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('getUsuarios')" :active="request()->routeIs('getUsuarios')">
                         {{ 'Usuarios' }}
                     </x-nav-link>

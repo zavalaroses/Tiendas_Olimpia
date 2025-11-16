@@ -1,4 +1,33 @@
 dao = {
+    getData: function (tienda) {
+        $.ajax({
+            url:'/get-data-apartados/'+tienda,
+            type:'get',
+            dataType:'json',
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            const table = $('#tbl_apartados');
+            const columns = [
+                {"targets":[0],"mData":'id'},
+                {"targets":[1],"mData":'cliente'},
+                {"targets":[2],"mData":'mueble'},
+                {"targets":[3],"mData":'cantidad'},
+                {"targets":[4],"mData":'anticipo'},
+                {"targets":[5],"mData":'restante'},
+                {"targets":[6],"mData":'fecha_apartado'},
+                {"aTargets": [7], "mData" : function(o){
+                    return '<div class="dropdown">'+
+                    '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
+                        '<ul class="dropdown-menu" aria-labelledby="dropdownMenu2">'+
+                            '<li onclick="dao.pagar(' + o.id + ')"><button class="dropdown-item"><i class="fa-solid fa-cash-register" style="color: #1C85AA"></i>&nbsp;Abonar</button></li>'+
+                            // '<li onclick="dao.eliminar(' + o.id +','+o.area+')"><button class="dropdown-item"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Eliminar</button></li>'+
+                        '</ul>'+
+                    '</div>';
+                }},
+            ];
+            _gen.setTableScrollEspecial2(table,columns,response);
+        });
+    },
     getCatMuebles: function (field,id) {
         $.ajax({
             url:'/get-data-muebles',
@@ -53,6 +82,10 @@ dao = {
             data.append("producto[]",nombre);
             data.append("cantidad[]",cantidad);
         });
+        const tienda = document.getElementById('tiendas');
+        if (tienda) {
+            data.append("id_tienda", tienda.value);
+        }
         $.ajax({
             url:'/post-add-apartado',
             type:'post',
@@ -70,37 +103,9 @@ dao = {
             });
             if (response.icon == 'success') {
                 closeModal('modalAddApartados','frm_add_apartado');
-                dao.getData();
+                let idT = tienda ? tienda.value : '';
+                dao.getData(idT);
             }
-        });
-    },
-    getData: function () {
-        $.ajax({
-            url:'/get-data-apartados',
-            type:'get',
-            dataType:'json',
-            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
-        }).done(function (response) {
-            const table = $('#tbl_apartados');
-            const columns = [
-                {"targets":[0],"mData":'id'},
-                {"targets":[1],"mData":'cliente'},
-                {"targets":[2],"mData":'mueble'},
-                {"targets":[3],"mData":'cantidad'},
-                {"targets":[4],"mData":'anticipo'},
-                {"targets":[5],"mData":'restante'},
-                {"targets":[6],"mData":'fecha_apartado'},
-                {"aTargets": [7], "mData" : function(o){
-                    return '<div class="dropdown">'+
-                    '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
-                        '<ul class="dropdown-menu" aria-labelledby="dropdownMenu2">'+
-                            '<li onclick="dao.pagar(' + o.id + ')"><button class="dropdown-item"><i class="fa-solid fa-cash-register" style="color: #1C85AA"></i>&nbsp;Abonar</button></li>'+
-                            // '<li onclick="dao.eliminar(' + o.id +','+o.area+')"><button class="dropdown-item"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Eliminar</button></li>'+
-                        '</ul>'+
-                    '</div>';
-                }},
-            ];
-            _gen.setTableScrollEspecial2(table,columns,response);
         });
     },
     pagar: function (id) {
@@ -140,6 +145,25 @@ dao = {
         }
       })
     },
+    getCatTiendas: function (field,id) {
+        $.ajax({
+            url:'/get-catalogo-tiendas',
+            type:'get',
+            dataType:'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            var select = $('#'+field);
+            select.html('');
+            select.append(new Option('Selecciona una tienda',''));
+            response.map(function (val,i) {
+                if (id !='' && id == val.id) {
+                    select.append(new Option(response[i].nombre,response[i].id, true, true));
+                }else{
+                    select.append(new Option(response[i].nombre,response[i].id, false,false));
+                }
+            });
+        })
+    },
 
 };
 
@@ -154,6 +178,7 @@ init = {
             anticipo:{required:true},
             total:{required:true},
             fecha:{required:true},
+            forma_pago:{required:true},
           },
           messages: {
             nombre : {required: 'Este campo es requerido'},
@@ -163,6 +188,7 @@ init = {
             anticipo : {required: 'Este campo es requerido'},
             total : {required: 'Este campo es requerido'},
             fecha : {required: 'Este campo es requerido'},
+            forma_pago : {required: 'Este campo es requerido'},
           }
         })
     },
@@ -233,7 +259,8 @@ function calcularTotal(subTotal) {
     document.getElementById('total').value = total;
 };
 $(document).ready(function () {
-    dao.getData();
+    dao.getData('');
+    dao.getCatTiendas('tiendas','');
     $('#btnAddApartado').on('click', function (e) {
         e.preventDefault();
         dao.getCatMuebles('mueble','');
@@ -274,6 +301,12 @@ $(document).ready(function () {
         if ($('#frm_pagar_adelanto').valid()) {
             dao.postAbonar();
         }
+    });
+    $('#tiendas').on('change', function (e) {
+        e.preventDefault();
+        const tienda = this.options[this.selectedIndex].text;
+        document.getElementById('tituto_tienda').innerText = tienda;
+        dao.getData(this.value);
     });
     
 });

@@ -1,4 +1,31 @@
 dao = {
+    getData: function ($tiendaId) {
+        $.ajax({
+            url:'/get-data-inventario/'+$tiendaId,
+            type:'get',
+            dataType:'json',
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            const table = $('#tbl_inventarios');
+            const columns = [
+                {"targets": [0],"mData":'id'},
+                {"targets": [1],"mData":'tienda'},
+                {"targets": [2],"mData":'mueble'},
+                {"targets": [3],"mData":'cantidad_stock'},
+                {"targets": [4],"mData":'cantidad_apartados'},
+                // {"aTargets": [5], "mData" : function(o){
+                //     return '<div class="dropdown">'+
+                //     '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
+                //         '<ul class="dropdown-menu" aria-labelledby="dropdownMenu2">'+
+                //             '<li onclick="dao.editar(' + o.id + ')"><button class="dropdown-item"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i>&nbsp;Editar</button></li>'+
+                //             '<li onclick="dao.eliminar(' + o.id +','+o.area+')"><button class="dropdown-item"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Eliminar</button></li>'+
+                //         '</ul>'+
+                //     '</div>';
+                // }},
+            ];
+            _gen.setTableScrollEspecial2(table,columns,response)
+        })
+    },
     getCatProveedores:function (field,id) {
         $.ajax({
             url:'/get-data-cat-proveedores',
@@ -66,6 +93,10 @@ dao = {
             data.append("nombre[]",nombre);
             data.append("cantidad[]",cantidad);
         });
+        const tienda = document.getElementById('tiendas');
+        if (tienda) {
+            data.append("id_tienda", tienda.value);
+        }
         $.ajax({
             url:'/post-add-entrada',
             type:'post',
@@ -83,36 +114,14 @@ dao = {
             });
             if (response.icon == 'success') {
                 closeModal('modalAddEntrada','frm_add_entrada');
-                dao.gatData();
+                if (tienda) {
+                    dao.gatData(tienda.value);
+                }else{
+                    dao.getData('');
+                }
+                
             }
         });
-    },
-    getData: function ($tiendaId) {
-        $.ajax({
-            url:'/get-data-inventario/'+$tiendaId,
-            type:'get',
-            dataType:'json',
-            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
-        }).done(function (response) {
-            const table = $('#tbl_inventarios');
-            const columns = [
-                {"targets": [0],"mData":'id'},
-                {"targets": [1],"mData":'tienda'},
-                {"targets": [2],"mData":'mueble'},
-                {"targets": [3],"mData":'cantidad_stock'},
-                {"targets": [4],"mData":'cantidad_apartados'},
-                // {"aTargets": [5], "mData" : function(o){
-                //     return '<div class="dropdown">'+
-                //     '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
-                //         '<ul class="dropdown-menu" aria-labelledby="dropdownMenu2">'+
-                //             '<li onclick="dao.editar(' + o.id + ')"><button class="dropdown-item"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i>&nbsp;Editar</button></li>'+
-                //             '<li onclick="dao.eliminar(' + o.id +','+o.area+')"><button class="dropdown-item"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Eliminar</button></li>'+
-                //         '</ul>'+
-                //     '</div>';
-                // }},
-            ];
-            _gen.setTableScrollEspecial2(table,columns,response)
-        })
     },
     getCatTiendas: function (field,id) {
         $.ajax({
@@ -224,13 +233,19 @@ $(document).ready(function () {
          });
         }
         
-     });
-     $('#btn_add_entrada').on('click',function (e) {
+    });
+    $('#btn_add_entrada').on('click',function (e) {
         e.preventDefault();
         init.validateEntrada($('#frm_add_entrada'));
         if ($('#frm_add_entrada').valid()) {
             dao.registrarEntrada();   
         }
-     });
+    });
+    $('#tiendas').on('change', function (e) {
+        e.preventDefault();
+        const tienda = this.options[this.selectedIndex].text;
+        document.getElementById('tituto_tienda').innerText = tienda;
+        dao.getData(this.value);
+    });
     
 });

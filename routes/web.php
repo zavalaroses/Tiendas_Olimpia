@@ -56,7 +56,7 @@ Route::middleware('auth')->controller(ApartadosController::class)->group(functio
     Route::get('/get-apartados','getApartados')->name('getApartados');
     Route::get('/get-precio-by-idMueble/{id?}','getPreciosById')->name('getPreciosById');
     Route::post('/post-add-apartado','postAddPartido')->name('postAddPartido');
-    Route::get('/get-data-apartados','getDataApartados')->name('getDataApartados');
+    Route::get('/get-data-apartados/{tienda?}','getDataApartados')->name('getDataApartados');
     Route::get('/get-cantidad-restante/{id}','getMontoRestante')->name('getMontoRestante');
     Route::post('/post-pagar-adelanto','postAddAdelanto')->name('postAddAdelanto');
 });
@@ -94,6 +94,9 @@ Route::middleware('auth')->controller(CatalogoController::class)->group(function
     Route::get('/get-proveedor-to-edit','getProveedorById')->name('getProveedorById');
     Route::post('/post-edit-proveedor','postUpdateProveedor')->name('postUpdateProveedor');
     Route::post('/delete-cat-proveedor','postDeleteProveedor')->name('postDeleteProveedor');
+});
+Route::middleware('auth')->controller(CajaController::class)->group(function(){
+    Route::get('/get-index-cajas','getIndex')->name('getCajas');
 });
 
 require __DIR__.'/auth.php';

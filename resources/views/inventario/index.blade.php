@@ -31,7 +31,7 @@
                 <caption class="captionTbl">
                     <br>
                     <div class="row" style="align-items: center; justify-content: center;">
-                        <div class="col-md-6 titleCenter" id="tienda">Todas las tiendas</div>
+                        <div class="col-md-6 titleCenter" id="tituto_tienda">Todas las tiendas</div>
                     </div>
                 </caption>
                 <thead>

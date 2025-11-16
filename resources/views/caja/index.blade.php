@@ -5,42 +5,43 @@
 <br>
 <!-- Simplicity is the consequence of refined emotions. - Jean D'Alembert -->
 <div class="container">
-    <div class="row d-fles" style="text-align: center">
-        <h2>APARTADOS</h2>
-    </div>
  <!-- Content here -->
+    <div class="row d-fles" style="text-align: center">
+        <h2>CAJA</h2>
+    </div>
      <div class="row">
          <div class="col-md-10">
+            
             @if(Auth::user()->rol == 1)
-               <div class="col-md-4">
-                   <select name="tiendas" id="tiendas" class="form-control"></select> 
-               </div>
-           @endif
+                <div class="col-md-4">
+                    <select name="tiendas" id="tiendas" class="form-control"></select> 
+                </div>
+               
+            @endif
+            
          </div>
          <div class="col-md-2">
-             <button id="btnAddApartado" type="button" name="btnAddApartado" class="btnNuevoUsuario">Nuevo Apartado</button>
+             <button id="btnAddInventario" type="button" name="btnAddInventario" class="btnNuevoUsuario">Nueva Entrada</button>
          </div>
      </div>
      <br>
     <div class="row">
         <div class="table-responsive">
-            <table id="tbl_apartados" style="width: 100%;" class="table table-borderless table-centered">
+            <table id="tbl_inventarios" style="width: 100%;" class="table table-borderless table-centered">
                 <caption class="captionTbl">
                     <br>
                     <div class="row" style="align-items: center; justify-content: center;">
-                        <div class="col-md-6 titleCenter" id="tituto_tienda">Tienda</div>
+                        <div class="col-md-6 titleCenter" id="tituto_tienda">Todas las tiendas</div>
                     </div>
                 </caption>
                 <thead>
                     <tr>
                         <th scope="col">ID</th>
-                        <th scope="col">Cliente</th>
+                        <th scope="col">Tienda</th>
                         <th scope="col">Mueble</th>
-                        <th scope="col">Cantidad</th>
-                        <th scope="col">Anticipo</th>
-                        <th scope="col">Restante</th>
-                        <th scope="col">Fecha Apartado</th>
-                        <th scope="col">Acciones</th>
+                        <th scope="col">En inventario</th>
+                        <th scope="col">Apartados</th>
+                        {{-- <th scope="col">Acciones</th> --}}
                     </tr>
                 </thead>
                 <tbody>
@@ -50,7 +51,6 @@
     </div>
 </div>
 <script src="/js/utilerias.js"></script>
-<script src="/js/apartados/init.js"></script>
-@include('apartados.modalAddApartados')
-@include('apartados.modalPagarAdelanto')
+<script src="/js/inventario/init.js"></script>
+@include('inventario.modalAddentrada')
 @endsection

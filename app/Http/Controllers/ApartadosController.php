@@ -12,6 +12,8 @@ use App\Models\ApartadoMueble;
 use App\Models\InventarioTienda;
 use App\Models\Salida;
 use App\Models\SalidaProducto;
+use App\Models\Transaccion;
+
 use Log;
 use Carbon\Carbon;
 
@@ -30,6 +32,7 @@ class ApartadosController extends Controller
     }
     public function postAddPartido(Request $request){
         try {
+            Log::debug($request);
             $request->validate([
                 'nombre' => 'required|string|max:255',
                 'apellidos' => 'required|string|max:255',
@@ -38,6 +41,7 @@ class ApartadosController extends Controller
                 'anticipo' => 'required',
                 'total' => 'required',
                 'fecha' => 'required',
+                'forma_pago'=>'required',
                 'id' => 'required|array|min:1',
                 'id.*' => 'required|integer',
                 'producto' => 'required|array|min:1',
@@ -45,18 +49,30 @@ class ApartadosController extends Controller
                 'cantidad' => 'required|array|min:1',
                 'cantidad.*' => 'required|numeric|min:1',
             ]);
+            if (Auth::user()->tienda_id == null && !$request->id_tienda && $request->id_tienda == null) {
+                # code...
+                $response = [
+                    'icon'=>'warning',
+                    'title'=>'Oops.',
+                    'text'=>'Es necesario seleccionar una tienda.',
+                ];
+                return response()->json($response,200);
+            }
             DB::beginTransaction();
+            $idtienda = $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id;
             $idCliente = null;
+            //revisamo si el cliente existe
             $oldCliente = Cliente::where([
                 'nombre'=>$request->nombre,
                 'apellidos'=>$request->apellidos
             ])->first();
 
+            // si el cliente existe asignamos el di si no lo creamos
             if ($oldCliente) {
                 $idCliente = $oldCliente->id;
             }else {
                 $newCliente = Cliente::create([
-                    'tienda_id'=>Auth::user()->tienda_id,
+                    'tienda_id'=>$idtienda,
                     'nombre'=>$request->nombre,
                     'apellidos'=>$request->apellidos,
                     'telefono'=>$request->telefono,
@@ -64,10 +80,12 @@ class ApartadosController extends Controller
                 ]);
                 $idCliente = $newCliente->id;
             }
+            // calcular el monto restante
             $restante = (float)$request->total - (float)$request->anticipo;
+            // registramos el apartado
             $apartado =  Apartado::create([
                 'cliente_id'=>$idCliente,
-                'tienda_id'=>Auth::user()->tienda_id,
+                'tienda_id'=>$idtienda,
                 'monto_anticipo'=>$request->anticipo,
                 'monto_restante'=>$restante,
                 'usuario_id'=>Auth::user()->id,
@@ -82,18 +100,31 @@ class ApartadosController extends Controller
                     'estatus'=>'Apartado',
                 ]);
                 $inventario = InventarioTienda::where([
-                    'tienda_id'=>Auth::user()->tienda_id,
+                    'tienda_id'=>$idtienda,
                     'mueble_id'=>$request->id[$i],
                 ])->first();
 
-                if ($inventario && $inventario->cantidad >= $request->cantidad[$i]) {
+                if ($inventario && $inventario->cantidad_stock >= $request->cantidad[$i]) {
                     # restamos inventario...
                     $inventario->decrement('cantidad_stock',$request->cantidad[$i]);
                     $inventario->increment('cantidad_apartados',$request->cantidad[$i]);
                 }else {
+                    
                     throw new \Exception("Inventarios insuficiente para el mueble", 1);
                 }
             }
+            // registramos la transaccion en la caja
+            Transaccion::create([
+                'tienda_id' =>$idtienda,
+                'venta_id'=>$apartado->id,
+                'cantidad'=>$request->anticipo,
+                'tipo_pago'=>$request->forma_pago,
+                'tipo_movimiento'=>'entrada',
+                'descripcion'=>'Monto de anticipo',
+                'user_id'=>Auth::user()->id,
+            ]);
+
+
             DB::commit();
             $response = [
                 'icon'=>'success',
@@ -112,8 +143,9 @@ class ApartadosController extends Controller
             return response()->json($response,500);
         }
     }
-    public function getDataApartados(){
+    public function getDataApartados($tienda = null){
         try {
+            $idTienda = $tienda ? $tienda : Auth::user()->tienda_id;
             $apartados = DB::table('apartados as a')
                 ->leftJoin('clientes as c','c.id','=','a.cliente_id')
                 ->leftJoin('apartado_muebles as am','am.id_apartado','=','a.id')
@@ -128,6 +160,9 @@ class ApartadosController extends Controller
                     'a.id as id'
                 )
                 ->whereNull('a.deleted_at')
+                ->when($idTienda, function($q)use($idTienda){
+                    $q->where('a.tienda_id',$idTienda);
+                })
                 ->orderBy('a.id')
             ->get();
             return response()->json($apartados,200);

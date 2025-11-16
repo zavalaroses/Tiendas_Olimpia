@@ -31,12 +31,21 @@ class InventarioController extends Controller
                 'proveedor'=>'required',
                 'fecha_ingreso'=>'required',
             ]);
+            if (Auth::user()->tienda_id == null && !$request->id_tienda && $request->id_tienda == null) {
+                # code...
+                $response = [
+                    'icon'=>'warning',
+                    'title'=>'Oops.',
+                    'text'=>'Es necesario seleccionar una tienda.',
+                ];
+                return response()->json($response,200);
+            }
             $proveedor = DB::table('proveedores')->where('id',$request->proveedor)->whereNull('deleted_at')->value('nombre');
             $horaMx = Carbon::now('America/Mexico_City')->format('H:i:s');
             $c1 = $proveedor ? $proveedor : 'NP'; 
             $codigo = $request->fecha_ingreso.'-'.$horaMx.'-'.$c1;
             $entrada = Entrada::create([
-                'tienda_id'=> Auth::user()->tienda_id,
+                'tienda_id'=> $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id,
                 'proveedor_id'=>$request->proveedor,
                 'usuario_id'=>Auth::user()->id,
                 'fecha'=> $request->fecha_ingreso,
@@ -52,15 +61,15 @@ class InventarioController extends Controller
                 $inventarioExist = InventarioTienda::where('tienda_id',Auth::user()->tienda_id)->where('mueble_id',$muebleId)->exists();
                 if ($inventarioExist) {
                     $afectedRow = InventarioTienda::where([
-                        'tienda_id'=>Auth::user()->tienda_id,
+                        'tienda_id'=>$request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id,
                         'mueble_id'=>$muebleId,
                     ])->increment('cantidad',$request->cantidad[$index],['updated_at'=>now()]);
                 }else {
                     InventarioTienda::create([
-                        'tienda_id'=>Auth::user()->tienda_id,
+                        'tienda_id'=>$request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id,
                         'mueble_id'=>$muebleId,
                         'estatus_id'=>1,
-                        'cantidad'=>$request->cantidad[$index]
+                        'cantidad_stock'=>$request->cantidad[$index]
                     ]);
                 }
             }
@@ -74,7 +83,7 @@ class InventarioController extends Controller
                 'title'=>'Oops.',
                 'text'=>'A ocurrido un error al registrar.',
             ];
-            return response()->json($response,500);
+            return response()->json($response,200);
         }
         $response = [
             'icon'=>'success',
@@ -85,6 +94,8 @@ class InventarioController extends Controller
     }
     public function getData($id = null){
         try {
+            $idTienda = $id ? $id : Auth::user()->tienda_id;
+
             $inventario = InventarioTienda::select(
                 'inventario_tienda.id',
                 't.nombre as tienda',
@@ -96,8 +107,8 @@ class InventarioController extends Controller
             ->leftJoin('muebles as m','m.id','=','inventario_tienda.mueble_id')
             ->leftJoin('tiendas as t','t.id','=','inventario_tienda.tienda_id')
             ->leftJoin('estatus_inventario as e','e.id','=','inventario_tienda.estatus_id')
-            ->when($id, function($q)use($id){
-                $q->where('tienda_id',$id);
+            ->when($idTienda, function($q)use($idTienda){
+                $q->where('tienda_id',$idTienda);
             })
             ->orderBy('inventario_tienda.id')
             ->orderBy('t.nombre')

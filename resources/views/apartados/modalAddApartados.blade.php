@@ -20,6 +20,12 @@
             <div class="modal-body">
                 <form class="row g-3" id="frm_add_apartado" name="frm_add_apartado">
                     <div class="row">
+                      <div class="col-md-8"></div>
+                      <div class="col-md-4">
+                        <input type="text" id="fecha" name="fecha" class="form-control" readonly>
+                      </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-4">
                             <label for="cliente" for="nombre">Nombre(s)</label>
                             <input type="text" class="form-control" id="nombre" name="nombre">
@@ -47,8 +53,12 @@
                             <input type="text" id="total" name="total" class="form-control" readonly>
                         </div>
                         <div class="col-md-4">
-                            <label for="fecha">Fecha</label>
-                            <input type="text" id="fecha" name="fecha" class="form-control" readonly>
+                            <label for="fecha">Forma de pago</label>
+                            <select name="forma_pago" id="forma_pago" class="form-control">
+                              <option value=1>Efectivo</option>
+                              <option value=2>Tarjeta</option>
+                              <option value=3>Transferencia</option>
+                            </select>
                         </div>
                     </div>
                     <div class="row">
