@@ -11,6 +11,7 @@ use App\Models\InventarioTienda;
 use App\Models\Salida;
 use App\Models\SalidaProducto;
 use App\Models\Cliente;
+use App\Models\Transaccion;
 use App\Models\catalogos\Chofer;
 use Log;
 use Carbon\Carbon;
@@ -21,8 +22,11 @@ class VentasController extends Controller
     public function getVentas(){
         return view('ventas.index');
     }
-    public function getDataSalidas(){
+    public function getDataSalidas($tienda = null){
         try {
+
+            $idTienda = $tienda ? $tienda : Auth::user()->tienda_id;
+
             $salidas = Salida::leftJoin('salida_producto as sp','sp.id_salida','=','salidas.id')
                 ->leftJoin('muebles as m','m.id','=','sp.id_mueble')
                 ->leftJoin('clientes as c','c.id','=','salidas.cliente_id')
@@ -36,6 +40,9 @@ class VentasController extends Controller
                     DB::raw("CONCAT(c. nombre,' ',c.apellidos) as cliente"),
                     'salidas.fecha_entrega',
                 )
+                ->when($idTienda, function($q) use($idTienda){
+                    $q->where('sp.id_tienda',$idTienda);
+                })
                 ->orderBy('salidas.id')
             ->get();
 
@@ -44,10 +51,11 @@ class VentasController extends Controller
             throw $th;
         }
     }
-    public function getChoferesEnvio(){
+    public function getChoferesEnvio($tienda = null){
         try {
+            $idTienda = $tienda ? $tienda : Auth::user()->tienda_id;
             $choferes = Chofer::select('id',DB::raw("CONCAT(nombre,' ',apellidos) as chofer"))
-            ->where('tienda_id',Auth::user()->tienda_id)
+            ->where('tienda_id',$idTienda)
             ->get();
             return response()->json($choferes,200);
         } catch (\Throwable $th) {
@@ -118,6 +126,16 @@ class VentasController extends Controller
                 'cantidad' => 'required|array|min:1',
                 'cantidad.*' => 'required|numeric|min:1',
             ]);
+            if (Auth::user()->tienda_id == null && !$request->id_tienda && $request->id_tienda == null) {
+                # code...
+                $response = [
+                    'icon'=>'warning',
+                    'title'=>'Oops.',
+                    'text'=>'Es necesario seleccionar una tienda.',
+                ];
+                return response()->json($response,200);
+            }
+            $idtienda = $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id;
             $idCliente = null;
             $oldCliente = Cliente::where([
                 'nombre'=>$request->nombre,
@@ -128,7 +146,7 @@ class VentasController extends Controller
                 $idCliente = $oldCliente->id;
             }else {
                 $newCliente = Cliente::create([
-                    'tienda_id'=>Auth::user()->tienda_id,
+                    'tienda_id'=>$idtienda,
                     'nombre'=>$request->nombre,
                     'apellidos'=>$request->apellidos,
                     'telefono'=>$request->telefono,
@@ -139,7 +157,7 @@ class VentasController extends Controller
 
             $apartado =  Apartado::create([
                 'cliente_id'=>$idCliente,
-                'tienda_id'=>Auth::user()->tienda_id,
+                'tienda_id'=>$idtienda,
                 'monto_anticipo'=>$request->total,
                 'monto_restante'=>0,
                 'usuario_id'=>Auth::user()->id,
@@ -153,13 +171,13 @@ class VentasController extends Controller
                     'estatus'=>'Apartado',
                 ]);
                 $inventario = InventarioTienda::where([
-                    'tienda_id'=>Auth::user()->tienda_id,
+                    'tienda_id'=>$idtienda,
                     'mueble_id'=>$request->id[$i],
                 ])->first();
 
-                if ($inventario && $inventario->cantidad >= $request->cantidad[$i]) {
+                if ($inventario && $inventario->cantidad_stock >= $request->cantidad[$i]) {
                     # restamos inventario...
-                    $inventario->decrement('cantidad',$request->cantidad[$i]);
+                    $inventario->decrement('cantidad_stock',$request->cantidad[$i]);
                 }else {
                     throw new \Exception("Inventarios insuficiente para el mueble", 1);
                 }
@@ -182,11 +200,20 @@ class VentasController extends Controller
                 SalidaProducto::create([
                     'id_salida'=>$salida->id,
                     'id_mueble'=>$request->id[$i],
-                    'id_tienda'=>Auth::user()->tienda_id,
+                    'id_tienda'=>$idtienda,
                     'cantidad'=>$request->cantidad[$i],
                     'id_usuario'=>Auth::user()->id
                 ]);
             }
+            Transaccion::create([
+                'tienda_id' =>$idtienda,
+                'venta_id'=>$salida->id,
+                'cantidad'=>$request->total,
+                'tipo_pago'=>$request->forma_pago,
+                'tipo_movimiento'=>'entrada',
+                'descripcion'=>'Venta',
+                'user_id'=>Auth::user()->id,
+            ]);
 
             $response = [
                 'icon' =>'success',

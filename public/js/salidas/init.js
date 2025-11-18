@@ -1,7 +1,7 @@
 dao = {
-    getDataSalidas: function () {
+    getDataSalidas: function (tienda) {
         $.ajax({
-            url:'/get-data-salidas-all',
+            url:'/get-data-salidas-all/'+tienda,
             type:'get',
             dataType:'json',
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
@@ -62,6 +62,7 @@ dao = {
         })
     },
     darSalida: function (id) {
+        // dao.getChoferes('','chofer_salida');
         $.ajax({
             url:'/get-chofer-info-salida/'+id,
             type:'get',
@@ -71,8 +72,8 @@ dao = {
             let {chofer,data} = response;
             document.getElementById('id_salida').value = id;
             document.getElementById('titular').innerText = data.nombre +' '+data.apellidos;
-            document.getElementById('telefono').innerText = data.telefono;
-            var field = $('#chofer');
+            document.getElementById('contacto').innerText = data.telefono;
+            var field = $('#chofer_salida');
             field.html('');
             field.append(new Option('Selecciona una opcion'));
             chofer.map(function(val,i) {
@@ -82,13 +83,20 @@ dao = {
             modalDarSalida.show();  
         });
     },
-    getChoferes: function (id,field) {
+    getChoferes: function (id,field,tienda) {
         $.ajax({
-            url:'/get-choferes-catalogo',
+            url:'/get-choferes-catalogo/'+tienda,
             type:'get',
             dataType:'json',
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
+            if (response && response.icon) {
+                Swal.fire({
+                    icon:response.icon,
+                    title:response.title,
+                    text:response.text,
+                });
+            }
             let select = $('#'+field);
             select.html();
             select.append(new Option('Selecciona un chofer',''));
@@ -135,6 +143,10 @@ dao = {
     postDarSalida: function () {
         var form = $('#frm_dar_salida')[0];
         var data = new FormData(form);
+        const tienda = document.getElementById('tiendas');
+        if (tienda) {
+            data.append("id_tienda", tienda.value);
+        }
         $.ajax({
             url:'/post-agendar-salida',
             type:'post',
@@ -152,7 +164,8 @@ dao = {
             });
             if (response.icon == 'success') {
                 closeModal('modalPagarAdelanto','frm_pagar_adelanto');
-                dao.getDataSalidas();
+                let idTienda = tienda ? tienda.value : '';
+                dao.getDataSalidas(idTienda);
             }
         })
     },
@@ -180,6 +193,10 @@ dao = {
             data.append("producto[]",nombre);
             data.append("cantidad[]",cantidad);
         });
+        const tienda = document.getElementById('tiendas');
+        if (tienda) {
+            data.append("id_tienda", tienda.value);
+        }
         $.ajax({
             url:'/post-agregar-venta',
             type:'post',
@@ -197,10 +214,30 @@ dao = {
             });
             if (response.icon == 'success') {
                 closeModal('modalAddVenta','frm_add_venta');
-                dao.getDataSalidas();
+                let idT = tienda ? tienda.value : '';
+                dao.getDataSalidas('');
             }
         })
-    }
+    },
+    getCatTiendas: function (field,id) {
+        $.ajax({
+            url:'/get-catalogo-tiendas',
+            type:'get',
+            dataType:'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            var select = $('#'+field);
+            select.html('');
+            select.append(new Option('Selecciona una tienda',''));
+            response.map(function (val,i) {
+                if (id !='' && id == val.id) {
+                    select.append(new Option(response[i].nombre,response[i].id, true, true));
+                }else{
+                    select.append(new Option(response[i].nombre,response[i].id, false,false));
+                }
+            });
+        })
+    },
 };
 init = {
     validateDarSalida: function(form){
@@ -225,6 +262,7 @@ init = {
             chofer : {required:true},
             total : {required:true},
             fecha_envio : {required:true},
+            forma_pago : {required:true},
           },
           messages: {
             nombre : {required: 'Este campo es requerido'},
@@ -234,6 +272,7 @@ init = {
             chofer: {required:'Este campo es requerido'},
             total: {required:'Este campo es requerido'},
             fecha_envio: {required:'Este campo es requerido'},
+            forma_pago: {required:'Este campo es requerido'},
           }
         })
     }
@@ -295,7 +334,7 @@ function calcularTotal(subTotal) {
     document.getElementById('total').value = total;
 };
 $(document).ready(function () {
-    dao.getDataSalidas();
+    dao.getDataSalidas('');
     $('#btn_agendar_salida').on('click',function (e) {
         e.preventDefault();
         init.validateDarSalida($('#frm_dar_salida'));
@@ -305,6 +344,21 @@ $(document).ready(function () {
     });
     $('#btnNuevaVenta').on('click', function (e) {
         e.preventDefault();
+
+        const tienda = document.getElementById('tiendas');
+        if (tienda) {
+            if (tienda.value == '') {
+                Swal.fire({
+                    icon:'warning',
+                    title:'Advertencia!',
+                    text:'Selecciona una tienda',
+                });
+                return;
+            }
+            dao.getChoferes('','chofer',tienda.value);
+        }else{
+            dao.getChoferes('','chofer','');
+        }
         const modalAddVenta = new bootstrap.Modal(document.getElementById('modalAddVenta'));
         modalAddVenta.show();
     });
@@ -334,6 +388,12 @@ $(document).ready(function () {
         if ($('#frm_add_venta').valid()) {
             dao.addVenta();
         }
+    });
+    $('#tiendas').on('change', function (e) {
+        e.preventDefault();
+        const tienda = this.options[this.selectedIndex].text;
+        document.getElementById('tituto_tienda').innerText = tienda;
+        dao.getDataSalidas(this.value);
     });
 
 });

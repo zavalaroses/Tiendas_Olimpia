@@ -181,8 +181,26 @@ class ApartadosController extends Controller
     }
     public function postAddAdelanto(Request $request){
         try {
-            DB::beginTransaction();
 
+            $request->validate([
+                'forma_pago'=>'required',
+                'adelanto' => 'required|numeric|min:1',
+            ]);
+            // validamos que exista un id de tienda 
+            if (Auth::user()->tienda_id == null && !$request->id_tienda && $request->id_tienda == null) {
+                # code...
+                $response = [
+                    'icon'=>'warning',
+                    'title'=>'Oops.',
+                    'text'=>'Es necesario seleccionar una tienda.',
+                ];
+                return response()->json($response,200);
+            }
+            DB::beginTransaction();
+            // asignamos el id de la tienda
+            $idtienda = $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id;
+
+            // validamos que la cantidad de pago no revase la cantidad restante
             $restante = Apartado::where('id',$request->id_apartado)->value('monto_restante');
             if ((float)$request->adelanto > (float)$restante) {
                 $response = [
@@ -192,11 +210,24 @@ class ApartadosController extends Controller
                 ];
                 return response()->json($response,200);
             }
+            // hacemos el update a los valores monetarios
             Apartado::where('id',$request->id_apartado)->decrement('monto_restante',floatval($request->adelanto));
             Apartado::where('id', $request->id_apartado)->increment('monto_anticipo', floatval($request->adelanto));
 
             $newRestante = Apartado::where('id',$request->id_apartado)->value('monto_restante');
+            
+            // registramos la transaccion en la caja
+            Transaccion::create([
+                'tienda_id' =>$idtienda,
+                'venta_id'=>$request->id_apartado,
+                'cantidad'=>$request->adelanto,
+                'tipo_pago'=>$request->forma_pago,
+                'tipo_movimiento'=>'entrada',
+                'descripcion'=>'Abono o adelanto',
+                'user_id'=>Auth::user()->id,
+            ]);
 
+            // si el restante queda en cero o se liquido movemos de apartado a venta.
             if ((float)$newRestante == 0) {
                 $apartadoOld = Apartado::leftJoin('apartado_muebles as am','am.id_apartado','=','apartados.id')
                     ->select(
@@ -227,7 +258,7 @@ class ApartadosController extends Controller
                     SalidaProducto::create([
                         'id_salida'=>$salida->id,
                         'id_mueble'=>$apartado->id_mueble,
-                        'id_tienda'=>Auth::user()->tienda_id,
+                        'id_tienda'=>$idtienda,
                         'cantidad'=>$apartado->cantidad,
                         'id_usuario'=>Auth::user()->id
                     ]);

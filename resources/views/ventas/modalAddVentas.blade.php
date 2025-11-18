@@ -19,6 +19,14 @@
             <br>
             <div class="modal-body">
                 <form class="row g-3" id="frm_add_venta" name="frm_add_venta">
+                  <div class="row">
+                    <div class="col-md-8"></div>
+                    <div class="col-md-4">
+                      <label for="fecha_envio">Fecha de envio</label>
+                      <input type="date" id="fecha_envio" name="fecha_envio" class="form-control">
+                    </div>
+                  </div>
+                  <div class="mini-br"></div>
                     <div class="row">
                         <div class="col-md-4">
                             <label for="cliente" for="nombre">Nombre(s)</label>
@@ -47,8 +55,12 @@
                             <input type="text" id="total" name="total" class="form-control" readonly>
                         </div>
                         <div class="col-md-4">
-                            <label for="fecha_envio">Fecha de envio</label>
-                            <input type="date" id="fecha_envio" name="fecha_envio" class="form-control">
+                          <label for="fecha">Forma de pago</label>
+                            <select name="forma_pago" id="forma_pago" class="form-control">
+                              <option value=1>Efectivo</option>
+                              <option value=2>Tarjeta</option>
+                              <option value=3>Transferencia</option>
+                            </select>
                         </div>
                     </div>
                     <div class="row">
@@ -111,7 +123,6 @@
     $(document).ready(function () {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('fecha_envio').min = today;
-        dao.getChoferes('','chofer');
         dao.getCatMuebles('mueble','');
     })
 </script>

@@ -21,7 +21,7 @@
               <div class="row">
                 <div class="col-md-2"></div>
                 <div class="col-md-4"><p><strong>Titular: </strong></p><p id="titular"></p></div>
-                <div class="col-md-4"><p><strong>Contacto: </strong></p><p id="telefono"></p></div>
+                <div class="col-md-4"><p><strong>Contacto: </strong></p><p id="contacto"></p></div>
                 <div class="col-md-2"></div>
               </div>
               <br>
@@ -66,7 +66,6 @@
     const day = String(hoy.getDate()).padStart(2,'0');
     const fechaMin = `${year}-${month}-${day}`; // formato yyyy-MM-dd
     document.getElementById('fechaSalida').setAttribute('min', fechaMin);
-    dao.getChoferes('','chofer_salida');
   });
   
 </script>

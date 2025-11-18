@@ -124,6 +124,10 @@ dao = {
     postAbonar: function () {
       var form = $('#frm_pagar_adelanto')[0];
       var data = new FormData(form);
+      const tienda = document.getElementById('tiendas');
+        if (tienda) {
+            data.append("id_tienda", tienda.value);
+        }
       $.ajax({
         url:'/post-pagar-adelanto',
         type:'post',
@@ -141,7 +145,8 @@ dao = {
         });
         if (response.icon == 'success') {
             closeModal('modalPagarAdelanto','frm_pagar_adelanto');
-            dao.getData();
+            let idTienda = tienda ? tienda.value : '';
+            dao.getData(idTienda);
         }
       })
     },
@@ -195,10 +200,12 @@ init = {
     validateAdelanto: function (form) {
         _gen.validate(form,{
             rules:{
-                adelanto: {required:true}
+                adelanto: {required:true},
+                forma_pago: {required:true}
             },
             messages: {
                 adelanto: {required:'Este campo es requerido'},
+                forma_pago: {required:'Este campo es requerido'}
             }
         })
     },

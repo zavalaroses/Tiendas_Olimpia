@@ -27,6 +27,18 @@
                             <input type="text" class="form-control" id="restante" name="restante" disabled>
                         </div>
                         <div class="mini-br"></div>
+
+                        <div class="col-md-2"></div>
+                        <div class="col-md-8">
+                          <label for="fecha">Forma de pago</label>
+                          <select name="forma_pago" id="forma_pago" class="form-control">
+                            <option value=1>Efectivo</option>
+                            <option value=2>Tarjeta</option>
+                            <option value=3>Transferencia</option>
+                          </select>
+                        </div>
+                        
+                        <div class="mini-br"></div>
                         <div class="col-md-2"></div>
                         <div class="col-md-8">
                             <label for="adelanto">Adelanto</label>

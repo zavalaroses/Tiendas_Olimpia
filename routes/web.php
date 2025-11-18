@@ -63,8 +63,8 @@ Route::middleware('auth')->controller(ApartadosController::class)->group(functio
 // rutas de ventas
 Route::middleware('auth')->controller(VentasController::class)->group(function(){
     Route::get('/get-ventas','getVentas')->name('getVentas');
-    Route::get('/get-data-salidas-all','getDataSalidas')->name('getDataSalidas');
-    Route::get('/get-choferes-catalogo','getChoferesEnvio')->name('getChoferesEnvio');
+    Route::get('/get-data-salidas-all/{tienda?}','getDataSalidas')->name('getDataSalidas');
+    Route::get('/get-choferes-catalogo/{tienda?}','getChoferesEnvio')->name('getChoferesEnvio');
     Route::get('/get-chofer-info-salida/{id?}','getDataToSalida')->name('getDataToSalida');
     Route::post('/post-agendar-salida','postAgendarSalida')->name('postAgendarSalida');
     Route::post('/post-agregar-venta','postAddVenta')->name('postAddVenta');
