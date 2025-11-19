@@ -538,6 +538,86 @@ var _gen = {
         // let otable = tabla.DataTable().columns.adjust().draw();
         // otable.$('[data-toggle="popover"]').popover();
     },
+    setTableScrollEspecial3: function (
+        tabla,
+        columnDefs,
+        datelist,
+        height,
+        pagination,
+        order
+    ) {
+        height = height || 600;
+        pagination = pagination || 50;
+        order = order || [];
+
+        if ($.fn.DataTable.isDataTable(tabla)) {
+            tabla.DataTable().clear().rows.add(datelist).draw();
+        } else {
+            tabla.DataTable({
+                dom:
+                    "<'row'<'col-md-6'B><'col-md-6'f>>" +
+                    "<'row'<'col-12'tr>>" +
+                    "<'row'<'col-12 d-flex justify-content-between' i p>>",
+
+                // 🔥 Ajustes clave para que respete la altura
+                scrollY: height,
+                scrollCollapse: false,
+                scrollX: true,
+
+                buttons: [
+                    {
+                        extend: "excel",
+                        text: '<i class="fa fa-file-excel"></i> Excel',
+                        className: "btn btn-success btn-sm",
+                        filename: "reporte",
+                    },
+                    {
+                        extend: "pdf",
+                        text: '<i class="fa fa-file-pdf"></i> PDF',
+                        className: "btn btn-danger btn-sm",
+                        filename: "reporte",
+                    },
+                ],
+
+                language: {
+                    info: "Página _PAGE_ de _PAGES_",
+                    infoEmpty: "No hay registros disponibles",
+                    zeroRecords: "No hay registros disponibles",
+                    infoFiltered: "(filtrados de _MAX_ registros)",
+                    search: "Búsqueda:",
+                    infoThousands: ",",
+                    loadingRecords: "Cargando...",
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "Siguiente",
+                        previous: "Anterior",
+                    },
+                },
+
+                pageLength: pagination,
+                order: order,
+                data: datelist,
+                columnDefs: columnDefs,
+
+                responsive: true,
+
+                initComplete: function () {
+                    let otable = tabla.DataTable().columns.adjust().draw();
+
+                    // Popovers
+                    otable.$('[data-bs-toggle="popover"]').each(function () {
+                        new Popover(this);
+                    });
+
+                    // Tooltips
+                    otable.$('[data-bs-toggle="tooltip"]').each(function () {
+                        new Tooltip(this);
+                    });
+                },
+            });
+        }
+    },
     
     setTableDetallesM: function (
         tabla,

@@ -182,6 +182,7 @@ class ApartadosController extends Controller
     public function postAddAdelanto(Request $request){
         try {
 
+            Log::debug($request);
             $request->validate([
                 'forma_pago'=>'required',
                 'adelanto' => 'required|numeric|min:1',

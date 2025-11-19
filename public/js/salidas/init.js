@@ -302,7 +302,10 @@ function addListaMuebles() {
     var iconoEliminar = document.createElement('i');
     iconoEliminar.className = "far fa-trash-alt";
     iconoEliminar.style.cursor = "pointer";
+    iconoEliminar.dataset.total = total;
     iconoEliminar.addEventListener("click", function () {
+        let subTotalFila = parseFloat(this.dataset.total);
+        actualizarTotalAlEliminar(subTotalFila);
         fila.remove();
     });
     celdaProducto.textContent = producto;
@@ -333,6 +336,12 @@ function calcularTotal(subTotal) {
     let total = sub + parseFloat(tot);
     document.getElementById('total').value = total;
 };
+function actualizarTotalAlEliminar(subTotal) {
+    let totalActual = parseFloat(document.getElementById('total').value) || 0;
+    let newTotal = totalActual - subTotal;
+    if (newTotal < 0) newTotal = 0;
+    document.getElementById('total').value = newTotal.toFixed(2); 
+}
 $(document).ready(function () {
     dao.getDataSalidas('');
     $('#btn_agendar_salida').on('click',function (e) {

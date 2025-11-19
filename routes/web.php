@@ -8,6 +8,7 @@ use App\Http\Controllers\GarantiasController;
 use App\Http\Controllers\ApartadosController;
 use App\Http\Controllers\VentasController;
 use App\Http\Controllers\CatalogoController;
+use App\Http\Controllers\CajaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -97,6 +98,8 @@ Route::middleware('auth')->controller(CatalogoController::class)->group(function
 });
 Route::middleware('auth')->controller(CajaController::class)->group(function(){
     Route::get('/get-index-cajas','getIndex')->name('getCajas');
+    Route::get('/get-data-transacciones/{tienda?}','getData')->name('getData');
+    Route::get('/get-resumen-corte/{tienda?}','getResumenCorte')->name('getResumenCorte');
 });
 
 require __DIR__.'/auth.php';

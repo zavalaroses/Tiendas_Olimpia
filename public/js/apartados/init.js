@@ -234,7 +234,10 @@ function addListaApartados() {
     var iconoEliminar = document.createElement('i');
     iconoEliminar.className = "far fa-trash-alt";
     iconoEliminar.style.cursor = "pointer";
+    iconoEliminar.dataset.total = total;
     iconoEliminar.addEventListener("click", function () {
+        let subTotalFila = parseFloat(this.dataset.total);
+        actualizarTotalAlEliminar(subTotalFila);
         fila.remove();
     });
     celdaProducto.textContent = producto;
@@ -259,12 +262,27 @@ function addListaApartados() {
     calcularTotal(total);
 
 };
+function actualizarTotalAlEliminar(subTotal) {
+    let totalActual = parseFloat(document.getElementById('total').value) || 0;
+    let newTotal = totalActual - subTotal;
+    if (newTotal < 0) newTotal = 0;
+    document.getElementById('total').value = newTotal.toFixed(2); 
+}
 function calcularTotal(subTotal) {
     let sub = parseFloat(subTotal);
     let tot = document.getElementById('total').value && parseFloat(document.getElementById('total').value) > 0 ? parseFloat(document.getElementById('total').value) : 0;
     let total = sub + parseFloat(tot);
     document.getElementById('total').value = total;
 };
+function adelantoIsValid() {
+    const total = parseFloat(document.getElementById('total')?.value || 0);
+    const adelanto = parseFloat(document.getElementById('anticipo')?.value || 0);
+    if (adelanto >= total) {
+        return false;
+    }else{
+        return true;
+    }
+}
 $(document).ready(function () {
     dao.getData('');
     dao.getCatTiendas('tiendas','');
@@ -299,7 +317,19 @@ $(document).ready(function () {
         e.preventDefault();
         init.validateApartado($('#frm_add_apartado'));
         if ($('#frm_add_apartado').valid()) {
-            dao.postAddApartado();
+            let valid = adelantoIsValid();
+            if (valid) {
+                dao.postAddApartado();    
+            }else{
+                Swal.fire({
+                icon:'info',
+                title:'Montos erroneos',
+                text:'El anticipo no puede ser igual o mayor al total.',
+                allowOutsideClick:true,
+                confirmButtonText:'Listo',
+            })
+            }
+            
         }
     });
     $('#btn_add_pago').on('click',function (e) {
