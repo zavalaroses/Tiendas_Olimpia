@@ -163,7 +163,7 @@ dao = {
                 text:response.text,
             });
             if (response.icon == 'success') {
-                closeModal('modalPagarAdelanto','frm_pagar_adelanto');
+                closeModal('modalPagarAdelanto','frm_pagar_adelanto','');
                 let idTienda = tienda ? tienda.value : '';
                 dao.getDataSalidas(idTienda);
             }
@@ -213,7 +213,7 @@ dao = {
                 text:response.text,
             });
             if (response.icon == 'success') {
-                closeModal('modalAddVenta','frm_add_venta');
+                closeModal('modalAddVenta','frm_add_venta','');
                 let idT = tienda ? tienda.value : '';
                 dao.getDataSalidas('');
             }

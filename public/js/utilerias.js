@@ -1331,7 +1331,7 @@ function valideKeySum(evt){
       return false;
     }
 }
-function closeModal(modal,form) {
+function closeModal(modal,form,table) {
     if (form) {
         document.getElementById(form).reset();
     }
@@ -1340,5 +1340,12 @@ function closeModal(modal,form) {
     if (modalInstance) {
         modalInstance.hide();
     }
-    // $('#'+modal).modal('hide');
+    if (table) {
+        let tbody = document.querySelector('#'+table+' tbody');
+        while (tbody.firstChild) {
+            tbody.removeChild(tbody.firstChild);
+        }
+
+    }
+    
 }

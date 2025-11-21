@@ -4,7 +4,7 @@
             <div class="modal-header captionModal">
               <div class="row" style="width: 100%">
                 <div class="col-md-12" style="display: flex; justify-content:right; margin-top:0%; margin-bottom:0%;">
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('modalAddEntrada','frm_add_entrada');">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('modalAddEntrada','frm_add_entrada','tbl_lista_entrada');">
                     <h5><span aria-hidden="true">&times;</span></h5>
                   </button>
                 </div>
@@ -57,7 +57,7 @@
                   <div class="col-md-6">
                     <div class="input-group">
                       <div class="col-md-5">
-                        <button type="reset" class="form-control btnCancel" onclick="closeModal('modalAddEntrada','frm_add_entrada');">CANCELAR</button>
+                        <button type="reset" class="form-control btnCancel" onclick="closeModal('modalAddEntrada','frm_add_entrada','tbl_lista_entrada');">CANCELAR</button>
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-5">
@@ -73,7 +73,6 @@
   $(document).ready(function () {
     
     const today = new Date().toISOString().split('T')[0];
-    console.log("🚀 ~ today:", today)
     document.getElementById('fecha_ingreso').value = today;
   });
 </script>

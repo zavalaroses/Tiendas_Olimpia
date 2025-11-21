@@ -19,7 +19,7 @@ dao = {
             });
             if (response.icon == 'success') {
                 dao.getDataTiendas();
-                closeModal('modalAddtienda','frm_add_tienda');
+                closeModal('modalAddtienda','frm_add_tienda','');
             }
         });
     },

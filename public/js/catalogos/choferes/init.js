@@ -37,7 +37,7 @@ dao = {
                 text:response.text,
             });
             if (response.icon == 'success') {
-                closeModal('modalAddChofer','frm_add_chofer');
+                closeModal('modalAddChofer','frm_add_chofer','');
                 dao.gatData();
             }
         });
@@ -106,7 +106,7 @@ dao = {
                 text:response.text,
             });
             if (response.icon == 'success') {
-                closeModal('modalUpdateChofer','frm_update_chofer');
+                closeModal('modalUpdateChofer','frm_update_chofer','');
                 dao.getData();
             }
         })

@@ -19,7 +19,7 @@ dao = {
             });
             if (response.icon == 'success') {
                 dao.getDataProveedores();
-                closeModal('modalAddtienda','frm_add_proveedor');
+                closeModal('modalAddtienda','frm_add_proveedor','');
             }
         });
     },
@@ -81,7 +81,7 @@ dao = {
             });
             if (response.icon == 'success') {
                 dao.getDataProveedores();
-                closeModal('modalUpdateProveedor','frm_update_proveedor');
+                closeModal('modalUpdateProveedor','frm_update_proveedor','');
             }
         })
     },

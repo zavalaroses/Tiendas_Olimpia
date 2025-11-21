@@ -18,7 +18,7 @@ dao = {
                 text:response.text
             });
             if (response.icon == 'success') {
-                closeModal('modalAddMueble','frm_add_mueble');
+                closeModal('modalAddMueble','frm_add_mueble','');
                 dao.getData();
             }
         })
@@ -80,7 +80,7 @@ dao = {
                 text:response.text,
             });
             if (response.icon == 'success') {
-                closeModal('modalUpdateMueble','frm_update_mueble');
+                closeModal('modalUpdateMueble','frm_update_mueble','');
                 dao.getData();
             }
         })

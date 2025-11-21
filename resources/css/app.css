@@ -200,3 +200,14 @@ background-color:  #006FFF33;
 width: auto;
 height: 30px;
 }
+
+.table-rosa-centered.table-striped > tbody > tr:nth-of-type(odd) {
+  --bs-table-accent-bg: #dea9a9fd !important;
+  background-color: #dea9a9fd !important;
+}
+
+.table-rosa-centered thead th,
+.table-rosa-centered tbody td {
+  text-align: center !important;
+  vertical-align: middle !important;
+}

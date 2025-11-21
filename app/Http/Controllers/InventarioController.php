@@ -40,12 +40,14 @@ class InventarioController extends Controller
                 ];
                 return response()->json($response,200);
             }
+            Log::debug($request);
+            $idTienda = $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id;
             $proveedor = DB::table('proveedores')->where('id',$request->proveedor)->whereNull('deleted_at')->value('nombre');
             $horaMx = Carbon::now('America/Mexico_City')->format('H:i:s');
             $c1 = $proveedor ? $proveedor : 'NP'; 
             $codigo = $request->fecha_ingreso.'-'.$horaMx.'-'.$c1;
             $entrada = Entrada::create([
-                'tienda_id'=> $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id,
+                'tienda_id'=> $idTienda,
                 'proveedor_id'=>$request->proveedor,
                 'usuario_id'=>Auth::user()->id,
                 'fecha'=> $request->fecha_ingreso,
@@ -58,15 +60,16 @@ class InventarioController extends Controller
                     'mueble_id' => $muebleId,
                     'cantidad' => $request->cantidad[$index],
                 ]);
-                $inventarioExist = InventarioTienda::where('tienda_id',Auth::user()->tienda_id)->where('mueble_id',$muebleId)->exists();
+                $inventarioExist = InventarioTienda::where('tienda_id',$idTienda)->where('mueble_id',$muebleId)->exists();
+                Log::debug(json_encode($inventarioExist));
                 if ($inventarioExist) {
                     $afectedRow = InventarioTienda::where([
-                        'tienda_id'=>$request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id,
+                        'tienda_id'=>$idTienda,
                         'mueble_id'=>$muebleId,
-                    ])->increment('cantidad',$request->cantidad[$index],['updated_at'=>now()]);
+                    ])->increment('cantidad_stock',$request->cantidad[$index],['updated_at'=>now()]);
                 }else {
                     InventarioTienda::create([
-                        'tienda_id'=>$request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id,
+                        'tienda_id'=>$idTienda,
                         'mueble_id'=>$muebleId,
                         'estatus_id'=>1,
                         'cantidad_stock'=>$request->cantidad[$index]

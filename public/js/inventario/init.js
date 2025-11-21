@@ -107,15 +107,16 @@ dao = {
             cache:false,
             headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         }).done(function name(response) {
+            console.log("🚀 ~ name ~ response:", response)
             Swal.fire({
                 icon:response.icon,
                 title:response.title,
                 text:response.text,
             });
             if (response.icon == 'success') {
-                closeModal('modalAddEntrada','frm_add_entrada');
+                closeModal('modalAddEntrada','frm_add_entrada','');
                 if (tienda) {
-                    dao.gatData(tienda.value);
+                    dao.getData(tienda.value);
                 }else{
                     dao.getData('');
                 }
@@ -215,6 +216,8 @@ $(document).ready(function () {
         e.preventDefault();
         dao.getCatProveedores('proveedor','');
         dao.getCatMuebles('producto','')
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('fecha_ingreso').value = today;
         const modalAddEntrada = new bootstrap.Modal(document.getElementById('modalAddEntrada'));
         modalAddEntrada.show();
     });
