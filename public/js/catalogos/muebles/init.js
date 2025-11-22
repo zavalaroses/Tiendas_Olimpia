@@ -73,7 +73,6 @@ dao = {
             cache:false,
             headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
             Swal.fire({
                 icon:response.icon,
                 title:response.title,
@@ -126,13 +125,13 @@ init = {
             rules:{
                 nombre:{required:true},
                 codigo:{required:true},
-                descripcion:{required:true},
+                // descripcion:{required:true},
                 precio:{required:true},
             },
             messages:{
                 nombre:{required:'Este campo es requerido'},
                 codigo:{required:'Este campo es requerido'},
-                descripcion:{required:'Este campo es requerido'},
+                // descripcion:{required:'Este campo es requerido'},
                 precio:{required:'Este campo es requerido'},
             }
         })

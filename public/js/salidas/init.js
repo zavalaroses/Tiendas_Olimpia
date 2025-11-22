@@ -213,9 +213,9 @@ dao = {
                 text:response.text,
             });
             if (response.icon == 'success') {
-                closeModal('modalAddVenta','frm_add_venta','');
+                closeModal('modalAddVenta','frm_add_venta','tbl_producto_venta');
                 let idT = tienda ? tienda.value : '';
-                dao.getDataSalidas('');
+                dao.getDataSalidas(idT);
             }
         })
     },

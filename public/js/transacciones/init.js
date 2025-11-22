@@ -59,7 +59,7 @@ var dao = {
 
             document.getElementById('totalG').textContent = formatoMoneda(response.totalGeneral);
         });
-    }
+    },
 
 
 };
@@ -74,5 +74,9 @@ function formatoMoneda(valor) {
 }
 
 $(document).ready(function () {
-    
+    $('#tiendas').on('change', function (e) {
+        e.preventDefault();
+        dao.getData(this.value);
+        dao.getResumenCorte(this.value);
+    });
 });

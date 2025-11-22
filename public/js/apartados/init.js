@@ -102,7 +102,7 @@ dao = {
                 text:response.text,
             });
             if (response.icon == 'success') {
-                closeModal('modalAddApartados','frm_add_apartado','');
+                closeModal('modalAddApartados','frm_add_apartado','tbl_add_list_apartados');
                 let idT = tienda ? tienda.value : '';
                 dao.getData(idT);
             }

@@ -13,6 +13,7 @@ dao = {
                 {"targets": [2],"mData":'mueble'},
                 {"targets": [3],"mData":'cantidad_stock'},
                 {"targets": [4],"mData":'cantidad_apartados'},
+                {"targets": [5],"mData":'por_entregar'},
                 // {"aTargets": [5], "mData" : function(o){
                 //     return '<div class="dropdown">'+
                 //     '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
@@ -107,14 +108,13 @@ dao = {
             cache:false,
             headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         }).done(function name(response) {
-            console.log("🚀 ~ name ~ response:", response)
             Swal.fire({
                 icon:response.icon,
                 title:response.title,
                 text:response.text,
             });
             if (response.icon == 'success') {
-                closeModal('modalAddEntrada','frm_add_entrada','');
+                closeModal('modalAddEntrada','frm_add_entrada','tbl_lista_entrada');
                 if (tienda) {
                     dao.getData(tienda.value);
                 }else{

@@ -111,6 +111,7 @@ class VentasController extends Controller
     }
     public function postAddVenta(Request $request){
         try {
+            DB::beginTransaction();
             $request->validate([
                 'nombre' => 'required|string|max:255',
                 'apellidos' => 'required|string|max:255',
@@ -204,6 +205,9 @@ class VentasController extends Controller
                     'cantidad'=>$request->cantidad[$i],
                     'id_usuario'=>Auth::user()->id
                 ]);
+                InventarioTienda::where('tienda_id',$idtienda)
+                    ->where('mueble_id',$request->id[$i])
+                    ->increment('por_entregar',$request->cantidad[$i]);
             }
             Transaccion::create([
                 'tienda_id' =>$idtienda,
@@ -224,6 +228,7 @@ class VentasController extends Controller
             return response()->json($response,200);
             
         } catch (\Throwable $th) {
+            DB::rollBack();
             throw $th;
         }
     }

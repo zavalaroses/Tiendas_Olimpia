@@ -217,13 +217,13 @@ class CatalogoController extends Controller
             $request->validate([
                 'nombre'=>['required','string','max:255'],
                 'codigo'=>['required','string','max:255'],
-                'descripcion'=>['required','string','max:255'],
+                // 'descripcion'=>['required','string','max:255'],
                 'precio'=>['required']
             ]);
             $mueble = Mueble::create([
                 'nombre'=>$request->nombre,
                 'codigo'=>$request->codigo,
-                'descripcion'=>$request->descripcion,
+                'descripcion'=>$request->descripcion ? $request->descripcion : null,
                 'precio'=>$request->precio
             ]);
             DB::commit();

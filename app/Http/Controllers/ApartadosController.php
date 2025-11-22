@@ -181,25 +181,15 @@ class ApartadosController extends Controller
     }
     public function postAddAdelanto(Request $request){
         try {
-
-            Log::debug($request);
             $request->validate([
                 'forma_pago'=>'required',
                 'adelanto' => 'required|numeric|min:1',
+                'id_apartado'=>'required'
             ]);
-            // validamos que exista un id de tienda 
-            if (Auth::user()->tienda_id == null && !$request->id_tienda && $request->id_tienda == null) {
-                # code...
-                $response = [
-                    'icon'=>'warning',
-                    'title'=>'Oops.',
-                    'text'=>'Es necesario seleccionar una tienda.',
-                ];
-                return response()->json($response,200);
-            }
             DB::beginTransaction();
             // asignamos el id de la tienda
             $idtienda = $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id;
+            $idtienda = Apartado::where('id',$request->id_apartado)->value('tienda_id');
 
             // validamos que la cantidad de pago no revase la cantidad restante
             $restante = Apartado::where('id',$request->id_apartado)->value('monto_restante');
@@ -263,6 +253,14 @@ class ApartadosController extends Controller
                         'cantidad'=>$apartado->cantidad,
                         'id_usuario'=>Auth::user()->id
                     ]);
+                    // una vez que se liquide lo quitamos de apartados y lo mandamos a listo para entrega
+                    InventarioTienda::where('tienda_id',$idtienda)
+                    ->where('mueble_id',$apartado->id_mueble)
+                    ->decrement('cantidad_apartados',$apartado->cantidad);
+
+                    InventarioTienda::where('tienda_id',$idtienda)
+                        ->where('mueble_id',$apartado->id_mueble)
+                        ->increment('por_entregar',$apartado->cantidad);
                 }
                 
                 $response = [

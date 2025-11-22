@@ -117,7 +117,6 @@
 
                     <div style="margin-top:12px;display:flex;gap:8px">
                         <button class="btn" id="btnCerrar">Cerrar corte</button>
-                        <button class="btn ghost" id="btnExport">Exportar CSV</button>
                     </div>
                 </div>
             </aside>

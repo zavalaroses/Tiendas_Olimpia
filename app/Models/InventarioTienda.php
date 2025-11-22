@@ -17,7 +17,8 @@ class InventarioTienda extends Model
         'mueble_id',
         'estatus_id',
         'cantidad_stock',
-        'cantidad_apartados'
+        'cantidad_apartados',
+        'por_entregar'
     ];
     protected $hidden = [
         'created_at',
