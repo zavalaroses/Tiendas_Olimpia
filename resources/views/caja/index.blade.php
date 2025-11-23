@@ -116,13 +116,14 @@
 
 
                     <div style="margin-top:12px;display:flex;gap:8px">
-                        <button class="btn" id="btnCerrar">Cerrar corte</button>
+                        <button class="btn" id="btnCerrarCorte">Cerrar corte</button>
                     </div>
                 </div>
             </aside>
         </div>
     </div>
 </body>
+@include('caja.modalCerrarCorte')
 <script src="/js/utilerias.js"></script>
 <script src="/js/transacciones/init.js"></script>
 <script>

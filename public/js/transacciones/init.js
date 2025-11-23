@@ -60,6 +60,38 @@ var dao = {
             document.getElementById('totalG').textContent = formatoMoneda(response.totalGeneral);
         });
     },
+    getDataCerrarCorte: function (tienda) {
+        $.ajax({
+            url:'/get-resumen-corte/'+tienda,
+            dataType:'json',
+            type:'get',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            console.log("🚀 ~ response:", response)
+            // Asegurar que todo llegue como número
+            const efectivo      = Number(response.efectivo) || 0;
+            const cuenta        = Number(response.cuenta) || 0;
+            const egresosEf     = Number(response.egresosEfectivo) || 0;
+            const egresosCt     = Number(response.egresosCuenta) || 0;
+            const totalEf       = Number(response.totalEfectivo) || 0;
+            const apertura       = Number(response.apertura) || 0;
+
+            // Llenamos el modal
+            $("#corte_apertura").text(`$ ${apertura.toFixed(2)}`);
+            $("#corte_ingresos_efectivo").text(`$ ${efectivo.toFixed(2)}`);
+            $("#corte_ingresos_tarjeta").text(`$ ${cuenta.toFixed(2)}`);
+            $("#corte_salidas").text(`$ ${(egresosEf).toFixed(2)}`);
+            $("#corte_efectivo_esperado").text(`$ ${totalEf.toFixed(2)}`);
+            $('#input_total').val(totalEf);
+
+            // Reiniciar campos del usuario
+            $("#efectivo_contado").val("");
+            $("#observaciones_corte").val("");
+            $("#corte_diferencia").text("$ 0.00");
+            const modalCerrarCorte = new bootstrap.Modal(document.getElementById('modalCerrarCorte'));
+            modalCerrarCorte.show();
+        });
+    }
 
 
 };
@@ -79,4 +111,36 @@ $(document).ready(function () {
         dao.getData(this.value);
         dao.getResumenCorte(this.value);
     });
+    $('#btnCerrarCorte').on('click',function (e) {
+        e.preventDefault();
+        const tienda = document.getElementById('tiendas');
+        if (tienda) {
+            if (tienda.value == '') {
+                Swal.fire({
+                    icon:'warning',
+                    title:'Advertencia!',
+                    text:'Selecciona una tienda',
+                });
+                return;
+            }
+            dao.getDataCerrarCorte(tienda.value);
+        }else{
+            dao.getDataCerrarCorte();
+        }
+    });
+    $("#efectivo_contado").on("input", function () {
+        const contado = Number($(this).val()) || 0;
+        let totalEfectivo = Number($('#input_total').val()) || 0;
+        const diferencia = contado - totalEfectivo;
+
+        $("#corte_diferencia").text("$ " + diferencia.toFixed(2));
+
+        if (diferencia === 0) {
+            $("#corte_diferencia").removeClass("text-danger").addClass("text-success");
+        } else {
+            $("#corte_diferencia").removeClass("text-success").addClass("text-danger");
+        }
+    });
+
+    
 });

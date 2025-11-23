@@ -39,6 +39,8 @@ class VentasController extends Controller
                     'sp.cantidad as cantidad',
                     DB::raw("CONCAT(c. nombre,' ',c.apellidos) as cliente"),
                     'salidas.fecha_entrega',
+                    'm.id as id_mueble',
+                    'sp.id_tienda'
                 )
                 ->when($idTienda, function($q) use($idTienda){
                     $q->where('sp.id_tienda',$idTienda);
@@ -232,4 +234,53 @@ class VentasController extends Controller
             throw $th;
         }
     }
+    public function postFinalizarVenta(Request $request){
+        try {
+            $checkChofer = VentasController::checkChoferAsignado($request->id);
+            if (!$checkChofer) {
+                Log::debug('debi entrar aqui');
+                # retornamos respuesta de que hay que asignar chofer de salida...
+                $response = [
+                    'icon'=>'warning' ,
+                    'title'=>'Advertencia' ,
+                    'text'=>'Es necesario asignar un chofer de entrega',
+                ];
+                return response()->json($response,200);
+            }
+            DB::beginTransaction();
+            $salida = Salida::join('apartados as a','a.id','=','salidas.apartado_id')
+                ->join('apartado_muebles as ap','ap.id_apartado','=','a.id')
+                ->select('a.tienda_id','ap.id_mueble','ap.cantidad')
+                ->where('salidas.id',$request->id)
+            ->get();
+            
+            foreach ($salida as  $mueble) {
+                # disminuimos la cantidad en inventario tienda...
+                InventarioTienda::where([
+                    'tienda_id'=>$mueble->tienda_id,
+                    'mueble_id'=>$mueble->id_mueble,
+                ])->decrement('por_entregar',$mueble->cantidad);
+            }
+            Salida::where('id',$request->id)->update([
+                'estatus'=>'Entregado',
+            ]);
+            DB::commit();
+            $response = [
+                'icon'=>'success',
+                'title'=>'Exito',
+                'text'=>'Se entrego con exito.',
+            ];
+            return response()->json($response,200);
+            
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+    public static function checkChoferAsignado($idVenta){
+        $chofer = Salida::where('id', $idVenta)->value('chofer_id');
+        return $chofer;
+    }
+    
 }

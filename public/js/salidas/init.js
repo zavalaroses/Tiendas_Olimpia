@@ -39,6 +39,9 @@ dao = {
                         a.getDate() === b.getDate();
 
                     if (fecha_entrega) {
+                        if (o.estatus == 'Entregado') {
+                            return `<span class="green" style="font-size:0.875rem !important; max-width: 100px;">${o.fecha_entrega}</span>`;
+                        }
                         if (esMismoDia(fecha_entrega,today)) {
                             return `<span class="yellow" style="font-size:0.875rem !important; max-width: 100px;">${o.fecha_entrega}</span>`;
                         }else if (fecha_entrega < today) {
@@ -49,20 +52,29 @@ dao = {
                     }
                 }},
                 {"aTargets": [7], "mData" : function(o){
-                    return '<div class="dropdown">'+
-                    '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
-                        '<ul class="dropdown-menu" aria-labelledby="dropdownMenu2">'+
-                            '<li onclick="dao.darSalida(' + o.id + ')"><button class="dropdown-item"><i class="fas fa-shipping-fast" style="color: #D48D8D"></i>&nbsp;Dar salida</button></li>'+
-                            // '<li onclick="dao.eliminar(' + o.id +','+o.area+')"><button class="dropdown-item"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Eliminar</button></li>'+
-                        '</ul>'+
-                    '</div>';
+                    if (o.estatus == 'Entregado') {
+                        return `
+                        <button class="dropdown-item" onclick="dao.modalGarantia(${o.id})">
+                            <i class="fas fa-shield-alt" style="color:#7C0A20"></i>&nbsp;Garantía
+                        </button>
+                    `;
+                    
+                    }else{
+                        return '<div class="dropdown">'+
+                            '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
+                                '<ul class="dropdown-menu" aria-labelledby="dropdownMenu2">'+
+                                    '<li onclick="dao.darSalida(' + o.id + ')"><button class="dropdown-item"><i class="fas fa-shipping-fast" style="color: #7C0A20"></i>&nbsp;Dar salida</button></li>'+
+                                    '<li onclick="dao.finalizarVenta(' + o.id +')"><button class="dropdown-item"><i class="fa-solid fa-house-circle-check" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Entregado</button></li>'+
+                                '</ul>'+
+                            '</div>';
+                    }
+                    
                 }},
             ];
             _gen.setTableScrollEspecial2(table,columns,response);
         })
     },
     darSalida: function (id) {
-        // dao.getChoferes('','chofer_salida');
         $.ajax({
             url:'/get-chofer-info-salida/'+id,
             type:'get',
@@ -238,6 +250,41 @@ dao = {
             });
         })
     },
+    finalizarVenta: function (id) {
+        const tienda = document.getElementById('tiendas');
+        Swal.fire({
+            title: "¿Estas seguro que deseas marcar como entregado?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#D48D8D',
+            cancelButtonColor: '#dea9a9fd',
+            cancelButtonText: 'Cancelar',
+            confirmButtonText: 'Continuar',
+            reverseButtons:true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "POST",
+                    url: '/finalizar-venta',
+                    data: {'id':id},
+                    headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                }).done(function (response) {
+                    Swal.fire({
+                        icon: response.icon,
+                        title: response.title,
+                        text: response.text,
+                        allowOutsideClick: true,
+                        confirmButtonText: "Listo",
+                    });
+                    if (response.icon == 'success') {
+                        let idTienda = tienda ? tienda.value : '';
+                        dao.getDataSalidas(idTienda);
+                    }
+                })
+            
+            }
+        })  
+    }
 };
 init = {
     validateDarSalida: function(form){
