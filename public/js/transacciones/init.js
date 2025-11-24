@@ -1,3 +1,4 @@
+
 var dao = {
     getData : function (tienda) {
         $.ajax({
@@ -91,12 +92,53 @@ var dao = {
             const modalCerrarCorte = new bootstrap.Modal(document.getElementById('modalCerrarCorte'));
             modalCerrarCorte.show();
         });
+    },
+    cerrarCorte: function (values) {
+        var form = $('#frm_cierre_corte')[0];
+        var data = new FormData(form);
+        Object.keys(values).forEach(key =>{
+            data.append(key,values[key]);
+        });
+
+        $.ajax({
+            url:'/cerrar-corte',
+            type:'post',
+            data:data,
+            enctype:'multipart/form-data',
+            contentType:false,
+            processData:false,
+            cache:false,
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            const tienda = document.getElementById('tiendas');
+            Swal.fire({
+                icon:response.icon,
+                title:response.title,
+                text:response.text,
+            });
+            if (response.icon == 'success') {
+                closeModal('modalCerrarCorte','frm_cierre_corte','');
+                let idT = tienda ? tienda.value : '';
+                dao.getData(idT);
+                dao.getResumenCorte(idT);
+            }
+        });
+
     }
 
 
 };
 var init = {
-
+    validateCerrarCorte: function(form){
+        _gen.validate(form,{
+          rules:{
+            efectivo_contado : {required: true},
+          },
+          messages: {
+            chofer : {required: 'Este campo es requerido'},
+          }
+        })
+    },
 };
 function formatoMoneda(valor) {
     return '$ ' + Number(valor).toLocaleString('es-MX', {
@@ -139,6 +181,24 @@ $(document).ready(function () {
             $("#corte_diferencia").removeClass("text-danger").addClass("text-success");
         } else {
             $("#corte_diferencia").removeClass("text-success").addClass("text-danger");
+        }
+    });
+    $('#btn_cerrar_corte').on('click',function (e) {
+        e.preventDefault();
+        init.validateCerrarCorte($('#frm_cierre_corte'));
+        if ($('#frm_cierre_corte').valid()) {
+            
+            let dataValues = {
+                tienda_id: $("#tiendas") ? $("#tiendas").val() : '',
+                apertura: Number($("#corte_apertura").text().replace(/[$,\s]/g, "")) || 0,
+                ingresos_efectivo: Number($("#corte_ingresos_efectivo").text().replace(/[$,\s]/g, "")) || 0,
+                ingresos_tarjeta: Number($("#corte_ingresos_tarjeta").text().replace(/[$,\s]/g, "")) || 0,
+                salidas: Number($("#corte_salidas").text().replace(/[$,\s]/g, "")) || 0,
+                efectivo_esperado: Number($('#input_total').val()),
+                corte_diferencia: Number($("#corte_diferencia").text().replace(/[$,\s]/g, "")) || 0,
+                observaciones: $("#observaciones_corte").val()
+            };
+            dao.cerrarCorte(dataValues);
         }
     });
 

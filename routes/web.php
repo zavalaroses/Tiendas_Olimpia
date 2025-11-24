@@ -101,6 +101,7 @@ Route::middleware('auth')->controller(CajaController::class)->group(function(){
     Route::get('/get-index-cajas','getIndex')->name('getCajas');
     Route::get('/get-data-transacciones/{tienda?}','getData')->name('getData');
     Route::get('/get-resumen-corte/{tienda?}','getResumenCorte')->name('getResumenCorte');
+    Route::post('/cerrar-corte','cerrarCorte')->name('cerrarCorte');
 });
 
 require __DIR__.'/auth.php';

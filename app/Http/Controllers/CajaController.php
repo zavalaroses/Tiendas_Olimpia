@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Transaccion;
+use App\Models\Corte;
 use Carbon\Carbon;
 use Log;
 
@@ -86,6 +87,43 @@ class CajaController extends Controller
             'totalGeneral'    => $totalGeneral,
             'userRol'         => Auth::user()->rol
         ], 200);
+    }
+    public function cerrarCorte(Request $request){
+        Log::debug($request);
+        try {
+            $request->validate([
+                'efectivo_esperado'  => 'required|numeric',
+                'efectivo_contado'   => 'required|numeric',
+                'observaciones'      => 'nullable|string'
+            ]);
+            DB::beginTransaction();
+            $idTienda = $request->tienda_id != '' ? $request->tienda_id : Auth::user()->tienda_id;
+            // guardamos el corte
+            $totalGeneral = $request->ingresos_efectivo + $request->ingresos_tarjeta;
+            $corte = Corte::create([
+                'tienda_id' => $idTienda,     
+                'user_id' => Auth::user()->id,  
+                'total_efectivo' => $request->efectivo_esperado,  
+                'total_cuenta'=>$request->ingresos_tarjeta,   
+                'total_general'=>$totalGeneral,          
+                'efectivo_contado' => $request->efectivo_contado,      
+                'diferencia' =>$request->corte_diferencia ,           
+                'egresos' =>$request->salidas, 
+            ]);
+
+            Transaccion::where('tienda_id',$idTienda)->delete();
+            DB::commit();
+
+            $response = [
+                'icon'=>'success',
+                'title'=>'Exito',
+                'text'=>'Corte realizado correctamente',
+            ];
+            return response()->json($response,200);
+        } catch (\Throwable $th) {
+           DB::rollback();
+            throw $th;
+        }
     }
 
 
