@@ -15,7 +15,7 @@
      <br>
     <div class="row">
         <div class="table-responsive">
-            <table id="tbl_users" style="width: 100%;">
+            <table id="tbl_users" style="width: 100%;" class="table table-borderless table-centered">
                 <caption class="captionTbl">
                     <br>
                     <div class="row" style="align-items: center; justify-content: center;">
@@ -27,9 +27,10 @@
                     <tr>
                         <th scope="col">ID</th>
                         <th scope="col">Usuario</th>
+                        <th scope="col">Tienda</th>
+                        <th scope="col">Rol</th>
+                        <th scope="col">Email</th>
                         <th scope="col">Fecha de ingreso</th>
-                        <th scope="col">Teléfono</th>
-                        <th scope="col">Área</th>
                         <th scope="col">Acciones</th>
                     </tr>
                 </thead>
@@ -39,4 +40,12 @@
         </div>
     </div>
 </div>
+@include('usuarios.modalAddUsuario')
+<script src="/js/utilerias.js"></script>
+<script src="/js/usuarios/init.js"></script>
+<script>
+    $(document).ready(function () {
+       dao.getData(); 
+    });
+</script>
 @endsection
