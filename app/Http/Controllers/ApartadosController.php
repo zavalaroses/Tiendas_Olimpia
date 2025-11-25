@@ -32,7 +32,6 @@ class ApartadosController extends Controller
     }
     public function postAddPartido(Request $request){
         try {
-            Log::debug($request);
             $request->validate([
                 'nombre' => 'required|string|max:255',
                 'apellidos' => 'required|string|max:255',
@@ -163,7 +162,7 @@ class ApartadosController extends Controller
                 ->when($idTienda, function($q)use($idTienda){
                     $q->where('a.tienda_id',$idTienda);
                 })
-                ->orderBy('a.id')
+                ->orderBy('a.id','desc')
             ->get();
             return response()->json($apartados,200);
         } catch (\Throwable $th) {

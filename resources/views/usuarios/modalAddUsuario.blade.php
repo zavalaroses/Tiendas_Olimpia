@@ -4,7 +4,7 @@
             <div class="modal-header captionModal">
               <div class="row" style="width: 100%">
                 <div class="col-md-12" style="display: flex; justify-content:right; margin-top:0%; margin-bottom:0%;">
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('modalAddUser','','');">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('modalAddUser','frm_add_user','');">
                     <h5><span aria-hidden="true">&times;</span></h5>
                   </button>
                 </div>
@@ -28,10 +28,10 @@
                         <label for="apellidos" class="form-label">Apellido(s)</label>
                         <input type="text" class="form-control" id="apellidos" name="apellidos">
                       </div>
-                      <div class="col-md-4">
+                      {{-- <div class="col-md-4">
                         <label for="telefono" class="form-label">Teléfono</label>
                         <input type="text" class="form-control" id="telefono" name="telefono">
-                      </div>
+                      </div> --}}
                       <div class="col-md-4">
                         <label for="tienda" class="form-label">Tienda</label>
                         <select id="tienda" class="form-select" name="tienda">
@@ -57,7 +57,7 @@
                   <div class="col-md-6">
                     <div class="input-group">
                       <div class="col-md-5">
-                        <button type="reset" class="form-control btnCancel" onclick="closeModal('modalAddUser','','');">CANCELAR</button>
+                        <button type="reset" class="form-control btnCancel" onclick="closeModal('modalAddUser','frm_add_user','');">CANCELAR</button>
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-5">

@@ -32,7 +32,7 @@ class CajaController extends Controller
             ->when($idTienda,function($q) use($idTienda){
                 $q->where('movimientos_tienda.tienda_id',$idTienda);
             })
-            ->orderBy('movimientos_tienda.created_at')
+            ->orderBy('movimientos_tienda.created_at', 'DESC')
         ->get();
         return response()->json($data,200);
     }
@@ -89,7 +89,6 @@ class CajaController extends Controller
         ], 200);
     }
     public function cerrarCorte(Request $request){
-        Log::debug($request);
         try {
             $request->validate([
                 'efectivo_esperado'  => 'required|numeric',
@@ -124,6 +123,40 @@ class CajaController extends Controller
            DB::rollback();
             throw $th;
         }
+    }
+    public function postAddEgreso(Request $request){
+        $request->validate([
+            'cantidad' => 'required|numeric',
+            'descripcion' => 'required',
+        ]);
+        try {
+            DB::beginTransaction();
+            $idTienda = $request->tienda != '' ? $request->tienda : Auth::user()->tienda_id;
+            $tipoPago = Auth::user()->rol == 1 ? 'tarjeta' : 'efectivo';
+            Transaccion::create([
+                'tienda_id' =>$idTienda,
+                'venta_id'=>null,
+                'cantidad'=>$request->cantidad,
+                'tipo_pago'=>$tipoPago,
+                'tipo_movimiento'=>'salida',
+                'descripcion'=>$request->descripcion,
+                'user_id'=>Auth::user()->id,
+            ]);
+            DB::commit();
+
+            $response = [
+                'icon'=>'success',
+                'title'=>'Exito',
+                'text'=>'Egreso realizado correctamente',
+            ];
+            return response()->json($response,200);
+            
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+
+        
     }
 
 

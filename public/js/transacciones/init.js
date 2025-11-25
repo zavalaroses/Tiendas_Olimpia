@@ -68,7 +68,6 @@ var dao = {
             type:'get',
             headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
             // Asegurar que todo llegue como número
             const efectivo      = Number(response.efectivo) || 0;
             const cuenta        = Number(response.cuenta) || 0;
@@ -99,7 +98,6 @@ var dao = {
         Object.keys(values).forEach(key =>{
             data.append(key,values[key]);
         });
-
         $.ajax({
             url:'/cerrar-corte',
             type:'post',
@@ -123,8 +121,35 @@ var dao = {
                 dao.getResumenCorte(idT);
             }
         });
+    },
+    postAddEgreso: function (idT) {
+        var form = $('#frm_add_egreso')[0];
+        var data = new FormData(form);
+        data.append('tienda',idT);
+        $.ajax({
+            url:'/post-add-egresos',
+            type:'post',
+            data:data,
+            enctype:'multipart/form-data',
+            contentType:false,
+            processData:false,
+            cache:false,
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            Swal.fire({
+                icon:response.icon,
+                title:response.title,
+                text:response.text,
+            });
+            if (response.icon == 'success') {
+                closeModal('modalAddEgreso','frm_add_egreso','');
+                dao.getData(idT);
+                dao.getResumenCorte(idT);
+            }
+            
+        })
+    },
 
-    }
 
 
 };
@@ -135,7 +160,19 @@ var init = {
             efectivo_contado : {required: true},
           },
           messages: {
-            chofer : {required: 'Este campo es requerido'},
+            efectivo_contado : {required: 'Este campo es requerido'},
+          }
+        })
+    },
+    validateEgreso: function(form){
+        _gen.validate(form,{
+          rules:{
+            cantidad : {required: true},
+            descripcion : {required: true},
+          },
+          messages: {
+            cantidad : {required: 'Este campo es requerido'},
+            descripcion : {required: 'Este campo es requerido'},
           }
         })
     },
@@ -167,7 +204,7 @@ $(document).ready(function () {
             }
             dao.getDataCerrarCorte(tienda.value);
         }else{
-            dao.getDataCerrarCorte();
+            dao.getDataCerrarCorte('');
         }
     });
     $("#efectivo_contado").on("input", function () {
@@ -185,11 +222,12 @@ $(document).ready(function () {
     });
     $('#btn_cerrar_corte').on('click',function (e) {
         e.preventDefault();
+        const tienda = document.getElementById('tiendas');
         init.validateCerrarCorte($('#frm_cierre_corte'));
         if ($('#frm_cierre_corte').valid()) {
             
             let dataValues = {
-                tienda_id: $("#tiendas") ? $("#tiendas").val() : '',
+                tienda_id: tienda ? tienda.value : '',
                 apertura: Number($("#corte_apertura").text().replace(/[$,\s]/g, "")) || 0,
                 ingresos_efectivo: Number($("#corte_ingresos_efectivo").text().replace(/[$,\s]/g, "")) || 0,
                 ingresos_tarjeta: Number($("#corte_ingresos_tarjeta").text().replace(/[$,\s]/g, "")) || 0,
@@ -199,6 +237,28 @@ $(document).ready(function () {
                 observaciones: $("#observaciones_corte").val()
             };
             dao.cerrarCorte(dataValues);
+        }
+    });
+    $('#btnNewEgreso').on('click',function (e) {
+        e.preventDefault();
+        const modalAddEgreso = new bootstrap.Modal(document.getElementById('modalAddEgreso'));
+        modalAddEgreso.show();
+    });
+    $('#btn_add_egreso').on('click',function (e) {
+        e.preventDefault();
+        const tienda = document.getElementById('tiendas');
+        init.validateEgreso($('#frm_add_egreso'));
+        if ($('#frm_add_egreso').valid()) {
+            if (tienda && tienda.value == '') {
+                Swal.fire({
+                    icon:'warning',
+                    title:'Advertencia!',
+                    text:'Selecciona una tienda',
+                });
+                return;
+            }
+            let idT = tienda ? tienda.value : '';
+            dao.postAddEgreso(idT);
         }
     });
 

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\User;
+
 use Log;
 
 class UsuariosController extends Controller
@@ -24,6 +25,17 @@ class UsuariosController extends Controller
             ->leftJoin('roles as r','r.id','=','users.rol')
             ->get();
             return response()->json($users,200);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+    public function getCatalogoRoles(){
+        try {
+            $roles = DB::table('roles')->select('id','nombre')
+                ->whereNull('deleted_at')
+                ->where('id','!=',1)
+            ->get();
+            return response()->json($roles,200);
         } catch (\Throwable $th) {
             throw $th;
         }

@@ -9,6 +9,7 @@ use App\Http\Controllers\ApartadosController;
 use App\Http\Controllers\VentasController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CajaController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,9 +37,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 // rutas de usuarios
-Route::middleware('auth')->controller(UsuariosController::class)->group(function () {
+Route::middleware(['auth','role'])->controller(UsuariosController::class)->group(function () {
     Route::get('/get-users', 'getUsuarios')->name('getUsuarios');
     Route::get('/get-data-usuarios', 'getDataUsuarios')->name('getDataUsuarios');
+    Route::get('/get-catalogo-roles','getCatalogoRoles')->name('getCatalogoRoles');
+});
+Route::middleware(['auth','role'])->group(function(){
+    Route::post('/register-user', [RegisteredUserController::class, 'store']);
 });
 // rutas de inventarios
 Route::middleware('auth')->controller(InventarioController::class)->group(function(){
@@ -73,7 +78,7 @@ Route::middleware('auth')->controller(VentasController::class)->group(function()
     
 });
 // rutas de catalogos
-Route::middleware('auth')->controller(CatalogoController::class)->group(function(){
+Route::middleware(['auth','role'])->controller(CatalogoController::class)->group(function(){
     Route::get('/get-cat-choferes','getChoferes')->name('getChoferes');
     Route::get('/get-cat-tiendas','getTiendas')->name('getTiendas');
     Route::post('/post-add-cat-tienda','postAddTienda')->name('postAddTienda');
@@ -86,22 +91,26 @@ Route::middleware('auth')->controller(CatalogoController::class)->group(function
     Route::post('/delete-cat-chofer','postDeleteCatChofer')->name('postDeleteCatChofer');
     Route::get('/get-muebles','getMuebles')->name('getMuebles');
     Route::post('/post-add-mueble','postAddMuble')->name('postAddMuble');
-    Route::get('/get-data-muebles','getDataMuebles')->name('getDataMuebles');
     Route::get('/get-mueble-by-id/{id?}','getMuebleByid')->name('getMuebleByid');
     Route::post('/post-update-mueble','postUpdateMueble')->name('postUpdateMueble');
     Route::post('/delete-cat-mueble','postDeleteMueble')->name('postDeleteMueble');
     Route::get('/get-index-proveedores','getProveedores')->name('getProveedores');
     Route::post('/post-add-cat-proveedores','postAddProveedor')->name('postAddProveedor');
-    Route::get('/get-data-cat-proveedores','getDataProveedores')->name('getDataProveedores');
+    
     Route::get('/get-proveedor-to-edit','getProveedorById')->name('getProveedorById');
     Route::post('/post-edit-proveedor','postUpdateProveedor')->name('postUpdateProveedor');
     Route::post('/delete-cat-proveedor','postDeleteProveedor')->name('postDeleteProveedor');
+});
+Route::middleware(['auth'])->controller(CatalogoController::class)->group(function(){
+    Route::get('/get-data-cat-proveedores','getDataProveedores')->name('getDataProveedores');
+    Route::get('/get-data-muebles','getDataMuebles')->name('getDataMuebles');
 });
 Route::middleware('auth')->controller(CajaController::class)->group(function(){
     Route::get('/get-index-cajas','getIndex')->name('getCajas');
     Route::get('/get-data-transacciones/{tienda?}','getData')->name('getData');
     Route::get('/get-resumen-corte/{tienda?}','getResumenCorte')->name('getResumenCorte');
     Route::post('/cerrar-corte','cerrarCorte')->name('cerrarCorte');
+    Route::post('/post-add-egresos','postAddEgreso')->name('postAddEgreso');
 });
 
 require __DIR__.'/auth.php';

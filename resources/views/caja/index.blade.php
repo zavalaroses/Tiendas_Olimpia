@@ -105,7 +105,7 @@
             <aside class="right">
                 <div class="summary">
                     <h3>Resumen del corte</h3>
-                    <div class="summary-row"><span>Efectivo apertura</span><span id="apertura">$ 1,000.00</span></div>
+                    <div class="summary-row"><span>Efectivo apertura</span><span id="apertura">$ 0.00</span></div>
                     <div class="summary-row"><span>Ingresos (efectivo)</span><span id="efectivoI">$ 21,530.00</span></div>
                     <div class="summary-row"><span>Ingresos (cuenta)</span><span id="efectivoC">$ 21,530.00</span></div>
                     <div class="summary-row"><span>Egresos (efectivo)</span><span id="egresoE">$ 1,400.00</span></div>
@@ -124,6 +124,7 @@
     </div>
 </body>
 @include('caja.modalCerrarCorte')
+@include('caja.modalAddEgreso')
 <script src="/js/utilerias.js"></script>
 <script src="/js/transacciones/init.js"></script>
 <script>

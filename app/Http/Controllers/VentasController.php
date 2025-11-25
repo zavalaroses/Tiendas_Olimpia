@@ -45,7 +45,7 @@ class VentasController extends Controller
                 ->when($idTienda, function($q) use($idTienda){
                     $q->where('sp.id_tienda',$idTienda);
                 })
-                ->orderBy('salidas.id')
+                ->orderBy('salidas.id','desc')
             ->get();
 
             return response()->json($salidas,200);
@@ -238,7 +238,6 @@ class VentasController extends Controller
         try {
             $checkChofer = VentasController::checkChoferAsignado($request->id);
             if (!$checkChofer) {
-                Log::debug('debi entrar aqui');
                 # retornamos respuesta de que hay que asignar chofer de salida...
                 $response = [
                     'icon'=>'warning' ,
