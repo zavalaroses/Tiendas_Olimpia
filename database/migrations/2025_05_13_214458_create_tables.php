@@ -64,8 +64,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tienda_id')->constrained()->onDelete('cascade');
             $table->foreignId('mueble_id')->constrained()->onDelete('cascade');
-            $table->foreignId('estatus_id')->constrained('estatus_inventario');
-            $table->integer('cantidad')->default(0);
+            $table->integer('estatus_id')->nullable();
+            $table->integer('cantidad_stock')->default(0);
+            $table->integer('cantidad_apartados')->default(0);
+            $table->integer('por_entregar')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -97,7 +99,7 @@ return new class extends Migration
             $table->foreignId('tienda_id')->constrained('tiendas');
             $table->string('nombre');
             $table->string('apellidos');
-            $table->string('correo');
+            $table->string('correo')->nullable();
             $table->string('telefono')->nullable();
             $table->string('direccion')->nullable();
             $table->timestamps();
@@ -107,15 +109,15 @@ return new class extends Migration
         Schema::create('apartados', function (Blueprint $table) {
             $table->id();
             $table->foreignId('cliente_id')->constrained('clientes');
-            $table->foreignId('mueble_id')->constrained('muebles');
+            // $table->foreignId('mueble_id')->constrained('muebles');
             $table->foreignId('tienda_id')->constrained('tiendas');
-            $table->integer('cantidad');
+            // $table->integer('cantidad');
             $table->decimal('monto_anticipo', 10, 2);
             $table->decimal('monto_restante', 10, 2);
             $table->foreignId('usuario_id')->constrained('users');
             $table->date('fecha_apartado');
-            $table->date('liquidado_at');
-            $table->string('recibo_pdf');
+            $table->date('liquidado_at')->nullable();
+            $table->string('recibo_pdf')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -126,10 +128,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('cliente_id')->constrained('clientes');
             $table->foreignId('apartado_id')->constrained('apartados');
-            $table->foreignId('chofer_id');
+            $table->foreignId('chofer_id')->nullable();
             $table->foreignId('usuario_id')->constrained('users');
             $table->date('fecha_entrega');
-            $table->string('pdf_entrega');
+            $table->string('pdf_entrega')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->integer('tienda_id');
             $table->string('nombre');
-            $table->string('apellidos');
+            $table->string('apellidos')->nullable();
             $table->string('correo')->nullable();
             $table->string('telefono')->nullable();
             $table->string('direccion')->nullable();
@@ -31,7 +31,7 @@ return new class extends Migration
             $table->integer('id_apartado');
             $table->integer('id_mueble');
             $table->integer('cantidad');
-            $table->string('estatus'); 
+            $table->string('estatus')->nullable(); 
             $table->timestamps();
             $table->softDeletes();
         });
