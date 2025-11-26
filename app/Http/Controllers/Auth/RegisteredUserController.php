@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use Log;
 
 class RegisteredUserController extends Controller
 {
@@ -28,7 +29,7 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $request->validate([
             'tienda'=>['required'],
@@ -48,6 +49,7 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
+        Log::debug(json_encode($request->password));
         
         return response()->json($request->password,200);
         // return redirect(RouteServiceProvider::HOME);
