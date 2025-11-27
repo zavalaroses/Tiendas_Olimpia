@@ -15,6 +15,9 @@ class CajaController extends Controller
     public function getIndex(){
         return view('caja.index');
     }
+    public function getHistorialCajas(){
+        return view('historial.index');
+    }
     public function getData($tienda = null){
         $idTienda = $tienda ? $tienda : Auth::user()->tienda_id;
         $data = Transaccion::join('users as u','u.id','=','user_id')
@@ -157,6 +160,31 @@ class CajaController extends Controller
         }
 
         
+    }
+    public function getDataHistorialCortes(Request $request){
+        try {
+            $cortes = Corte::join('users as u','u.id','=','cortes.user_id')
+                ->leftJoin('tiendas as t','t.id','=','cortes.tienda_id')
+                ->select(
+                    'cortes.id',
+                    't.nombre as tienda',
+                    'u.name as usuario',
+                    'total_efectivo',
+                    'total_cuenta',
+                    'total_general',
+                    'efectivo_contado',
+                    'diferencia',
+                    'egresos',
+                    'cortes.created_at as fecha'
+                )
+                ->when($request->tienda, fn($q) => $q->where('cortes.tienda_id', $request->tienda))
+                ->when($request->inicio, fn($q) => $q->whereDate('cortes.created_at', '>=', $request->inicio))
+                ->when($request->fin, fn($q) => $q->whereDate('cortes.created_at', '<=', $request->fin))
+            ->get();
+            return response()->json($cortes,200);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
 

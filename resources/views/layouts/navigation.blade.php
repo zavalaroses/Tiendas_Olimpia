@@ -53,6 +53,11 @@
                         </x-nav-link>
                     </div>
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('getHistorialCajas')" :active="request()->routeIs('getHistorialCajas')">
+                            {{ 'Historial cajas' }}
+                        </x-nav-link>
+                    </div>
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <div x-data="{ openDropdown: false }" class="relative hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                             <!-- Botón principal -->
                             <button @click="openDropdown = !openDropdown"

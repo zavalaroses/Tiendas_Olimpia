@@ -111,6 +111,10 @@ Route::middleware('auth')->controller(CajaController::class)->group(function(){
     Route::get('/get-resumen-corte/{tienda?}','getResumenCorte')->name('getResumenCorte');
     Route::post('/cerrar-corte','cerrarCorte')->name('cerrarCorte');
     Route::post('/post-add-egresos','postAddEgreso')->name('postAddEgreso');
+    Route::get('/get-index-historial-cajas','getHistorialCajas')->name('getHistorialCajas');
+});
+Route::middleware(['auth','role'])->controller(CajaController::class)->group(function(){
+    Route::get('/get-data-historial-cajas','getDataHistorialCortes')->name('getDataHistorialCortes');
 });
 
 require __DIR__.'/auth.php';
