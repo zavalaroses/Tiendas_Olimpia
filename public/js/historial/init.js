@@ -29,6 +29,12 @@ var dao = {
                 {"aTargets": [9], "mData" : function (o) {
                     return o.fecha;
                 }},
+                {"aTargets": [10], "mData" : function (o) {
+                  return `<button class="btn btn-sm btnAgregar" onClick="dao.detallesCorte(${o.id})">
+                        <i class="fa fa-eye"></i>
+                    </button>`
+                }},
+
             ];
             _gen.setTableScrollEspecial2(table,columns,response);
             
@@ -53,6 +59,62 @@ var dao = {
             });
         })
     },
+    detallesCorte: function (id) {
+        $.ajax({
+            url:'/get-detalles-corte/'+id,
+            type:'get',
+            dataType:'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (res) {
+            // ---- Datos del corte ----
+            let resumen = `
+                <div class="row mb-2">
+                    <div class="col-md-3"><strong>Corte:</strong> ${res.corte.id}</div>
+                    <div class="col-md-3"><strong>Tienda:</strong> ${res.corte.tienda}</div>
+                    <div class="col-md-3"><strong>Usuario:</strong> ${res.corte.usuario}</div>
+                    <div class="col-md-3"><strong>Fecha:</strong> ${res.corte.fecha}</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3"><strong>Total General:</strong> $${res.corte.total_general}</div>
+                    <div class="col-md-3"><strong>Efectivo Esperado:</strong> $${res.corte.total_efectivo}</div>
+                    <div class="col-md-3"><strong>Efectivo Contado:</strong> $${res.corte.efectivo_contado}</div>
+                    <div class="col-md-3"><strong>Diferencia:</strong> 
+                        <span class="${res.corte.diferencia >= 0 ? 'text-success' : 'text-danger'}">
+                            $${res.corte.diferencia}
+                        </span>
+                    </div>
+                </div>
+                <hr/>
+            `;
+            // ---- Detalle de transacciones ----
+            let filas = "";
+
+            if (res.transacciones.length === 0) {
+                filas = `<tr><td colspan="6">No hay transacciones</td></tr>`;
+            } else {
+                res.transacciones.forEach(t => {
+                    filas += `
+                    <tr>
+                        <td>${t.id}</td>
+                        <td>${t.tipo}</td>
+                        <td>$${t.monto}</td>
+                        <td>${t.pago}</td>
+                        <td>${t.fecha}</td>
+                        <td>${t.usuario}</td>
+                    </tr>`;
+                });
+            }
+
+            $('#detalle_corte_body').html(filas);
+
+            $('#info_corte').html(resumen);
+            const modalDetalleCorte = new bootstrap.Modal(document.getElementById('modalDetalleCorte'));
+            modalDetalleCorte.show();
+        })
+        
+    }
+
 };
 var init = {
 
