@@ -15,6 +15,9 @@ class CajaController extends Controller
     public function getIndex(){
         return view('caja.index');
     }
+    public function getHistorialCajas(){
+        return view('historial.index');
+    }
     public function getData($tienda = null){
         $idTienda = $tienda ? $tienda : Auth::user()->tienda_id;
         $data = Transaccion::join('users as u','u.id','=','user_id')
@@ -109,6 +112,9 @@ class CajaController extends Controller
                 'diferencia' =>$request->corte_diferencia ,           
                 'egresos' =>$request->salidas, 
             ]);
+            Transaccion::where('tienda_id',$idTienda)->whereNull('deleted_at')->update([
+                'corte_caja_id'=>$corte->id
+            ]);
 
             Transaccion::where('tienda_id',$idTienda)->delete();
             DB::commit();
@@ -156,6 +162,70 @@ class CajaController extends Controller
             throw $th;
         }
 
+        
+    }
+    public function getDataHistorialCortes(Request $request){
+        try {
+            $cortes = Corte::join('users as u','u.id','=','cortes.user_id')
+                ->leftJoin('tiendas as t','t.id','=','cortes.tienda_id')
+                ->select(
+                    'cortes.id',
+                    't.nombre as tienda',
+                    'u.name as usuario',
+                    'total_efectivo',
+                    'total_cuenta',
+                    'total_general',
+                    'efectivo_contado',
+                    'diferencia',
+                    'egresos',
+                    'cortes.created_at as fecha'
+                )
+                ->when($request->tienda, fn($q) => $q->where('cortes.tienda_id', $request->tienda))
+                ->when($request->inicio, fn($q) => $q->whereDate('cortes.created_at', '>=', $request->inicio))
+                ->when($request->fin, fn($q) => $q->whereDate('cortes.created_at', '<=', $request->fin))
+                ->orderBy('cortes.id','DESC')
+            ->get();
+            return response()->json($cortes,200);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+    public function getDetalleCorte($id){
+        $corte = DB::table('cortes as c')
+            ->join('tiendas as t','t.id','=','c.tienda_id')
+            ->join('users as u', 'u.id','=','c.user_id')
+            ->select(
+                'c.id as id',
+                't.nombre as tienda',
+                'u.name as usuario',
+                'c.created_at as fecha',
+                'c.total_general',
+                'c.total_efectivo',
+                'c.efectivo_contado',
+                'c.diferencia'
+            )
+            ->where('c.id',$id)
+        ->first();
+
+        $transacciones = DB::table('movimientos_tienda as mt')
+            ->join('users as u','u.id','=','mt.user_id')
+            ->select(
+                'mt.id',
+                'mt.tipo_movimiento as tipo',
+                'mt.cantidad as monto',
+                'mt.tipo_pago as pago',
+                'mt.created_at as fecha',
+                'u.name as usuario'
+            )
+            ->where('mt.corte_caja_id',$id)
+            ->orderBy('mt.id','DESC')
+        ->get();
+
+        $response = [
+            'corte'=>$corte,
+            'transacciones'=>$transacciones
+        ];
+        return response()->json($response,200);
         
     }
 
