@@ -7,10 +7,16 @@
 <div class="container">
  <!-- Content here -->
      <div class="row">
-         <div class="col-md-10"></div>
-         <div class="col-md-2">
-             <button id="btnAddGarantia" type="button" name="btnAddGarantia" class="btnNuevoUsuario">Nueva Garantia</button>
+        <div class="col-md-10">
+            @if(Auth::user()->rol == 1)
+               <div class="col-md-4">
+                   <select name="tiendas" id="tiendas" class="form-control"></select> 
+               </div>
+           @endif
          </div>
+        <div class="col-md-2">
+            <button id="btnAddGarantia" type="button" name="btnAddGarantia" class="btnNuevoUsuario">Nueva Garantia</button>
+        </div>
      </div>
      <br>
     <div class="row">
@@ -40,5 +46,4 @@
 </div>
 <script src="/js/utilerias.js"></script>
 <script src="/js/garantias/init.js"></script>
-@include('garantias.modalAddGarantia')
 @endsection

@@ -54,8 +54,10 @@ Route::middleware('auth')->controller(InventarioController::class)->group(functi
     
 });
 // rutas de garantias
-Route::middleware('auth')->group(function(){
-    Route::get('/get-garantias',[GarantiasController::class,'getGarantias'])->name('getGarantias');
+Route::middleware('auth')->controller(GarantiasController::class)->group(function(){
+    Route::get('/get-garantias','getGarantias')->name('getGarantias');
+    Route::get('/get-data-muebles-by-tienda/{tienda?}','getMueblesByTienda')->name('getMueblesByTienda');
+
 });
 // rutas de apartados
 Route::middleware('auth')->controller(ApartadosController::class)->group(function(){
