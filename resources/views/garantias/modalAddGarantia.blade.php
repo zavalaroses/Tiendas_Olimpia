@@ -21,50 +21,28 @@
                 <form class="row g-3" id="frm_add_garantia" name="frm_add_garantia">
                   <div class="row">
                     <div class="col-md-2"></div>
-                    <div class="col-md-8">
-                      <label for="cliente" class="form-label">cliente</label>
-                      <input type="text" class="form-control" id="cliente" name="cliente">
-                    </div>
-                    <div class="col-md-2"></div>
-                    <div class="col-md-2"></div>
-                    <div class="col-md-8">
-                      <label for="descripcion">Motivo</label>
-                      <textarea name="descipcion" id="descipcion" cols="5" rows="2" class="form-control"></textarea>
-                    </div>
-                    <div class="col-md-2"></div>
-                    
-                  </div>
-                  <div class="row">
-                    <div class="col-md-2"></div>
-                    <div class="col-md-4">
-                      <label for="nombre" class="form-label">Mueble</label>
-                      <select name="mueble" id="mueble" class="form-select">
-                        <option value="">Seleccione una opcion</option>
-                      </select>
+                    <div class="col-md-6">
+                      <input type="hidden" name="id_mueble" id="id_mueble_g">
+                      <input type="hidden" name="tienda" id="tienda_g">
+                      <input type="hidden" name="id_salida" id="id_salida_g">
+                      <label for="mueble" class="form-label">Mueble</label>
+                      <input type="text" class="form-control" id="mueble_g" name="mueble" disabled>
                     </div>
                     <div class="col-md-2">
                       <label for="cantidad" class="form-label">Cantidad</label>
-                      <input type="number" class="form-control" id="cantidad" name="cantidad">
+                      <input type="number" class="form-control" id="cantidad_g" name="cantidad">
                     </div>
+                    <div class="col-md-2"></div>
+
+                    <div class="col-md-2"></div>
+                    <div class="col-md-8">
+                      <label for="descripcion">Motivo</label>
+                      <textarea name="descripcion" id="descripcion_g" cols="5" rows="2" class="form-control"></textarea>
+                    </div>
+                    <div class="col-md-2"></div>
                     
-                    <div class="col-md-2">
-                      <label for="tienda" class="form-label">Agregar</label>
-                      <button type="button" id="btn_add_garantia" name="btn_add_garantia" class="form-control btAdd" >
-                        <i class="fa-solid fa-plus" ></i>
-                      </button>
-                    </div>
                   </div>
-                  <div class="col-md-12">
-                    <table id="tbl_add_list_garantia" name= "tbl_add_list_garantia" style="width: 100%; display:none">
-                      <thead>
-                        <th>Producto</th>
-                        <th>Cantidad</th>
-                        <th>Cliente</th>
-                        <th>Acciones</th>
-                      </thead>
-                      <tbody></tbody>
-                    </table>
-                  </div>
+                  
                 </form>
             </div>
             <div class="modal-footer" style="display: flex; justify-content:center">
@@ -75,7 +53,7 @@
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-5">
-                        <button type="button" class="form-control btnAgregar" id="btn_add_user">AGREGAR</button>
+                        <button type="button" class="form-control btnAgregar" id="btn_ad_garantia">AGREGAR</button>
                       </div>
                     </div>
                   </div>

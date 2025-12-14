@@ -15,13 +15,13 @@
            @endif
          </div>
         <div class="col-md-2">
-            <button id="btnAddGarantia" type="button" name="btnAddGarantia" class="btnNuevoUsuario">Nueva Garantia</button>
+            {{-- <button id="btnAddGarantia" type="button" name="btnAddGarantia" class="btnNuevoUsuario">Nueva Garantia</button> --}}
         </div>
      </div>
      <br>
     <div class="row">
         <div class="table-responsive">
-            <table id="tblGarantias" style="width: 100%;">
+            <table id="tblGarantias" style="width: 100%;" class="table table-borderless table-centered">
                 <caption class="captionTbl">
                     <br>
                     <div class="row" style="align-items: center; justify-content: center;">
@@ -34,7 +34,10 @@
                         <th scope="col">Tienda</th>
                         <th scope="col">Mueble</th>
                         <th scope="col">Motivo</th>
+                        <th scope="col">Cantidad</th>
                         <th scope="col">Usuario</th>
+                        <th scope="col">Fecha de registo</th>
+                        <th scope="col">Cliente</th>
                         <th scope="col">Acciones</th>
                     </tr>
                 </thead>

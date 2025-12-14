@@ -57,6 +57,9 @@ Route::middleware('auth')->controller(InventarioController::class)->group(functi
 Route::middleware('auth')->controller(GarantiasController::class)->group(function(){
     Route::get('/get-garantias','getGarantias')->name('getGarantias');
     Route::get('/get-data-muebles-by-tienda/{tienda?}','getMueblesByTienda')->name('getMueblesByTienda');
+    Route::post('/post-add-garantia','postAddGarantia')->name('postAddGarantia');
+    Route::get('/get-data-garantias/{tienda?}','getDataGarantias')->name('getDataGarantias');
+    Route::post('/terminar-garantia','postTerminarGarantia')->name('postTerminarGarantia');
 
 });
 // rutas de apartados

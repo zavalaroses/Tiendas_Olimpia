@@ -17,7 +17,7 @@ dao = {
                     }else if (o.estatus == 'Entregado') {
                         return `<span class="green" style="font-size:0.875rem !important; max-width: 100px;">${o.estatus}</span>`;
                     } else {
-                        return o.estatus;
+                        return `<span class="blue" style="font-size:0.875rem !important; max-width: 100px;">${o.estatus}</span>`;
                     }
                 }},
                 {"targets":[4],"mData":'cantidad'},
@@ -54,7 +54,7 @@ dao = {
                 {"aTargets": [7], "mData" : function(o){
                     if (o.estatus == 'Entregado') {
                         return `
-                        <button class="dropdown-item" onclick="dao.modalGarantia(${o.id})">
+                        <button class="dropdown-item" onclick="dao.modalGarantia(${o.id_mueble},${o.id_tienda},'${o.mueble}',${o.id})">
                             <i class="fas fa-shield-alt" style="color:#7C0A20"></i>&nbsp;Garantía
                         </button>
                     `;
@@ -284,7 +284,45 @@ dao = {
             
             }
         })  
-    }
+    },
+    modalGarantia: function (id_mueble,tienda,mueble,salida) {
+        document.getElementById('mueble_g').value = mueble ? mueble : '';
+        document.getElementById('id_mueble_g').value = id_mueble ? id_mueble : '';
+        document.getElementById('tienda_g').value = tienda ? tienda : '';
+        document.getElementById('id_salida_g').value = salida ? salida : '';
+        const modalAddGarantia = new bootstrap.Modal(document.getElementById('modalAddGarantia'));
+        modalAddGarantia.show();
+    },
+    postAddGarantia: function() {
+        var form = $('#frm_add_garantia')[0];
+        var data = new FormData(form);
+        $.ajax({
+            url:'/post-add-garantia',
+            type:'post',
+            data:data,
+            enctype:'multipart/form-data',
+            processData:false,
+            contentType:false,
+            cache:false,
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function name(response) {
+            Swal.fire({
+                icon:response.icon,
+                title:response.title,
+                text:response.text,
+            });
+            const tienda = document.getElementById('tiendas');
+            if (response.icon == 'success') {
+                closeModal('modalAddGarantia','frm_add_garantia','');
+                if (tienda) {
+                    dao.getDataSalidas(tienda.value);
+                }else{
+                    dao.getDataSalidas('');
+                }
+                
+            }
+        });
+    },
 };
 init = {
     validateDarSalida: function(form){
@@ -322,7 +360,21 @@ init = {
             forma_pago: {required:'Este campo es requerido'},
           }
         })
-    }
+    },
+    validateG: function(form){
+        _gen.validate(form,{
+          rules:{
+            mueble : {required: true},
+            cantidad : {required: true},
+            descripcion:{required:true},
+          },
+          messages: {
+            mueble : {required: 'Este campo es requerido'},
+            cantidad : {required: 'Este campo es requerido'},
+            descripcion : {required: 'Este campo es requerido'},
+          }
+        })
+    },
 
 };
 function addListaMuebles() {
@@ -450,6 +502,13 @@ $(document).ready(function () {
         const tienda = this.options[this.selectedIndex].text;
         document.getElementById('tituto_tienda').innerText = tienda;
         dao.getDataSalidas(this.value);
+    });
+    $('#btn_ad_garantia').on('click', function (e) {
+        e.preventDefault();
+        init.validateG($('#frm_add_garantia'));
+        if ($('#frm_add_garantia').valid()) {
+        dao.postAddGarantia();
+        }
     });
 
 });
