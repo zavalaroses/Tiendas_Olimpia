@@ -13,6 +13,7 @@ use App\Models\InventarioTienda;
 use App\Models\Salida;
 use App\Models\SalidaProducto;
 use App\Models\Transaccion;
+use App\Models\Cuenta;
 
 use Log;
 use Carbon\Carbon;
@@ -113,7 +114,7 @@ class ApartadosController extends Controller
                 }
             }
             // registramos la transaccion en la caja
-            Transaccion::create([
+            $transaccion = Transaccion::create([
                 'tienda_id' =>$idtienda,
                 'venta_id'=>$apartado->id,
                 'cantidad'=>$request->anticipo,
@@ -122,6 +123,18 @@ class ApartadosController extends Controller
                 'descripcion'=>'Monto de anticipo',
                 'user_id'=>Auth::user()->id,
             ]);
+            if ($request->forma_pago != 'Efectivo') {
+                # agregamos el movimiento a la cuenta...
+                Cuenta::create([
+                    'tienda_id'=>$idtienda,     
+                    'user_id'=>Auth::user()->id,  
+                    'monto'=>$request->anticipo,  
+                    'tipo_movimiento'=>'entrada',
+                    'concepto'=>$request->forma_pago,       
+                    'referencia'=> $transaccion,     
+                    'descripcion'=>'Monto de anticipo',           
+                ]); 
+            }
 
 
             DB::commit();
@@ -207,7 +220,7 @@ class ApartadosController extends Controller
             $newRestante = Apartado::where('id',$request->id_apartado)->value('monto_restante');
             
             // registramos la transaccion en la caja
-            Transaccion::create([
+            $transaccion = Transaccion::create([
                 'tienda_id' =>$idtienda,
                 'venta_id'=>$request->id_apartado,
                 'cantidad'=>$request->adelanto,
@@ -216,6 +229,19 @@ class ApartadosController extends Controller
                 'descripcion'=>'Abono o adelanto',
                 'user_id'=>Auth::user()->id,
             ]);
+
+            if ($request->forma_pago != 'efectivo') {
+                # agregamos el movimiento a la cuenta...
+                Cuenta::create([
+                    'tienda_id'=>$idtienda,     
+                    'user_id'=>Auth::user()->id,  
+                    'monto'=>$request->adelanto,  
+                    'tipo_movimiento'=>'entrada',
+                    'concepto'=>$request->forma_pago,       
+                    'referencia'=> $transaccion,     
+                    'descripcion'=>'Abono o adelanto',           
+                ]); 
+            }
 
             // si el restante queda en cero o se liquido movemos de apartado a venta.
             if ((float)$newRestante == 0) {

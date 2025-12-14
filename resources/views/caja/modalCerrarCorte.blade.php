@@ -43,7 +43,7 @@
                 </div>
       
                 <div class="summary-row d-flex justify-content-between mb-2 fw-bold border-top pt-2">
-                  <span>Total efectivo esperado:</span>
+                  <span>Efectivo esperado:</span>
                   <span id="corte_efectivo_esperado">$ 0.00</span>
                 </div>
               </div>
@@ -51,7 +51,7 @@
               <form id="frm_cierre_corte">
                 <!-- Efectivo contado -->
                 <div class="mb-3">
-                  <label for="efectivo_contado" class="form-label fw-bold">Efectivo contado por el cajero:</label>
+                  <label for="efectivo_contado" class="form-label fw-bold">Efectivo en caja:</label>
                   <input type="number" min="0" class="form-control" id="efectivo_contado" name="efectivo_contado" placeholder="Ingresa el efectivo contado">
                 </div>
         
@@ -65,6 +65,7 @@
                 <div class="summary-row d-flex justify-content-between mt-3 fw-bold">
                   <span>Diferencia:</span>
                   <input type="hidden" id="input_total" name="input_total">
+                  <input type="hidden" id="diferencia" name="diferencia">
                   <span id="corte_diferencia" class="text-danger">$ 0.00</span>
                 </div>
               </form>

@@ -121,6 +121,7 @@ Route::middleware('auth')->controller(CajaController::class)->group(function(){
 Route::middleware(['auth','role'])->controller(CajaController::class)->group(function(){
     Route::get('/get-data-historial-cajas','getDataHistorialCortes')->name('getDataHistorialCortes');
     Route::get('/get-detalles-corte/{id?}','getDetalleCorte')->name('getDetalleCorte');
+    Route::get('/get-index-cuenta','getManejoCuenta')->name('getManejoCuenta');
 });
 
 require __DIR__.'/auth.php';
