@@ -252,6 +252,81 @@ class CajaController extends Controller
         return response()->json($response,200);
         
     }
+    public function getDataCuenta($tienda = null){
+        $idTienda = $tienda ?: Auth::user()->tienda_id;
+        $data = Cuenta::leftJoin('tiendas as t','t.id','=','movimientos_cuenta.tienda_id')
+            ->leftJoin('users as u','u.id','=','movimientos_cuenta.user_id')
+            ->select(
+                'movimientos_cuenta.id',
+                't.nombre as tienda',
+                'u.name as usuario',
+                'monto',
+                'tipo_movimiento',
+                'concepto',
+                'referencia',
+                'descripcion',
+                'fecha_movimiento as fecha',
+            )
+            ->when($idTienda, function($q)use($idTienda){
+                $q->where('movimientos_cuenta.tienda_id',$idTienda);
+            })
+            ->orderBy('movimientos_cuenta.id','DESC')
+            ->get();
+
+        $entradas = Cuenta::where('tipo_movimiento','entrada')
+            ->when($idTienda, function($q)use($idTienda){
+                $q->where('tienda_id',$idTienda);
+            })
+        ->sum('monto');
+        $salidas = Cuenta::where('tipo_movimiento','salida')
+            ->when($idTienda, function($q)use($idTienda){
+                $q->where('tienda_id',$idTienda);
+            })
+        ->sum('monto');
+        $saldoCuenta = $entradas - $salidas;
+
+        $response = [
+            'data'=>$data,
+            'entradas'=>$entradas,
+            'salidas'=>$salidas,
+            'saldoCuenta'=>$saldoCuenta
+        ];
+
+        return response()->json($response,200);
+
+    }
+    public function postAddIngresoCuenta(Request $request){
+        try {
+            $request->validate([
+                'cantidad' => 'required|numeric',
+                'descripcion' => 'required',
+            ]);
+            DB::beginTransaction();
+
+            Cuenta::create([
+                'tienda_id'=>$request->tienda,     
+                'user_id'=>Auth::user()->id,  
+                'monto'=>$request->cantidad,  
+                'tipo_movimiento'=>'entrada',
+                'concepto'=>'ajuste',            
+                'descripcion'=>$request->descripcion,           
+            ]); 
+
+            DB::commit();
+
+            $response = [
+                'icon'=>'success',
+                'title'=>'Exito',
+                'text'=>'Ingreso realizado correctamente',
+            ];
+            return response()->json($response,200);
+
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
 
 
 }

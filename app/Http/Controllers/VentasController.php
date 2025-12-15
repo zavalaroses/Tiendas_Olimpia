@@ -183,7 +183,13 @@ class VentasController extends Controller
                     # restamos inventario...
                     $inventario->decrement('cantidad_stock',$request->cantidad[$i]);
                 }else {
-                    throw new \Exception("Inventarios insuficiente para el mueble", 1);
+                    $response = [
+                        'icon'=>'warning',
+                        'title'=>'Oops.',
+                        'text'=>'Inventarios insuficiente para el mueble.',
+                    ];
+                    return response()->json($response,200);
+                    // throw new \Exception("Inventarios insuficiente para el mueble", 1);
                 }
                 
             }

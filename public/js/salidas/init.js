@@ -62,7 +62,7 @@ dao = {
                     }else{
                         return '<div class="dropdown">'+
                             '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
-                                '<ul class="dropdown-menu" aria-labelledby="dropdownMenu2">'+
+                                '<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu2">'+
                                     '<li onclick="dao.darSalida(' + o.id + ')"><button class="dropdown-item"><i class="fas fa-shipping-fast" style="color: #7C0A20"></i>&nbsp;Dar salida</button></li>'+
                                     '<li onclick="dao.finalizarVenta(' + o.id +')"><button class="dropdown-item"><i class="fa-solid fa-house-circle-check" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Entregado</button></li>'+
                                 '</ul>'+

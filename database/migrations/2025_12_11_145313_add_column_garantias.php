@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('inventario_tienda', function(Blueprint $table){
-            $table->integer('en_garantia')->nullable()->after('por_entregar');
+            $table->integer('en_garantia')->nullable()->default(0)->after('por_entregar');
         });
     }
 

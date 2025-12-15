@@ -70,15 +70,15 @@
 <body>
     <div class="container">
         <div class="row">
-                <div class="col-md-8">
+                <div class="col-md-10">
                     @if(Auth::user()->rol == 1)
                     <div class="col-md-4">
                         <select name="tiendas" id="tiendas" class="form-control"></select> 
                     </div>
                 @endif
                 </div>
-                <div class="col-md-4">
-                    <button id="btnNewIngreso" type="button" name="btnNewEgreso" class="btnNuevoUsuario">Ingreso</button>
+                <div class="col-md-2">
+                    <button id="btnNewIngreso" type="button" name="btnNewIngreso" class="btnNuevoUsuario">Ingreso</button>
                     {{-- <button id="btnNewEgreso" type="button" name="btnNewEgreso" class="btnNuevoUsuario">Egreso</button> --}}
                 </div>
             </div>
@@ -108,9 +108,9 @@
                 <div class="summary">
                     <h3>Resumen de cuenta</h3>
                     
-                    <div class="summary-row"><span>Ingresos</span><span id="efectivoI">$ 21,530.00</span></div>
-                    <div class="summary-row"><span>Egresos</span><span id="egresoT">$ 1,400.00</span></div>
-                    <div class="summary-row total"><span>Total general</span><span id="totalG">$ 19,130.00</span></div>
+                    <div class="summary-row"><span>Ingresos</span><span id="ingresos">$ 21,530.00</span></div>
+                    <div class="summary-row"><span>Egresos</span><span id="salidas">$ 1,400.00</span></div>
+                    <div class="summary-row total"><span>Total general</span><span id="saldoCuenta">$ 19,130.00</span></div>
 
 
                     {{-- <div style="margin-top:12px;display:flex;gap:8px">
@@ -121,6 +121,7 @@
         </div>
     </div>
 </body>
+@include('caja.modalAddIngresoCuenta')
 <script src="/js/utilerias.js"></script>
 <script src="/js/cuenta/init.js"></script>
 <script>
