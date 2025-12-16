@@ -42,6 +42,7 @@
         </div>
     </body>
 </html>
+@include('garantias.modalAddGarantia')
 <script>
     $(document).ready(function () {
         $.ajaxSetup({

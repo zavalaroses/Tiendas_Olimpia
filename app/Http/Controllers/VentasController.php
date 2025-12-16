@@ -12,6 +12,7 @@ use App\Models\Salida;
 use App\Models\SalidaProducto;
 use App\Models\Cliente;
 use App\Models\Transaccion;
+use App\Models\Cuenta;
 use App\Models\catalogos\Chofer;
 use Log;
 use Carbon\Carbon;
@@ -182,7 +183,13 @@ class VentasController extends Controller
                     # restamos inventario...
                     $inventario->decrement('cantidad_stock',$request->cantidad[$i]);
                 }else {
-                    throw new \Exception("Inventarios insuficiente para el mueble", 1);
+                    $response = [
+                        'icon'=>'warning',
+                        'title'=>'Oops.',
+                        'text'=>'Inventarios insuficiente para el mueble.',
+                    ];
+                    return response()->json($response,200);
+                    // throw new \Exception("Inventarios insuficiente para el mueble", 1);
                 }
                 
             }
@@ -211,7 +218,7 @@ class VentasController extends Controller
                     ->where('mueble_id',$request->id[$i])
                     ->increment('por_entregar',$request->cantidad[$i]);
             }
-            Transaccion::create([
+            $transaccion = Transaccion::create([
                 'tienda_id' =>$idtienda,
                 'venta_id'=>$salida->id,
                 'cantidad'=>$request->total,
@@ -220,6 +227,19 @@ class VentasController extends Controller
                 'descripcion'=>'Venta',
                 'user_id'=>Auth::user()->id,
             ]);
+
+            if ($request->forma_pago != 'Efectivo') {
+                # agregamos el movimiento a la cuenta...
+                Cuenta::create([
+                    'tienda_id'=>$idtienda,     
+                    'user_id'=>Auth::user()->id,  
+                    'monto'=>$request->total,  
+                    'tipo_movimiento'=>'entrada',
+                    'concepto'=>$request->forma_pago,       
+                    'referencia'=> $transaccion,     
+                    'descripcion'=>'Venta',           
+                ]); 
+            }
 
             $response = [
                 'icon' =>'success',

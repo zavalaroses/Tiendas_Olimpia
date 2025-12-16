@@ -38,7 +38,7 @@ dao = {
                 {"aTargets": [3], "mData" : function(o){
                     return '<div class="dropdown">'+
                     '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
-                        '<ul class="dropdown-menu" aria-labelledby="dropdownMenu2">'+
+                        '<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu2">'+
                             '<li onclick="dao.editar(' + o.id + ')"><button class="dropdown-item"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i>&nbsp;Editar</button></li>'+
                             '<li onclick="dao.eliminar(' + o.id +','+o.area+')"><button class="dropdown-item"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Eliminar</button></li>'+
                         '</ul>'+

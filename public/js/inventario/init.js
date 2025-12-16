@@ -14,15 +14,14 @@ dao = {
                 {"targets": [3],"mData":'cantidad_stock'},
                 {"targets": [4],"mData":'cantidad_apartados'},
                 {"targets": [5],"mData":'por_entregar'},
-                // {"aTargets": [5], "mData" : function(o){
-                //     return '<div class="dropdown">'+
-                //     '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
-                //         '<ul class="dropdown-menu" aria-labelledby="dropdownMenu2">'+
-                //             '<li onclick="dao.editar(' + o.id + ')"><button class="dropdown-item"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i>&nbsp;Editar</button></li>'+
-                //             '<li onclick="dao.eliminar(' + o.id +','+o.area+')"><button class="dropdown-item"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Eliminar</button></li>'+
-                //         '</ul>'+
-                //     '</div>';
-                // }},
+                {"targets": [6],"mData":'en_garantia'},
+                {"targets": [7],"mData":function (o) {
+                    return `
+                        <button class="dropdown-item" onclick="dao.modalGarantia(${o.id},${o.id_tienda},'${o.mueble}')">
+                            <i class="fas fa-shield-alt" style="color:#7C0A20"></i>&nbsp;Garantía
+                        </button>
+                    `;
+                }},
             ];
             _gen.setTableScrollEspecial2(table,columns,response)
         })
@@ -143,7 +142,43 @@ dao = {
             });
         })
     },
-
+    modalGarantia: function (id,tienda,mueble) {
+        document.getElementById('mueble_g').value = mueble ? mueble : '';
+        document.getElementById('id_mueble_g').value = id ? id : '';
+        document.getElementById('tienda_g').value = tienda ? tienda : '';
+        const modalAddGarantia = new bootstrap.Modal(document.getElementById('modalAddGarantia'));
+        modalAddGarantia.show();
+    },
+    postAddGarantia: function() {
+        var form = $('#frm_add_garantia')[0];
+        var data = new FormData(form);
+        $.ajax({
+            url:'/post-add-garantia',
+            type:'post',
+            data:data,
+            enctype:'multipart/form-data',
+            processData:false,
+            contentType:false,
+            cache:false,
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function name(response) {
+            Swal.fire({
+                icon:response.icon,
+                title:response.title,
+                text:response.text,
+            });
+            const tienda = document.getElementById('tiendas');
+            if (response.icon == 'success') {
+                closeModal('modalAddGarantia','frm_add_garantia','');
+                if (tienda) {
+                    dao.getData(tienda.value);
+                }else{
+                    dao.getData('');
+                }
+                
+            }
+        });
+    },
 };
 
 init = {
@@ -156,6 +191,20 @@ init = {
           messages: {
             proveedor : {required: 'Este campo es requerido'},
             fecha_ingreso : {required: 'Este campo es requerido'},
+          }
+        })
+    },
+    validateG: function(form){
+        _gen.validate(form,{
+          rules:{
+            mueble : {required: true},
+            cantidad : {required: true},
+            descripcion:{required:true},
+          },
+          messages: {
+            mueble : {required: 'Este campo es requerido'},
+            cantidad : {required: 'Este campo es requerido'},
+            descripcion : {required: 'Este campo es requerido'},
           }
         })
     },
@@ -249,6 +298,13 @@ $(document).ready(function () {
         const tienda = this.options[this.selectedIndex].text;
         document.getElementById('tituto_tienda').innerText = tienda;
         dao.getData(this.value);
+    });
+    $('#btn_ad_garantia').on('click', function (e) {
+        e.preventDefault();
+        init.validateG($('#frm_add_garantia'));
+        if ($('#frm_add_garantia').valid()) {
+        dao.postAddGarantia();
+        }
     });
     
 });

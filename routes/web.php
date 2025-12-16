@@ -54,8 +54,13 @@ Route::middleware('auth')->controller(InventarioController::class)->group(functi
     
 });
 // rutas de garantias
-Route::middleware('auth')->group(function(){
-    Route::get('/get-garantias',[GarantiasController::class,'getGarantias'])->name('getGarantias');
+Route::middleware('auth')->controller(GarantiasController::class)->group(function(){
+    Route::get('/get-garantias','getGarantias')->name('getGarantias');
+    Route::get('/get-data-muebles-by-tienda/{tienda?}','getMueblesByTienda')->name('getMueblesByTienda');
+    Route::post('/post-add-garantia','postAddGarantia')->name('postAddGarantia');
+    Route::get('/get-data-garantias/{tienda?}','getDataGarantias')->name('getDataGarantias');
+    Route::post('/terminar-garantia','postTerminarGarantia')->name('postTerminarGarantia');
+
 });
 // rutas de apartados
 Route::middleware('auth')->controller(ApartadosController::class)->group(function(){
@@ -105,17 +110,22 @@ Route::middleware(['auth'])->controller(CatalogoController::class)->group(functi
     Route::get('/get-data-cat-proveedores','getDataProveedores')->name('getDataProveedores');
     Route::get('/get-data-muebles','getDataMuebles')->name('getDataMuebles');
 });
+// rutas de caja 
 Route::middleware('auth')->controller(CajaController::class)->group(function(){
     Route::get('/get-index-cajas','getIndex')->name('getCajas');
     Route::get('/get-data-transacciones/{tienda?}','getData')->name('getData');
     Route::get('/get-resumen-corte/{tienda?}','getResumenCorte')->name('getResumenCorte');
     Route::post('/cerrar-corte','cerrarCorte')->name('cerrarCorte');
     Route::post('/post-add-egresos','postAddEgreso')->name('postAddEgreso');
-    Route::get('/get-index-historial-cajas','getHistorialCajas')->name('getHistorialCajas');
 });
+// rutas caja solo admin
 Route::middleware(['auth','role'])->controller(CajaController::class)->group(function(){
     Route::get('/get-data-historial-cajas','getDataHistorialCortes')->name('getDataHistorialCortes');
     Route::get('/get-detalles-corte/{id?}','getDetalleCorte')->name('getDetalleCorte');
+    Route::get('/get-index-cuenta','getManejoCuenta')->name('getManejoCuenta');
+    Route::get('/get-index-historial-cajas','getHistorialCajas')->name('getHistorialCajas');
+    Route::get('/get-data-cuenta/{tienda?}','getDataCuenta')->name('getDataCuenta');
+    Route::post('/post-add-ingresos','postAddIngresoCuenta')->name('postAddIngresoCuenta');
 });
 
 require __DIR__.'/auth.php';

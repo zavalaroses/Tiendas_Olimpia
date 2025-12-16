@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Transaccion;
 use App\Models\Corte;
+use App\Models\Cuenta;
 use Carbon\Carbon;
 use Log;
 
@@ -14,6 +15,9 @@ class CajaController extends Controller
 {
     public function getIndex(){
         return view('caja.index');
+    }
+    public function getManejoCuenta(){
+        return view('caja.indexCuenta');
     }
     public function getHistorialCajas(){
         return view('historial.index');
@@ -78,6 +82,10 @@ class CajaController extends Controller
 
         $totalGeneral = $ingresosTotales - $egresosTotales;
 
+        $efectivoApertura = Corte::where('tienda_id', $idTienda)
+            ->orderByDesc('id') // o fecha_cierre
+        ->value('saldo_final') ?? 0;
+
         return response()->json([
             'efectivo'        => $efectivo,
             'cuenta'          => $cuenta,
@@ -88,7 +96,8 @@ class CajaController extends Controller
             'totalEfectivo'   => $totalEfectivo,
             'totalCuenta'     => $totalCuenta,
             'totalGeneral'    => $totalGeneral,
-            'userRol'         => Auth::user()->rol
+            'userRol'         => Auth::user()->rol,
+            'efectivoApertura'=> $efectivoApertura
         ], 200);
     }
     public function cerrarCorte(Request $request){
@@ -111,6 +120,7 @@ class CajaController extends Controller
                 'efectivo_contado' => $request->efectivo_contado,      
                 'diferencia' =>$request->corte_diferencia ,           
                 'egresos' =>$request->salidas, 
+                'saldo_final'=>$request->saldoFinal
             ]);
             Transaccion::where('tienda_id',$idTienda)->whereNull('deleted_at')->update([
                 'corte_caja_id'=>$corte->id
@@ -148,6 +158,20 @@ class CajaController extends Controller
                 'descripcion'=>$request->descripcion,
                 'user_id'=>Auth::user()->id,
             ]);
+
+            if ($tipoPago == 'tarjeta') {
+                # agregamos el movimiento a la cuenta...
+                Cuenta::create([
+                    'tienda_id'=>$idTienda,     
+                    'user_id'=>Auth::user()->id,  
+                    'monto'=>$request->cantidad,  
+                    'tipo_movimiento'=>'salida',
+                    'concepto'=>'tarjeta',       
+                    'referencia'=> $request->descripcion,     
+                    'descripcion'=>$request->descripcion,           
+                ]); 
+            }
+
             DB::commit();
 
             $response = [
@@ -227,6 +251,81 @@ class CajaController extends Controller
         ];
         return response()->json($response,200);
         
+    }
+    public function getDataCuenta($tienda = null){
+        $idTienda = $tienda ?: Auth::user()->tienda_id;
+        $data = Cuenta::leftJoin('tiendas as t','t.id','=','movimientos_cuenta.tienda_id')
+            ->leftJoin('users as u','u.id','=','movimientos_cuenta.user_id')
+            ->select(
+                'movimientos_cuenta.id',
+                't.nombre as tienda',
+                'u.name as usuario',
+                'monto',
+                'tipo_movimiento',
+                'concepto',
+                'referencia',
+                'descripcion',
+                'fecha_movimiento as fecha',
+            )
+            ->when($idTienda, function($q)use($idTienda){
+                $q->where('movimientos_cuenta.tienda_id',$idTienda);
+            })
+            ->orderBy('movimientos_cuenta.id','DESC')
+            ->get();
+
+        $entradas = Cuenta::where('tipo_movimiento','entrada')
+            ->when($idTienda, function($q)use($idTienda){
+                $q->where('tienda_id',$idTienda);
+            })
+        ->sum('monto');
+        $salidas = Cuenta::where('tipo_movimiento','salida')
+            ->when($idTienda, function($q)use($idTienda){
+                $q->where('tienda_id',$idTienda);
+            })
+        ->sum('monto');
+        $saldoCuenta = $entradas - $salidas;
+
+        $response = [
+            'data'=>$data,
+            'entradas'=>$entradas,
+            'salidas'=>$salidas,
+            'saldoCuenta'=>$saldoCuenta
+        ];
+
+        return response()->json($response,200);
+
+    }
+    public function postAddIngresoCuenta(Request $request){
+        try {
+            $request->validate([
+                'cantidad' => 'required|numeric',
+                'descripcion' => 'required',
+            ]);
+            DB::beginTransaction();
+
+            Cuenta::create([
+                'tienda_id'=>$request->tienda,     
+                'user_id'=>Auth::user()->id,  
+                'monto'=>$request->cantidad,  
+                'tipo_movimiento'=>'entrada',
+                'concepto'=>'ajuste',            
+                'descripcion'=>$request->descripcion,           
+            ]); 
+
+            DB::commit();
+
+            $response = [
+                'icon'=>'success',
+                'title'=>'Exito',
+                'text'=>'Ingreso realizado correctamente',
+            ];
+            return response()->json($response,200);
+
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
     }
 
 

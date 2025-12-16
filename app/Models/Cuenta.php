@@ -6,22 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Corte extends Model
+class Cuenta extends Model
 {
     use HasFactory;
     use SoftDeletes;
-
-    protected $table = 'cortes';
+    protected $table = 'movimientos_cuenta';
     protected $fillable = [
         'tienda_id',     
         'user_id',  
-        'total_efectivo',  
-        'total_cuenta',   
-        'total_general',          
-        'efectivo_contado',      
-        'diferencia',           
-        'egresos', 
-        'saldo_final',
+        'monto',  
+        'tipo_movimiento',
+        'concepto',       
+        'referencia',     
+        'descripcion',           
+        'fecha_movimiento', 
     ];
     protected $hidden = [
         'created_at',

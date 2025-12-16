@@ -42,7 +42,8 @@
                         <th scope="col">En inventario</th>
                         <th scope="col">Apartados</th>
                         <th scope="col">Por entregar</th>
-                        {{-- <th scope="col">Acciones</th> --}}
+                        <th scope="col">En garantia</th>
+                        <th scope="col">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -211,3 +211,16 @@ height: 30px;
   text-align: center !important;
   vertical-align: middle !important;
 }
+
+.dataTables_scrollBody {
+    overflow: visible !important;
+}
+
+.dataTables_scrollHead {
+    overflow: visible !important;
+}
+
+.dropdown-menu {
+    position: fixed !important;
+    z-index: 9999 !important;
+}

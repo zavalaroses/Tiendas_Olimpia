@@ -102,11 +102,13 @@ class InventarioController extends Controller
             $inventario = InventarioTienda::select(
                 'inventario_tienda.id',
                 't.nombre as tienda',
+                't.id as id_tienda',
                 'm.nombre as mueble',
                 'e.estatus as estatus',
                 'inventario_tienda.cantidad_stock',
                 'inventario_tienda.cantidad_apartados',
-                'inventario_tienda.por_entregar'
+                'inventario_tienda.por_entregar',
+                'inventario_tienda.en_garantia'
             )
             ->leftJoin('muebles as m','m.id','=','inventario_tienda.mueble_id')
             ->leftJoin('tiendas as t','t.id','=','inventario_tienda.tienda_id')

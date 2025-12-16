@@ -49,6 +49,8 @@ var dao = {
             type:'get',
             headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
+
+            document.getElementById('apertura').textContent = formatoMoneda(response.efectivoApertura);
             document.getElementById('efectivoI').textContent = formatoMoneda(response.efectivo);
             document.getElementById('efectivoC').textContent = formatoMoneda(response.cuenta);
 
@@ -74,15 +76,16 @@ var dao = {
             const egresosEf     = Number(response.egresosEfectivo) || 0;
             const egresosCt     = Number(response.egresosCuenta) || 0;
             const totalEf       = Number(response.totalEfectivo) || 0;
-            const apertura       = Number(response.apertura) || 0;
+            const apertura       = Number(response.efectivoApertura) || 0;
+            let totaEsperado = apertura + totalEf;
 
             // Llenamos el modal
             $("#corte_apertura").text(`$ ${apertura.toFixed(2)}`);
             $("#corte_ingresos_efectivo").text(`$ ${efectivo.toFixed(2)}`);
             $("#corte_ingresos_tarjeta").text(`$ ${cuenta.toFixed(2)}`);
             $("#corte_salidas").text(`$ ${(egresosEf).toFixed(2)}`);
-            $("#corte_efectivo_esperado").text(`$ ${totalEf.toFixed(2)}`);
-            $('#input_total').val(totalEf);
+            $("#corte_efectivo_esperado").text(`$ ${totaEsperado.toFixed(2)}`);
+            $('#input_total').val(totaEsperado);
 
             // Reiniciar campos del usuario
             $("#efectivo_contado").val("");
@@ -211,8 +214,9 @@ $(document).ready(function () {
         const contado = Number($(this).val()) || 0;
         let totalEfectivo = Number($('#input_total').val()) || 0;
         const diferencia = contado - totalEfectivo;
-
+        
         $("#corte_diferencia").text("$ " + diferencia.toFixed(2));
+        $("#diferencia").val(diferencia);
 
         if (diferencia === 0) {
             $("#corte_diferencia").removeClass("text-danger").addClass("text-success");
@@ -225,6 +229,9 @@ $(document).ready(function () {
         const tienda = document.getElementById('tiendas');
         init.validateCerrarCorte($('#frm_cierre_corte'));
         if ($('#frm_cierre_corte').valid()) {
+            let total = Number($('#input_total').val());
+            let diferencia = Number($("#diferencia").val()) || 0;
+            let saldo_final = total + diferencia;
             
             let dataValues = {
                 tienda_id: tienda ? tienda.value : '',
@@ -234,7 +241,8 @@ $(document).ready(function () {
                 salidas: Number($("#corte_salidas").text().replace(/[$,\s]/g, "")) || 0,
                 efectivo_esperado: Number($('#input_total').val()),
                 corte_diferencia: Number($("#corte_diferencia").text().replace(/[$,\s]/g, "")) || 0,
-                observaciones: $("#observaciones_corte").val()
+                observaciones: $("#observaciones_corte").val(),
+                saldoFinal: saldo_final
             };
             dao.cerrarCorte(dataValues);
         }
