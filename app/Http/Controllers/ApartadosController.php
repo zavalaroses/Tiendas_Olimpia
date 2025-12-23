@@ -123,14 +123,20 @@ class ApartadosController extends Controller
                 'descripcion'=>'Monto de anticipo',
                 'user_id'=>Auth::user()->id,
             ]);
-            if ($request->forma_pago != 'Efectivo') {
+            if ($request->forma_pago != 1) {
                 # agregamos el movimiento a la cuenta...
+                $transaccionRef = 2; // tarjeta
+                if ($request->forma_pago == 2) {
+                    $transaccionRef = 'tarjeta';
+                }elseif ($request->forma_pago == 3) {
+                    $transaccionRef = 'transferencia';
+                }
                 Cuenta::create([
                     'tienda_id'=>$idtienda,     
                     'user_id'=>Auth::user()->id,  
                     'monto'=>$request->anticipo,  
                     'tipo_movimiento'=>'entrada',
-                    'concepto'=>$request->forma_pago,       
+                    'concepto'=>$transaccionRef,       
                     'referencia'=> $transaccion,     
                     'descripcion'=>'Monto de anticipo',           
                 ]); 
@@ -230,14 +236,20 @@ class ApartadosController extends Controller
                 'user_id'=>Auth::user()->id,
             ]);
 
-            if ($request->forma_pago != 'efectivo') {
+            if ($request->forma_pago != 1) {
                 # agregamos el movimiento a la cuenta...
+                $transaccionRef = 2; // tarjeta
+                if ($request->forma_pago == 2) {
+                    $transaccionRef = 'tarjeta';
+                }elseif ($request->forma_pago == 3) {
+                    $transaccionRef = 'transferencia';
+                }
                 Cuenta::create([
                     'tienda_id'=>$idtienda,     
                     'user_id'=>Auth::user()->id,  
                     'monto'=>$request->adelanto,  
                     'tipo_movimiento'=>'entrada',
-                    'concepto'=>$request->forma_pago,       
+                    'concepto'=>$transaccionRef,       
                     'referencia'=> $transaccion,     
                     'descripcion'=>'Abono o adelanto',           
                 ]); 

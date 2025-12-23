@@ -227,15 +227,20 @@ class VentasController extends Controller
                 'descripcion'=>'Venta',
                 'user_id'=>Auth::user()->id,
             ]);
-
-            if ($request->forma_pago != 'Efectivo') {
+            if ($request->forma_pago != 1) {
                 # agregamos el movimiento a la cuenta...
+                $transaccionRef = 2; // tarjeta
+                if ($request->forma_pago == 2) {
+                    $transaccionRef = 'tarjeta';
+                }elseif ($request->forma_pago == 3) {
+                    $transaccionRef = 'transferencia';
+                }
                 Cuenta::create([
                     'tienda_id'=>$idtienda,     
                     'user_id'=>Auth::user()->id,  
                     'monto'=>$request->total,  
                     'tipo_movimiento'=>'entrada',
-                    'concepto'=>$request->forma_pago,       
+                    'concepto'=>$transaccionRef,       
                     'referencia'=> $transaccion,     
                     'descripcion'=>'Venta',           
                 ]); 
