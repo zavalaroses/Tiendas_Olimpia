@@ -106,14 +106,21 @@
                 <div class="summary">
                     <h3>Resumen del corte</h3>
                     <div class="summary-row"><span>Efectivo apertura</span><span id="apertura">$ 0.00</span></div>
-                    <div class="summary-row"><span>Ingresos (efectivo)</span><span id="efectivoI">$ 21,530.00</span></div>
-                    <div class="summary-row"><span>Ingresos (cuenta)</span><span id="efectivoC">$ 21,530.00</span></div>
-                    <div class="summary-row"><span>Egresos (efectivo)</span><span id="egresoE">$ 1,400.00</span></div>
-                    <div class="summary-row"><span>Egresos (cuenta)</span><span id="egresoC">$ 1,400.00</span></div>
-                    <div class="summary-row"><span>Total ingresos</span><span id="ingresoT">$ 1,400.00</span></div>
-                    <div class="summary-row"><span>Total egresos</span><span id="egresoT">$ 1,400.00</span></div>
-                    <div class="summary-row total"><span>Total general</span><span id="totalG">$ 19,130.00</span></div>
-
+                    <div class="summary-row"><span>Ingresos (efectivo)</span><span id="efectivoI"></span></div>
+                    @if (Auth::user()->rol == 1)
+                        <div class="summary-row"><span>Ingresos (cuenta)</span><span id="efectivoC"></span></div>
+                    @endif
+                    <div class="summary-row"><span>Egresos (efectivo)</span><span id="egresoE"></span></div>
+                    @if (Auth::user()->rol == 1)
+                        <div class="summary-row"><span>Egresos (cuenta)</span><span id="egresoC"></span></div>
+                    @endif
+                    
+                    @if(Auth::user()->rol == 1)
+                        <div class="summary-row"><span>Total ingresos</span><span id="ingresoT"></span></div>
+                        <div class="summary-row"><span>Total egresos</span><span id="egresoT"></span></div>
+                        <div class="summary-row total"><span>Total general</span><span id="totalG"></span></div>
+                    @endif
+                    
 
                     <div style="margin-top:12px;display:flex;gap:8px">
                         <button class="btn" id="btnCerrarCorte">Cerrar corte</button>
