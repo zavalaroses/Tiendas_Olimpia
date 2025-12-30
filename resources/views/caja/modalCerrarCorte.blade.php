@@ -31,11 +31,12 @@
                   <span>Ingresos en efectivo:</span>
                   <span id="corte_ingresos_efectivo">$ 0.00</span>
                 </div>
-      
-                <div class="summary-row d-flex justify-content-between mb-2">
-                  <span>Ingresos con tarjeta:</span>
-                  <span id="corte_ingresos_tarjeta">$ 0.00</span>
-                </div>
+                @if(Auth::user()->rol == 1)
+                  <div class="summary-row d-flex justify-content-between mb-2">
+                    <span>Ingresos con tarjeta:</span>
+                    <span id="corte_ingresos_tarjeta">$ 0.00</span>
+                  </div>
+                @endif
       
                 <div class="summary-row d-flex justify-content-between mb-2">
                   <span>Salidas de dinero:</span>

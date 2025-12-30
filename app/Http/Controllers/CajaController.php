@@ -36,6 +36,13 @@ class CajaController extends Controller
                 'u.name as usuario',
                 'movimientos_tienda.created_at as fecha'
             )
+            ->where(function($q){
+                if (Auth::user()->rol == 2) {
+                    # si es usuario tienga quitamos los gastos de la cuenta...
+                    $q->where('tipo_movimiento','!=','salida')
+                        ->orWhere('tipo_pago','!=','tarjeta');
+                }
+            })
             ->when($idTienda,function($q) use($idTienda){
                 $q->where('movimientos_tienda.tienda_id',$idTienda);
             })

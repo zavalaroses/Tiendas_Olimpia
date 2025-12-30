@@ -52,15 +52,16 @@ var dao = {
 
             document.getElementById('apertura').textContent = formatoMoneda(response.efectivoApertura);
             document.getElementById('efectivoI').textContent = formatoMoneda(response.efectivo);
-            document.getElementById('efectivoC').textContent = formatoMoneda(response.cuenta);
 
             document.getElementById('egresoE').textContent = formatoMoneda(response.egresosEfectivo);
-            document.getElementById('egresoC').textContent = formatoMoneda(response.egresosCuenta);
+            if (response.userRol == 1){
+                document.getElementById('efectivoC').textContent = formatoMoneda(response.cuenta);
+                document.getElementById('egresoC').textContent = formatoMoneda(response.egresosCuenta);
 
-            document.getElementById('ingresoT').textContent = formatoMoneda(response.ingresoTotal);
-            document.getElementById('egresoT').textContent = formatoMoneda(response.egresoTotal);
-
-            document.getElementById('totalG').textContent = formatoMoneda(response.totalGeneral);
+                document.getElementById('ingresoT').textContent = formatoMoneda(response.ingresoTotal);
+                document.getElementById('egresoT').textContent = formatoMoneda(response.egresoTotal);
+                document.getElementById('totalG').textContent = formatoMoneda(response.totalGeneral);
+            }
         });
     },
     getDataCerrarCorte: function (tienda) {
