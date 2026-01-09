@@ -1,3 +1,5 @@
+let totalMuebles = 0;
+let costoEnvio = 0;
 dao = {
     getData: function (tienda) {
         $.ajax({
@@ -102,7 +104,7 @@ dao = {
                 text:response.text,
             });
             if (response.icon == 'success') {
-                closeModal('modalAddApartados','frm_add_apartado','tbl_add_list_apartados');
+                cerrarModalVenta('modalAddApartados','frm_add_apartado','tbl_add_list_apartados');
                 let idT = tienda ? tienda.value : '';
                 dao.getData(idT);
             }
@@ -263,16 +265,22 @@ function addListaApartados() {
 
 };
 function actualizarTotalAlEliminar(subTotal) {
-    let totalActual = parseFloat(document.getElementById('total').value) || 0;
-    let newTotal = totalActual - subTotal;
-    if (newTotal < 0) newTotal = 0;
-    document.getElementById('total').value = newTotal.toFixed(2); 
+    totalMuebles -= Number(subTotal) || 0;
+    if (totalMuebles < 0) totalMuebles = 0;
+    recalcularTotalVenta();
+
+    // let totalActual = parseFloat(document.getElementById('total').value) || 0;
+    // let newTotal = totalActual - subTotal;
+    // if (newTotal < 0) newTotal = 0;
+    // document.getElementById('total').value = newTotal.toFixed(2); 
 }
 function calcularTotal(subTotal) {
-    let sub = parseFloat(subTotal);
-    let tot = document.getElementById('total').value && parseFloat(document.getElementById('total').value) > 0 ? parseFloat(document.getElementById('total').value) : 0;
-    let total = sub + parseFloat(tot);
-    document.getElementById('total').value = total;
+    totalMuebles += Number(subTotal) || 0;
+    recalcularTotalVenta();
+    // let sub = parseFloat(subTotal);
+    // let tot = document.getElementById('total').value && parseFloat(document.getElementById('total').value) > 0 ? parseFloat(document.getElementById('total').value) : 0;
+    // let total = sub + parseFloat(tot);
+    // document.getElementById('total').value = total;
 };
 function adelantoIsValid() {
     const total = parseFloat(document.getElementById('total')?.value || 0);
@@ -283,12 +291,36 @@ function adelantoIsValid() {
         return true;
     }
 }
+function recalcularTotalVenta(){
+    let totalFinal = totalMuebles + costoEnvio;
+    $('#total').val(totalFinal.toFixed(2));
+}
+function resetearVenta() {
+    totalMuebles = 0;
+    costoEnvio = 0;
+
+    // Limpia inputs relacionados
+    document.getElementById('total').value = '0.00';
+    
+    const envioInput = document.getElementById('envio');
+    if (envioInput) {
+        envioInput.value = '';
+    }
+}
+function cerrarModalVenta(modalId, formId, tableId) {
+    // Tu lógica actual
+    closeModal(modalId, formId, tableId);
+
+    // Reset de valores lógicos
+    resetearVenta();
+}
 $(document).ready(function () {
     dao.getData('');
     dao.getCatTiendas('tiendas','');
     $('#btnAddApartado').on('click', function (e) {
         e.preventDefault();
         dao.getCatMuebles('mueble','');
+        resetearVenta();
         let today = new Date().toLocaleDateString();
         document.getElementById('fecha').value = today;
         const modalAddApartados = new bootstrap.Modal(document.getElementById('modalAddApartados'));
@@ -344,6 +376,10 @@ $(document).ready(function () {
         const tienda = this.options[this.selectedIndex].text;
         document.getElementById('tituto_tienda').innerText = tienda;
         dao.getData(this.value);
+    });
+    $('#envio').on('change', function (e){
+        costoEnvio = Number(this.value) || 0;
+        recalcularTotalVenta();
     });
     
 });

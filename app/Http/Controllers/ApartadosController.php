@@ -48,6 +48,7 @@ class ApartadosController extends Controller
                 'producto.*' => 'required|string|max:255',
                 'cantidad' => 'required|array|min:1',
                 'cantidad.*' => 'required|numeric|min:1',
+                'envio' => 'nullable|numeric|min:0',
             ]);
             if (Auth::user()->tienda_id == null && !$request->id_tienda && $request->id_tienda == null) {
                 # code...
@@ -87,6 +88,7 @@ class ApartadosController extends Controller
                 'cliente_id'=>$idCliente,
                 'tienda_id'=>$idtienda,
                 'monto_anticipo'=>$request->anticipo,
+                'costo_envio' => $request->envio ?? 0,
                 'monto_restante'=>$restante,
                 'usuario_id'=>Auth::user()->id,
                 'fecha_apartado'=>Carbon::createFromFormat('d/m/Y', $request->fecha)->format('Y-m-d'),

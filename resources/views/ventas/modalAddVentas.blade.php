@@ -20,7 +20,11 @@
             <div class="modal-body">
                 <form class="row g-3" id="frm_add_venta" name="frm_add_venta">
                   <div class="row">
-                    <div class="col-md-8"></div>
+                    <div class="col-md-4">
+                      <label for="total">Total</label>
+                      <input type="text" id="total" name="total" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-4"></div>
                     <div class="col-md-4">
                       <label for="fecha_envio">Fecha de envio</label>
                       <input type="date" id="fecha_envio" name="fecha_envio" class="form-control">
@@ -51,8 +55,8 @@
                             <select name="chofer" id="chofer" class="form-control"></select>
                         </div>
                         <div class="col-md-4">
-                            <label for="total">Total</label>
-                            <input type="text" id="total" name="total" class="form-control" readonly>
+                          <label for="total">Costo de envio</label>
+                          <input type="number" id="envio" name="envio" class="form-control">
                         </div>
                         <div class="col-md-4">
                           <label for="fecha">Forma de pago</label>
