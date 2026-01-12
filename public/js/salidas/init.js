@@ -1,3 +1,5 @@
+let totalMuebles = 0;
+let costoEnvio = 0;
 dao = {
     getDataSalidas: function (tienda) {
         $.ajax({
@@ -429,17 +431,26 @@ function addListaMuebles() {
     calcularTotal(total);
 
 };
+function recalcularTotalVenta(){
+    let totalFinal = totalMuebles + costoEnvio;
+    $('#total').val(totalFinal.toFixed(2));
+}
 function calcularTotal(subTotal) {
-    let sub = parseFloat(subTotal);
-    let tot = document.getElementById('total').value && parseFloat(document.getElementById('total').value) > 0 ? parseFloat(document.getElementById('total').value) : 0;
-    let total = sub + parseFloat(tot);
-    document.getElementById('total').value = total;
+    totalMuebles += Number(subTotal) || 0;
+    recalcularTotalVenta();
+    // let sub = parseFloat(subTotal);
+    // let tot = document.getElementById('total').value && parseFloat(document.getElementById('total').value) > 0 ? parseFloat(document.getElementById('total').value) : 0;
+    // let total = sub + parseFloat(tot);
+    // document.getElementById('total').value = total;
 };
 function actualizarTotalAlEliminar(subTotal) {
-    let totalActual = parseFloat(document.getElementById('total').value) || 0;
-    let newTotal = totalActual - subTotal;
-    if (newTotal < 0) newTotal = 0;
-    document.getElementById('total').value = newTotal.toFixed(2); 
+    totalMuebles -= Number(subTotal) || 0;
+    if (totalMuebles < 0) totalMuebles = 0;
+    recalcularTotalVenta();
+    // let totalActual = parseFloat(document.getElementById('total').value) || 0;
+    // let newTotal = totalActual - subTotal;
+    // if (newTotal < 0) newTotal = 0;
+    // document.getElementById('total').value = newTotal.toFixed(2); 
 }
 $(document).ready(function () {
     dao.getDataSalidas('');
@@ -509,6 +520,10 @@ $(document).ready(function () {
         if ($('#frm_add_garantia').valid()) {
         dao.postAddGarantia();
         }
+    });
+    $('#envio').on('change', function (e){
+        costoEnvio = Number(this.value) || 0;
+        recalcularTotalVenta();
     });
 
 });

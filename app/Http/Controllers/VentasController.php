@@ -129,6 +129,7 @@ class VentasController extends Controller
                 'producto.*' => 'required|string|max:255',
                 'cantidad' => 'required|array|min:1',
                 'cantidad.*' => 'required|numeric|min:1',
+                'envio' => 'nullable|numeric|min:0',
             ]);
             if (Auth::user()->tienda_id == null && !$request->id_tienda && $request->id_tienda == null) {
                 # code...
@@ -166,6 +167,7 @@ class VentasController extends Controller
                 'monto_restante'=>0,
                 'usuario_id'=>Auth::user()->id,
                 'fecha_apartado'=>Carbon::now()->toDateString(),
+                'costo_envio' => $request->envio ?? 0,
             ]);
             for ($i=0; $i < count($request->id) ; $i++) { 
                 ApartadoMueble::create([
