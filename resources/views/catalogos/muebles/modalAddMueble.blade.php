@@ -20,26 +20,34 @@
             <div class="modal-body">
                 <form class="row g-3" id="frm_add_mueble" name="frm_add_mueble">
                     <div class="row">
-                        
-                        <div class="col-md-8">
-                            <label for="nombre" >Nombre</label>
-                            <input type="text" class="form-control" id="nombre" name="nombre">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="codigo">Codigo</label>
-                            <input type="text" name="codigo" id="codigo" class="form-control">
-                        </div>
-                        
-                        <div class="clear:both"></div>
 
-                        <div class="col-md-8">
-                            <label for="descripcion">Descripción</label>
-                            <input type="text" name="descripcion" id="descripcion" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="precio">Precio</label>
-                            <input type="text" name="precio" id="precio" class="form-control">
-                        </div>
+                      <div class="col-md-12">
+                          <label for="nombre" >Nombre</label>
+                          <input type="text" class="form-control" id="nombre" name="nombre">
+                      </div>
+
+
+                      <div class="col-md-4">
+                          <label for="codigo">Codigo</label>
+                          <input type="text" name="codigo" id="codigo" class="form-control">
+                      </div>
+                      <div class="col-md-4">
+                          <label for="precio">Precio venta</label>
+                          <input type="text" name="precio" id="precio" class="form-control">
+                      </div>
+                      <div class="col-md-4">
+                        <label for="compra">Precio compra</label>
+                        <input type="text" name="compra" id="compra" class="form-control">
+                      </div>
+                        
+                      <div class="clear:both"></div>
+                      
+
+                      <div class="col-md-12">
+                          <label for="descripcion">Descripción</label>
+                          <input type="text" name="descripcion" id="descripcion" class="form-control">
+                      </div>
+                        
 
                     </div>
                     

@@ -22,31 +22,7 @@ var _gen = {
         }
         }
     },
-    // logOut: function () {
-    //     Swal.fire({
-    //         icon:'question',
-    //         title: '¿Estás seguro de que quieres cerrar la sesión?',
-    //         showDenyButton: true,
-    //         confirmButtonText: 'Aceptar',
-    //         denyButtonText: `Cancelar`,
-    //       }).then((result) => {
-    //         /* Read more about isConfirmed, isDenied below */
-    //         if (result.isConfirmed) {
-    //             $.ajax({
-    //                 url: '/logout',
-    //                 type: 'POST',
-    //                 data: {
-    //                   action: 'logout'
-    //                 }, // Line A
-    //                 success: function() {
-    //                     console.log("Cerrando Session");
-    //                     window.location.href = "/login";
-    //                 }
-    //               });
-    //         }
-    //       })
-        
-    // },
+    
     notificacion: function (titulo, content, style) {
         if (style == 1) {
             var _c = '#739E73',
@@ -193,7 +169,6 @@ var _gen = {
         });
     },
   
-
     setTableB: function (
         tabla,
         columns,
@@ -282,96 +257,6 @@ var _gen = {
             },
         });
     },
-
-    // setTableScroll: function (
-    //     tabla,
-    //     columnDefs,
-    //     datelist,
-    //     height,
-    //     pagination,
-    //     order
-    // ) {
-    //     height = height;
-    //     pagination = pagination || 50;
-    //     order = order || [];
-
-    //     var responsiveHelper_datatable_tabletools = undefined;
-    //     var breakpointDefinition = {
-    //         tablet: 640,
-    //         phone: 480,
-    //     };
-    //     if ($.fn.DataTable.isDataTable(tabla)) {
-    //         tabla.DataTable().clear().rows.add(datelist);
-    //     } else {
-    //         tabla.DataTable({
-    //             //	dom: "<'dt-toolbar'<'col-xs-12 col-sm-6'f><'col-sm-6 col-xs-6 hidden-xs text-right'T>r>"+
-    //             dom:
-    //                 "<'dt-toolbar'<'col-xs-12 col-sm-12'f><'col-sm-6 col-xs-12 hidden-xs text-right'>r>" +
-    //                 't' +
-    //                 "<'dt-toolbar-footer'<'col-sm-12 col-xs-12 hidden-xs'i><'col-sm-12 col-xs-12'p>>",
-    //             tableTools: {
-    //                 aButtons: [
-    //                     {
-    //                         sExtends: 'xls',
-    //                         sButtonText: 'Descargar a Excel',
-    //                         sFileName: '*.xls',
-    //                     },
-    //                 ],
-    //                 sSwfPath:
-    //                     'assets/js/plugin/datatables/swf/copy_csv_xls_pdf.swf',
-    //             },
-    //             language: {
-    //                 info: 'Página _PAGE_ de _PAGES_',
-    //                 infoEmpty: 'No hay registros disponibles',
-    //                 zeroRecords: 'No hay registros disponibles',
-    //                 infoFiltered: '(filtrados de _MAX_ registros)',
-    //                 search: "Búsqueda:",
-    //                 infoThousands: ",",
-    //                 loadingRecords: "Cargando...",
-    //                 buttonText: "Imprimir",
-    //                 paginate: {
-    //                     first: "Primero",
-    //                     last: "Último",
-    //                     next: "Siguiente",
-    //                     previous: "Anterior",
-    //                 },
-    //             },
-    //             pageLength: pagination,
-    //             scrollX: true,
-    //             order: order,
-    //             scrollY: height + 'px',
-    //             data: datelist,
-    //             responsive: true,
-    //             columnDefs: columnDefs,
-    //             preDrawCallback: function () {
-    //                 if (!responsiveHelper_datatable_tabletools) {
-    //                     responsiveHelper_datatable_tabletools = new ResponsiveDatatablesHelper(
-    //                         tabla,
-    //                         breakpointDefinition
-    //                     );
-    //                 }
-    //             },
-    //             rowCallback: function (nRow) {
-    //                 responsiveHelper_datatable_tabletools.createExpandIcon(
-    //                     nRow
-    //                 );
-    //             },
-    //             drawCallback: function (oSettings) {
-    //                 responsiveHelper_datatable_tabletools.respond();
-    //                 tabla.$('[data-toggle="popover"]').popover();
-    //                 tabla.$('[data-toggle="tooltip"]').tooltip();
-    //             },
-    //             initComplete: function () {
-    //                 otable = tabla.DataTable().columns.adjust().draw();
-    //             },
-    //         });
-    //     }
-    //     otable = tabla.DataTable().columns.adjust().draw();
-    //     otable.$('[data-toggle="popover"]').popover();
-    // },
-    
-    
-   
 
     setTableScrollEspecial: function (
         tabla,
@@ -932,6 +817,51 @@ var _gen = {
         menu += '</ul></div>';
 
         return menu;
+    },
+    error: function (error) {
+        console.log("error-",error);
+        if (error.status == 401)
+        Swal.fire({
+            icon: 'warning',
+            title: 'Movimiento no autorizado',
+            text: 'No cuenta con los permisos suficientes para realizar esta acción',
+            showConfirmButton: true,
+        });
+        else if (error.status == 500)
+        Swal.fire({
+            icon: 'error',
+            title: 'Error del servidor',
+            text: 'Ha ocurrido un error interno. Intentelo más tarde o contacte a soporte técnico',
+            showConfirmButton: true,
+        });
+        else if (error.status == 422)
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'El documento contiene campos vacios',
+            showConfirmButton: true,
+        });
+        else if (error.status == 423)
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'El documento esta vacio',
+            showConfirmButton: true,
+        });
+        else if (error.status == 424)
+        Swal.fire({
+            icon: 'error',
+            title: 'Error del servidor',
+            text: 'El Proyecto Ingresado no existe',
+            showConfirmButton: true,
+        });
+        else if (error.status == 404)
+        Swal.fire({
+            icon: 'error',
+            title: 'Error del servidor',
+            text: 'La ruta ingresada no existe',
+            showConfirmButton: true,
+        });
     },
 };
 //Funcion para Serializar Objeto

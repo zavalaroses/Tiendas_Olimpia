@@ -28,7 +28,8 @@
                         <th scope="col">Nombre</th>
                         <th scope="col">Codigo</th>
                         <th scope="col">Descipción</th>
-                        <th scope="col">Precio</th>
+                        <th scope="col">Precio venta</th>
+                        <th scope="col">Precio compra</th>
                         <th scope="col">Acciones</th>
                     </tr>
                 </thead>

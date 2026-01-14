@@ -212,19 +212,22 @@ class CatalogoController extends Controller
         return response()->json($response,200);
     }
     public function postAddMuble(Request $request){
+        $request->validate([
+            'nombre'=>['required','string','max:255'],
+            'codigo'=>['required','string','max:255'],
+            'descripcion'=>['nullable','string','max:255'],
+            'precio'=>['required','numeric','min:0'],
+            'compra'=>['nullable','numeric','min:0']
+        ]);
         try {
             DB::beginTransaction();
-            $request->validate([
-                'nombre'=>['required','string','max:255'],
-                'codigo'=>['required','string','max:255'],
-                // 'descripcion'=>['required','string','max:255'],
-                'precio'=>['required']
-            ]);
+            
             $mueble = Mueble::create([
                 'nombre'=>$request->nombre,
                 'codigo'=>$request->codigo,
                 'descripcion'=>$request->descripcion ? $request->descripcion : null,
-                'precio'=>$request->precio
+                'precio'=>$request->precio,
+                'precio_compra'=>$request->compra ?? 0
             ]);
             DB::commit();
             $response = [
@@ -246,7 +249,7 @@ class CatalogoController extends Controller
     }
     public function getDataMuebles(){
         try {
-            $muebles = Mueble::All();
+            $muebles = Mueble::where('estatus','!=','InActivo')->get();
             return response()->json($muebles,200);
         } catch (\Throwable $th) {
             Log::debug('exp '.$th->getMessage());
@@ -273,20 +276,23 @@ class CatalogoController extends Controller
         }
     }
     public function postUpdateMueble(Request $request){
+        $request->validate([
+            'id'=>['required'],
+            'nombre'=>['required','string','max:255'],
+            'codigo'=>['required','string','max:255'],
+            'descripcion'=>['nullable','string','max:255'],
+            'precio'=>['required','numeric','min:0'],
+            'compra'=>['nullable','numeric','min:0']
+        ]);
         try {
             DB::beginTransaction();
-            $request->validate([
-                'id'=>['required'],
-                'nombre'=>['required','string','max:255'],
-                'codigo'=>['required','string','max:255'],
-                'descripcion'=>['required','string','max:255'],
-                'precio'=>['required'],
-            ]);
+            
             Mueble::where('id',$request->id)->update([
                 'nombre'=>$request->nombre,
                 'codigo'=>$request->codigo,
                 'descripcion'=>$request->descripcion,
-                'precio'=>$request->precio
+                'precio'=>$request->precio,
+                'precio_compra'=>$request->compra ?? 0,
             ]);
             DB::commit();
             $response = [

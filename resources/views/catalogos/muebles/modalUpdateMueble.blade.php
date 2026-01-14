@@ -21,29 +21,31 @@
                 <form class="row g-3" id="frm_update_mueble" name="frm_update_mueble">
                     <input type="hidden" name="id" id="id_ed">
                     <div class="row">
-                        
-                        <div class="col-md-8">
-                            <label for="nombre" >Nombre</label>
-                            <input type="text" class="form-control" id="nombre_ed" name="nombre">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="codigo">Codigo</label>
-                            <input type="text" name="codigo" id="codigo_ed" class="form-control">
-                        </div>
-                        
-                        <div class="clear:both"></div>
+                      <div class="col-md-12">
+                          <label for="nombre" >Nombre</label>
+                          <input type="text" class="form-control" id="nombre_ed" name="nombre">
+                      </div>
 
-                        <div class="col-md-8">
-                            <label for="descripcion">Descripción</label>
-                            <input type="text" name="descripcion" id="descripcion_ed" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="precio">Precio</label>
-                            <input type="text" name="precio" id="precio_ed" class="form-control">
-                        </div>
+                      <div class="col-md-4">
+                          <label for="precio">Precio venta</label>
+                          <input type="number" name="precio" id="precio_ed" class="form-control">
+                      </div>
 
+                      <div class="col-md-4">
+                        <label for="compra">Precio compra</label>
+                        <input type="number" name="compra" id="precio_compra_ed" class="form-control">
+                      </div>
+
+                      <div class="col-md-4">
+                          <label for="codigo">Codigo</label>
+                          <input type="text" name="codigo" id="codigo_ed" class="form-control">
+                      </div>
+
+                      <div class="col-md-12">
+                          <label for="descripcion">Descripción</label>
+                          <input type="text" name="descripcion" id="descripcion_ed" class="form-control">
+                      </div>
                     </div>
-                    
                 </form>
             </div>
             <div class="modal-footer" style="display: flex; justify-content:center">

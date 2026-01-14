@@ -37,7 +37,8 @@ dao = {
                 {"targets": [2],"mData":'codigo'},
                 {"targets": [3],"mData":'descripcion'},
                 {"targets": [4],"mData":'precio'},
-                {"aTargets": [5], "mData" : function(o){
+                {"targets": [5],"mData":'precio_compra'},
+                {"aTargets": [6], "mData" : function(o){
                     return '<button class="btn" onclick="dao.getDataEditar(' + o.id + ')"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i></button>'+
                         '<button class="btn" onclick="dao.eliminar(' + o.id +')"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i></button></li>';
                 }},
@@ -82,7 +83,9 @@ dao = {
                 closeModal('modalUpdateMueble','frm_update_mueble','');
                 dao.getData();
             }
-        })
+        }).fail(function (error){
+            _gen.error(error);
+        });
     },
     eliminar:function (id) {
         Swal.fire({
