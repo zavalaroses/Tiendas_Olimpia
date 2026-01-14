@@ -70,6 +70,7 @@ Route::middleware('auth')->controller(ApartadosController::class)->group(functio
     Route::get('/get-data-apartados/{tienda?}','getDataApartados')->name('getDataApartados');
     Route::get('/get-cantidad-restante/{id}','getMontoRestante')->name('getMontoRestante');
     Route::post('/post-pagar-adelanto','postAddAdelanto')->name('postAddAdelanto');
+    Route::post('/post-add-pedido-especial','postAddPedido')->name('postAddPedido');
 });
 // rutas de ventas
 Route::middleware('auth')->controller(VentasController::class)->group(function(){

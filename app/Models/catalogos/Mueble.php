@@ -16,7 +16,9 @@ class Mueble extends Model
         'nombre',
         'codigo',
         'descripcion',
-        'precio'
+        'precio',
+        'precio_compra',
+        'estatus'
     ];
     protected $hidden = [
         'created_at',

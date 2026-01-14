@@ -87,6 +87,7 @@ dao = {
         const tienda = document.getElementById('tiendas');
         if (tienda) {
             data.append("id_tienda", tienda.value);
+            
         }
         $.ajax({
             url:'/post-add-apartado',
@@ -104,10 +105,12 @@ dao = {
                 text:response.text,
             });
             if (response.icon == 'success') {
-                cerrarModalVenta('modalAddApartados','frm_add_apartado','tbl_add_list_apartados');
+                closeModal('modalAddApartados','frm_add_apartado','tbl_add_list_apartados');
                 let idT = tienda ? tienda.value : '';
                 dao.getData(idT);
             }
+        }).fail(function (error){
+            _gen.error(error);
         });
     },
     pagar: function (id) {
@@ -121,36 +124,40 @@ dao = {
             document.getElementById('id_apartado').value = id;
             const modalPagarAdelanto = new bootstrap.Modal(document.getElementById('modalPagarAdelanto'));
             modalPagarAdelanto.show();    
+        }).fail(function (error){
+            _gen.error(error);
         });
     },
     postAbonar: function () {
-      var form = $('#frm_pagar_adelanto')[0];
-      var data = new FormData(form);
-      const tienda = document.getElementById('tiendas');
+        var form = $('#frm_pagar_adelanto')[0];
+        var data = new FormData(form);
+        const tienda = document.getElementById('tiendas');
         if (tienda) {
             data.append("id_tienda", tienda.value);
         }
-      $.ajax({
-        url:'/post-pagar-adelanto',
-        type:'post',
-        data:data,
-        enctype:"multipart/form-data",
-        processData:false,
-        contentType:false,
-        cache:false,
-        headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
-      }).done(function (response) {
-        Swal.fire({
-            icon:response.icon,
-            title:response.title,
-            text:response.text,
+        $.ajax({
+            url:'/post-pagar-adelanto',
+            type:'post',
+            data:data,
+            enctype:"multipart/form-data",
+            processData:false,
+            contentType:false,
+            cache:false,
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            Swal.fire({
+                icon:response.icon,
+                title:response.title,
+                text:response.text,
+            });
+            if (response.icon == 'success') {
+                closeModal('modalPagarAdelanto','frm_pagar_adelanto','');
+                let idTienda = tienda ? tienda.value : '';
+                dao.getData(idTienda);
+            }
+        }).fail(function (error){
+            _gen.error(error);
         });
-        if (response.icon == 'success') {
-            closeModal('modalPagarAdelanto','frm_pagar_adelanto','');
-            let idTienda = tienda ? tienda.value : '';
-            dao.getData(idTienda);
-        }
-      })
     },
     getCatTiendas: function (field,id) {
         $.ajax({
@@ -171,6 +178,49 @@ dao = {
             });
         })
     },
+    postAddPedido: function () {
+        console.log('llego a esta accion')
+        var form = $('#frm_add_pedido')[0];
+        let data = new FormData(form);
+        const tienda = document.getElementById('tiendas');
+        if (tienda) {
+            if (tienda.value != '' && tienda.value != null) {
+                data.append("id_tienda", tienda.value);
+            }else{
+                Swal.fire({
+                    icon:'warning',
+                    title:'Advertencia',
+                    text:'Es necesario seleccionar una tienda.',
+                    allowOutsideClick:true,
+                    confirmButtonText:'Listo',
+                });
+            } 
+        }
+        $.ajax({
+            url:'/post-add-pedido-especial',
+            type:'post',
+            data:data,
+            enctype:"multipart/form-data",
+            processData:false,
+            contentType:false,
+            cache:false,
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            Swal.fire({
+                icon:response.icon,
+                title:response.title,
+                text:response.text,
+            });
+            if (response.icon == 'success') {
+                cerrarModalVenta('modalAddPedido','frm_add_pedido','');
+                let idT = tienda ? tienda.value : '';
+                dao.getData(idT);
+            }
+        }).fail(function (error){
+            _gen.error(error);
+        });
+
+    }
 
 };
 
@@ -197,6 +247,35 @@ init = {
             fecha : {required: 'Este campo es requerido'},
             forma_pago : {required: 'Este campo es requerido'},
           }
+        })
+    },
+    validatePedido: function (form){
+        _gen.validate(form,{
+            rules: {
+                nombre: {required:true},
+                apellidos:{required:true},
+                telefono:{required:true},
+                direccion:{required:true},
+                mueble:{required:true},
+                precio:{required:true},
+                descripcion:{required:true},
+                cantidad:{required:true},
+                anticipo:{required:true},
+                forma_pago:{required:true},
+            },
+            messages:{
+                nombre: {required:'Este campo es requerido'},
+                apellidos:{required:'Este campo es requerido'},
+                telefono:{required:'Este campo es requerido'},
+                direccion:{required:'Este campo es requerido'},
+                mueble:{required:'Este campo es requerido'},
+                precio:{required:'Este campo es requerido'},
+                descripcion:{required:'Este campo es requerido'},
+                cantidad:{required:'Este campo es requerido'},
+                anticipo:{required:'Este campo es requerido'},
+                forma_pago:{required:'Este campo es requerido'},
+            }
+
         })
     },
     validateAdelanto: function (form) {
@@ -268,19 +347,10 @@ function actualizarTotalAlEliminar(subTotal) {
     totalMuebles -= Number(subTotal) || 0;
     if (totalMuebles < 0) totalMuebles = 0;
     recalcularTotalVenta();
-
-    // let totalActual = parseFloat(document.getElementById('total').value) || 0;
-    // let newTotal = totalActual - subTotal;
-    // if (newTotal < 0) newTotal = 0;
-    // document.getElementById('total').value = newTotal.toFixed(2); 
 }
 function calcularTotal(subTotal) {
     totalMuebles += Number(subTotal) || 0;
     recalcularTotalVenta();
-    // let sub = parseFloat(subTotal);
-    // let tot = document.getElementById('total').value && parseFloat(document.getElementById('total').value) > 0 ? parseFloat(document.getElementById('total').value) : 0;
-    // let total = sub + parseFloat(tot);
-    // document.getElementById('total').value = total;
 };
 function adelantoIsValid() {
     const total = parseFloat(document.getElementById('total')?.value || 0);
@@ -314,6 +384,14 @@ function cerrarModalVenta(modalId, formId, tableId) {
     // Reset de valores lógicos
     resetearVenta();
 }
+function calcularTotalPedido (){
+    let envio = $('#envio_pedido').val() != '' ? parseFloat($('#envio_pedido').val()) : 0;
+    let precio = $('#precio_mueble').val() != '' ? parseFloat($('#precio_mueble').val()) : 0;
+    let cantidad = $('#cantidad_mueble').val() != '' ? parseFloat($('#cantidad_mueble').val()) : 1;
+    let total = ( precio * cantidad ) + envio;
+    $('#total_pedido').val(total);
+}
+
 $(document).ready(function () {
     dao.getData('');
     dao.getCatTiendas('tiendas','');
@@ -380,6 +458,39 @@ $(document).ready(function () {
     $('#envio').on('change', function (e){
         costoEnvio = Number(this.value) || 0;
         recalcularTotalVenta();
+    });
+    $('#btnAddPedido').on('click', function (e) {
+        e.preventDefault();
+        let today = new Date().toLocaleDateString();
+        document.getElementById('fecha_pedido').value = today;
+        const modalAddPedido = new bootstrap.Modal(document.getElementById('modalAddPedido'));
+        modalAddPedido.show();
+    });
+    $('#btn_add_pedido_apartado').on('click', function (e) {
+        e.preventDefault();
+        init.validatePedido($('#frm_add_pedido'));
+        if ($('#frm_add_pedido').valid()) {
+            console.log('ya es valido');
+            dao.postAddPedido();
+        }
+    });
+    $('#envio_pedido').on('change', function (e) {
+        e.preventDefault();
+        calcularTotalPedido();
+    });
+    $('#precio_mueble').on('change', function (e) {
+        e.preventDefault();
+        if (this.value < 0) {
+            this.value = this.value * -1
+        }
+        calcularTotalPedido();
+    });
+    $('#cantidad_mueble').on('change', function (e) {
+        e.preventDefault();
+        if (this.value < 1) {
+            this.value = 1;
+        }
+        calcularTotalPedido();
     });
     
 });

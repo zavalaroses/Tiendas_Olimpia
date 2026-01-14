@@ -10,15 +10,16 @@
     </div>
  <!-- Content here -->
      <div class="row">
-         <div class="col-md-10">
+         <div class="col-md-8">
             @if(Auth::user()->rol == 1)
                <div class="col-md-4">
                    <select name="tiendas" id="tiendas" class="form-control"></select> 
                </div>
            @endif
          </div>
-         <div class="col-md-2">
-             <button id="btnAddApartado" type="button" name="btnAddApartado" class="btnNuevoUsuario">Nuevo Apartado</button>
+         <div class="col-md-4">
+            <button id="btnAddPedido" type="button" name="btnAddPedido" class="btnNuevoUsuario">+ Pedido</button>
+            <button id="btnAddApartado" type="button" name="btnAddApartado" class="btnNuevoUsuario">Nuevo Apartado</button>
          </div>
      </div>
      <br>
@@ -53,4 +54,5 @@
 <script src="/js/apartados/init.js"></script>
 @include('apartados.modalAddApartados')
 @include('apartados.modalPagarAdelanto')
+@include('apartados.modalAddPedido')
 @endsection
