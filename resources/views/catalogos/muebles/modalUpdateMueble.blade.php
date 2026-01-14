@@ -39,6 +39,7 @@
                       <div class="col-md-4">
                           <label for="codigo">Codigo</label>
                           <input type="text" name="codigo" id="codigo_ed" class="form-control">
+                          <input type="hidden" id="estatus_ed">
                       </div>
 
                       <div class="col-md-12">
