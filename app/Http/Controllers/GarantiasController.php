@@ -51,7 +51,7 @@ class GarantiasController extends Controller
                 # validamos que la cantidad a garantia sea menor o igual a la cantidad de muebles vendidos...
                 $exist = DB::table('salidas as s')
                     ->join('salida_producto as sp','sp.id_salida','=','s.id')
-                    ->where('sp.id',$request->id_salida)
+                    ->where('s.id',$request->id_salida)
                     ->where('sp.id_mueble',$request->id_mueble)
                     ->where('sp.cantidad','>=',$request->cantidad)
                     ->whereNull('sp.deleted_at')
