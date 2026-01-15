@@ -17,7 +17,7 @@ dao = {
                 {"targets": [6],"mData":'en_garantia'},
                 {"targets": [7],"mData":function (o) {
                     return `
-                        <button class="dropdown-item" onclick="dao.modalGarantia(${o.id},${o.id_tienda},'${o.mueble}')">
+                        <button class="dropdown-item" onclick="dao.modalGarantia(${o.id_mueble},${o.id_tienda},'${o.mueble}')">
                             <i class="fas fa-shield-alt" style="color:#7C0A20"></i>&nbsp;Garantía
                         </button>
                     `;
