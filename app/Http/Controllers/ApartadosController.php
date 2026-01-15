@@ -105,10 +105,18 @@ class ApartadosController extends Controller
                     'tienda_id'=>$idtienda,
                     'mueble_id'=>$request->id[$i],
                 ])->first();
-
-                    # restamos inventario no importa si dan negativos si existe la sobreventa...
-                    $inventario->decrement('cantidad_stock',$request->cantidad[$i]);
-                    $inventario->increment('cantidad_apartados',$request->cantidad[$i]);
+                if (!$inventario) {
+                    # si no existe este registro en inventario lo agregamos en cero para despues restarlo...
+                   $inventario = InventarioTienda::create([
+                        'tienda_id'=>$idtienda,
+                        'mueble_id'=>$request->id[$i],
+                        'estatus_id'=>1,
+                        'cantidad_stock'=>0
+                    ]);
+                }
+                # restamos inventario no importa si dan negativos si existe la sobreventa...
+                $inventario->decrement('cantidad_stock',$request->cantidad[$i]);
+                $inventario->increment('cantidad_apartados',$request->cantidad[$i]);
                 
             }
             // registramos la transaccion en la caja

@@ -40,7 +40,6 @@ class InventarioController extends Controller
                 ];
                 return response()->json($response,200);
             }
-            Log::debug($request);
             $idTienda = $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id;
             $proveedor = DB::table('proveedores')->where('id',$request->proveedor)->whereNull('deleted_at')->value('nombre');
             $horaMx = Carbon::now('America/Mexico_City')->format('H:i:s');
@@ -61,7 +60,6 @@ class InventarioController extends Controller
                     'cantidad' => $request->cantidad[$index],
                 ]);
                 $inventarioExist = InventarioTienda::where('tienda_id',$idTienda)->where('mueble_id',$muebleId)->exists();
-                Log::debug(json_encode($inventarioExist));
                 if ($inventarioExist) {
                     $afectedRow = InventarioTienda::where([
                         'tienda_id'=>$idTienda,
