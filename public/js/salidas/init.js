@@ -227,7 +227,7 @@ dao = {
                 text:response.text,
             });
             if (response.icon == 'success') {
-                closeModal('modalAddVenta','frm_add_venta','tbl_producto_venta');
+                cerrarModalVenta('modalAddVenta','frm_add_venta','tbl_producto_venta');
                 let idT = tienda ? tienda.value : '';
                 dao.getDataSalidas(idT);
             }
@@ -438,19 +438,30 @@ function recalcularTotalVenta(){
 function calcularTotal(subTotal) {
     totalMuebles += Number(subTotal) || 0;
     recalcularTotalVenta();
-    // let sub = parseFloat(subTotal);
-    // let tot = document.getElementById('total').value && parseFloat(document.getElementById('total').value) > 0 ? parseFloat(document.getElementById('total').value) : 0;
-    // let total = sub + parseFloat(tot);
-    // document.getElementById('total').value = total;
 };
 function actualizarTotalAlEliminar(subTotal) {
     totalMuebles -= Number(subTotal) || 0;
     if (totalMuebles < 0) totalMuebles = 0;
     recalcularTotalVenta();
-    // let totalActual = parseFloat(document.getElementById('total').value) || 0;
-    // let newTotal = totalActual - subTotal;
-    // if (newTotal < 0) newTotal = 0;
-    // document.getElementById('total').value = newTotal.toFixed(2); 
+}
+function cerrarModalVenta(modalId, formId, tableId) {
+    // Tu lógica actual
+    closeModal(modalId, formId, tableId);
+
+    // Reset de valores lógicos
+    resetearVenta();
+}
+function resetearVenta() {
+    totalMuebles = 0;
+    costoEnvio = 0;
+
+    // Limpia inputs relacionados
+    document.getElementById('total').value = '0.00';
+    
+    const envioInput = document.getElementById('envio');
+    if (envioInput) {
+        envioInput.value = '';
+    }
 }
 $(document).ready(function () {
     dao.getDataSalidas('');
@@ -463,6 +474,7 @@ $(document).ready(function () {
     });
     $('#btnNuevaVenta').on('click', function (e) {
         e.preventDefault();
+        resetearVenta();
 
         const tienda = document.getElementById('tiendas');
         if (tienda) {
