@@ -131,14 +131,15 @@ dao = {
             dataType:'json',
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
+            let {muebles} = response;
             var select = $('#'+field);
             select.html('');
             select.append(new Option('Selecciona una opción'));
-            response.map(function (val,i) {
+            muebles.map(function (val,i) {
                 if (id != '' && id == val.id) {
-                    select.append(new Option(response[i].nombre,response[i].id, true, true));
+                    select.append(new Option(muebles[i].nombre,muebles[i].id, true, true));
                 }else{
-                    select.append(new Option(response[i].nombre,response[i].id, false, false));
+                    select.append(new Option(muebles[i].nombre,muebles[i].id, false, false));
                 }
             });
         })

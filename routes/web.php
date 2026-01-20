@@ -95,7 +95,7 @@ Route::middleware(['auth','role'])->controller(CatalogoController::class)->group
     Route::get('/get-chofer-to-edit','getChoferById')->name('getChoferById');
     Route::post('/post-update-chofer','postAddChofer')->name('postAddChofer');
     Route::post('/delete-cat-chofer','postDeleteCatChofer')->name('postDeleteCatChofer');
-    Route::get('/get-muebles','getMuebles')->name('getMuebles');
+
     Route::post('/post-add-mueble','postAddMuble')->name('postAddMuble');
     Route::get('/get-mueble-by-id/{id?}','getMuebleByid')->name('getMuebleByid');
     Route::post('/post-update-mueble','postUpdateMueble')->name('postUpdateMueble');
@@ -110,6 +110,7 @@ Route::middleware(['auth','role'])->controller(CatalogoController::class)->group
 Route::middleware(['auth'])->controller(CatalogoController::class)->group(function(){
     Route::get('/get-data-cat-proveedores','getDataProveedores')->name('getDataProveedores');
     Route::get('/get-data-muebles','getDataMuebles')->name('getDataMuebles');
+    Route::get('/get-muebles','getMuebles')->name('getMuebles');
 });
 // rutas de caja 
 Route::middleware('auth')->controller(CajaController::class)->group(function(){

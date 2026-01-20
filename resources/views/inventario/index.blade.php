@@ -39,6 +39,7 @@
                         <th scope="col">ID</th>
                         <th scope="col">Tienda</th>
                         <th scope="col">Mueble</th>
+                        <th scope="col">Precio</th>
                         <th scope="col">En inventario</th>
                         <th scope="col">Apartados</th>
                         <th scope="col">Por entregar</th>

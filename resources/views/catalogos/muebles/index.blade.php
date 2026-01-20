@@ -9,7 +9,9 @@
      <div class="row">
          <div class="col-md-10"></div>
          <div class="col-md-2">
-             <button id="btnAddMueble" type="button" name="btnAddMueble" class="btnNuevoUsuario">Agregar</button>
+            @if(Auth::user()->rol == 1)
+                <button id="btnAddMueble" type="button" name="btnAddMueble" class="btnNuevoUsuario">Agregar</button>
+            @endif
          </div>
      </div>
      <br>
@@ -29,8 +31,10 @@
                         <th scope="col">Codigo</th>
                         <th scope="col">Descipción</th>
                         <th scope="col">Precio venta</th>
-                        <th scope="col">Precio compra</th>
-                        <th scope="col">Acciones</th>
+                        @if(Auth::user()->rol == 1)
+                            <th scope="col">Precio compra</th>
+                            <th scope="col">Acciones</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
