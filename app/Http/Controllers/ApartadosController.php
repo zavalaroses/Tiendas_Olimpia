@@ -143,7 +143,7 @@ class ApartadosController extends Controller
                     'monto'=>$request->anticipo,  
                     'tipo_movimiento'=>'entrada',
                     'concepto'=>$transaccionRef,       
-                    'referencia'=> $transaccion,     
+                    'referencia'=> $transaccion->id,     
                     'descripcion'=>'Monto de anticipo',           
                 ]); 
             }
@@ -256,7 +256,7 @@ class ApartadosController extends Controller
                     'monto'=>$request->adelanto,  
                     'tipo_movimiento'=>'entrada',
                     'concepto'=>$transaccionRef,       
-                    'referencia'=> $transaccion,     
+                    'referencia'=> $transaccion->id,     
                     'descripcion'=>'Abono o adelanto',           
                 ]); 
             }
@@ -432,7 +432,7 @@ class ApartadosController extends Controller
                     'monto'=>$request->anticipo,  
                     'tipo_movimiento'=>'entrada',
                     'concepto'=>$transaccionRef,       
-                    'referencia'=> $transaccion,     
+                    'referencia'=> $transaccion->id,
                     'descripcion'=>'Monto de anticipo',           
                 ]); 
             }

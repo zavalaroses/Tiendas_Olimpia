@@ -21,8 +21,10 @@
               <th>Tipo</th>
               <th>Monto</th>
               <th>Pago</th>
+              <th>Cliente</th>
               <th>Fecha</th>
               <th>Usuario</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="detalle_corte_body">

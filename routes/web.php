@@ -128,6 +128,7 @@ Route::middleware(['auth','role'])->controller(CajaController::class)->group(fun
     Route::get('/get-index-historial-cajas','getHistorialCajas')->name('getHistorialCajas');
     Route::get('/get-data-cuenta/{tienda?}','getDataCuenta')->name('getDataCuenta');
     Route::post('/post-add-ingresos','postAddIngresoCuenta')->name('postAddIngresoCuenta');
+    Route::get('/get-detalle-transaccion/{id?}','getDetalleTransaccion')->name('getDetalleTransaccion');
 });
 
 require __DIR__.'/auth.php';
