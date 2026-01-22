@@ -34,10 +34,8 @@
                 </caption>
                 <thead>
                     <tr>
-                        <th scope="col">ID</th>
+                        <th scope="col">ID Nota</th>
                         <th scope="col">Cliente</th>
-                        <th scope="col">Mueble</th>
-                        <th scope="col">Cantidad</th>
                         <th scope="col">Anticipo</th>
                         <th scope="col">Restante</th>
                         <th scope="col">Fecha Apartado</th>
@@ -55,4 +53,5 @@
 @include('apartados.modalAddApartados')
 @include('apartados.modalPagarAdelanto')
 @include('apartados.modalAddPedido')
+@include('apartados.modalDetalleApartado')
 @endsection
