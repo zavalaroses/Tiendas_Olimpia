@@ -15,7 +15,16 @@ var dao = {
                     return `${day}-${month}-${year}`;
                 },'sClass':'muted'},
                 {"targets":[1],"mData":'tienda'},
-                {"targets":[2],"mData":'tipo_movimiento'},
+                {"targets":[2],"mData":function(o){
+                    if (o.tipo_movimiento == 'entrada') {
+                        return '<span class="badge bg-success">Ingreso</span>';
+                    }
+                    if (o.tipo_movimiento == 'salida') {
+                        return '<span class="badge bg-danger">Salida</span>';
+                    }else{
+                        return '<span class="badge bg-secondary">'+ o.tipo_movimiento +'</span>';
+                    }
+                }},
                 {"targets":[3],"mData":'concepto'},
                 {"targets":[4],"mData":'monto'},
                 {"targets":[5],"mData":'descripcion'},

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use App\Models\catalogos\Tiendas;
 use App\Models\catalogos\Chofer;
 use App\Models\catalogos\Mueble;
@@ -250,7 +251,11 @@ class CatalogoController extends Controller
     public function getDataMuebles(){
         try {
             $muebles = Mueble::where('estatus','!=','InActivo')->get();
-            return response()->json($muebles,200);
+            $response = [
+                'muebles'=>$muebles,
+                'rol'=>Auth::user()->rol
+            ];
+            return response()->json($response,200);
         } catch (\Throwable $th) {
             Log::debug('exp '.$th->getMessage());
             $response = [

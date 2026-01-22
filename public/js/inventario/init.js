@@ -11,11 +11,12 @@ dao = {
                 {"targets": [0],"mData":'id'},
                 {"targets": [1],"mData":'tienda'},
                 {"targets": [2],"mData":'mueble'},
-                {"targets": [3],"mData":'cantidad_stock'},
-                {"targets": [4],"mData":'cantidad_apartados'},
-                {"targets": [5],"mData":'por_entregar'},
-                {"targets": [6],"mData":'en_garantia'},
-                {"targets": [7],"mData":function (o) {
+                {"targets": [3],"mData":'precio'},
+                {"targets": [4],"mData":'cantidad_stock'},
+                {"targets": [5],"mData":'cantidad_apartados'},
+                {"targets": [6],"mData":'por_entregar'},
+                {"targets": [7],"mData":'en_garantia'},
+                {"targets": [8],"mData":function (o) {
                     return `
                         <button class="dropdown-item" onclick="dao.modalGarantia(${o.id_mueble},${o.id_tienda},'${o.mueble}')">
                             <i class="fas fa-shield-alt" style="color:#7C0A20"></i>&nbsp;Garantía
@@ -52,14 +53,15 @@ dao = {
             dataType:'json',
             headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
+            let {muebles} = response
             var select = $('#'+field);
             select.html('');
             select.append(new Option('Selecciona una opción',''));
-            response.map(function (val,i) {
+            muebles.map(function (val,i) {
                 if (id !='' && id == val.id) {
-                    select.append(new Option(response[i].nombre,response[i].id, true, true));
+                    select.append(new Option(muebles[i].nombre,muebles[i].id, true, true));
                 }else{
-                    select.append(new Option(response[i].nombre,response[i].id, false,false));
+                    select.append(new Option(muebles[i].nombre,muebles[i].id, false,false));
                 }
             });
         })

@@ -156,7 +156,7 @@ class CajaController extends Controller
             DB::beginTransaction();
             $idTienda = $request->tienda != '' ? $request->tienda : Auth::user()->tienda_id;
             $tipoPago = Auth::user()->rol == 1 ? 'tarjeta' : 'efectivo';
-            Transaccion::create([
+            $transaccion = Transaccion::create([
                 'tienda_id' =>$idTienda,
                 'venta_id'=>null,
                 'cantidad'=>$request->cantidad,
@@ -174,7 +174,7 @@ class CajaController extends Controller
                     'monto'=>$request->cantidad,  
                     'tipo_movimiento'=>'salida',
                     'concepto'=>'tarjeta',       
-                    'referencia'=> $request->descripcion,     
+                    'referencia'=> $transaccion->id,     
                     'descripcion'=>$request->descripcion,           
                 ]); 
             }
@@ -240,21 +240,39 @@ class CajaController extends Controller
 
         $transacciones = DB::table('movimientos_tienda as mt')
             ->join('users as u','u.id','=','mt.user_id')
+            ->leftJoin('apartados as a','a.id','=','mt.venta_id')
+            ->leftJoin('clientes as c','c.id','=','a.cliente_id')
             ->select(
-                'mt.id',
+                DB::raw("IFNULL(a.id,'-') as id"),
+                'mt.id as id_transaccion',
                 'mt.tipo_movimiento as tipo',
                 'mt.cantidad as monto',
                 'mt.tipo_pago as pago',
                 'mt.created_at as fecha',
-                'u.name as usuario'
+                'u.name as usuario',
+                DB::raw("IFNULL(CONCAT(c.nombre,' ',c.apellidos),'-') as cliente")
+
             )
             ->where('mt.corte_caja_id',$id)
-            ->orderBy('mt.id','DESC')
+            ->orderBy('id','DESC')
         ->get();
+
+        $totalEntrada = DB::table('movimientos_tienda as mt')
+            ->join('users as u','u.id','=','mt.user_id')
+            ->where('mt.tipo_movimiento','entrada')
+            ->where('mt.corte_caja_id',$id)
+            ->sum('mt.cantidad');
+        $totalSalida = DB::table('movimientos_tienda as mt')
+            ->join('users as u','u.id','=','mt.user_id')
+            ->where('mt.tipo_movimiento','salida')
+            ->where('mt.corte_caja_id',$id)
+            ->sum('mt.cantidad');
 
         $response = [
             'corte'=>$corte,
-            'transacciones'=>$transacciones
+            'transacciones'=>$transacciones,
+            'totalEntrada'=>$totalEntrada,
+            'totalSalida'=>$totalSalida,
         ];
         return response()->json($response,200);
         
@@ -333,6 +351,36 @@ class CajaController extends Controller
             DB::rollBack();
             throw $th;
         }
+    }
+    public function getDetalleTransaccion($id){
+        $transaccion = DB::table('movimientos_tienda as mt')
+            ->leftJoin('tiendas as t','t.id','=','mt.tienda_id')
+            ->leftJoin('apartados as a','a.id','=','mt.venta_id')
+            ->leftJoin('users as u','u.id','=','mt.user_id')
+            ->leftJoin('clientes as c','c.id','=','a.cliente_id')
+            ->leftJoin('apartado_muebles as am','am.id_apartado','=','a.id')
+            ->leftJoin('muebles as m','m.id','=','am.id_mueble')
+            ->select(
+                'a.id as id_nota',
+                DB::raw('(a.monto_anticipo + a.monto_restante) as total_nota'),
+                'a.monto_anticipo',
+                'a.monto_restante',
+                'a.costo_envio',
+                'a.fecha_apartado',
+                'a.liquidado_at',
+                'mt.cantidad as monto',
+                'mt.tipo_pago',
+                'mt.tipo_movimiento',
+                'mt.descripcion',
+                't.nombre as tienda',
+                DB::raw("IFNULL(CONCAT(c.nombre,' ',c.apellidos),'-') as cliente"),
+                DB::raw("IFNULL(u.name,'-') as usuario"),
+                DB::raw("GROUP_CONCAT(m.nombre SEPARATOR ', ') as muebles")
+            )
+            ->where('mt.id',$id)
+            ->groupBy('a.id','a.monto_anticipo','a.monto_restante','a.costo_envio','a.fecha_apartado','a.liquidado_at','mt.cantidad','mt.tipo_pago','mt.tipo_movimiento','mt.descripcion','t.nombre','c.nombre','c.apellidos','u.name')
+        ->first();
+        return response()->json($transaccion,200);
     }
 
 

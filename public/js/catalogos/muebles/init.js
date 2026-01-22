@@ -30,20 +30,33 @@ dao = {
             dataType:'json',
             headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
+            let {muebles,rol} = response;
             const table = $('#tbl_muebles');
-            const columns = [
-                {"targets": [0],"mData":'id'},
-                {"targets": [1],"mData":'nombre'},
-                {"targets": [2],"mData":'codigo'},
-                {"targets": [3],"mData":'descripcion'},
-                {"targets": [4],"mData":'precio'},
-                {"targets": [5],"mData":'precio_compra'},
-                {"aTargets": [6], "mData" : function(o){
-                    return '<button class="btn" onclick="dao.getDataEditar(' + o.id + ')"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i></button>'+
-                        '<button class="btn" onclick="dao.eliminar(' + o.id +')"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i></button></li>';
-                }},
-            ];
-            _gen.setTableScrollEspecial2(table,columns,response)
+            let columns = [];
+            if (rol == 1) {
+                columns = [
+                    {"targets": [0],"mData":'id'},
+                    {"targets": [1],"mData":'nombre'},
+                    {"targets": [2],"mData":'codigo'},
+                    {"targets": [3],"mData":'descripcion'},
+                    {"targets": [4],"mData":'precio'},
+                    {"targets": [5],"mData":'precio_compra'},
+                    {"aTargets": [6], "mData" : function(o){
+                        return '<button class="btn" onclick="dao.getDataEditar(' + o.id + ')"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i></button>'+
+                            '<button class="btn" onclick="dao.eliminar(' + o.id +')"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i></button></li>';
+                    }},
+                ];
+            }else{
+                columns = [
+                    {"targets": [0],"mData":'id'},
+                    {"targets": [1],"mData":'nombre'},
+                    {"targets": [2],"mData":'codigo'},
+                    {"targets": [3],"mData":'descripcion'},
+                    {"targets": [4],"mData":'precio'},
+                ];
+            }
+            
+            _gen.setTableScrollEspecial2(table,columns,muebles)
         });
         
     },

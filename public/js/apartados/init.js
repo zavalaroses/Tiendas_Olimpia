@@ -12,17 +12,15 @@ dao = {
             const columns = [
                 {"targets":[0],"mData":'id'},
                 {"targets":[1],"mData":'cliente'},
-                {"targets":[2],"mData":'mueble'},
-                {"targets":[3],"mData":'cantidad'},
-                {"targets":[4],"mData":'anticipo'},
-                {"targets":[5],"mData":'restante'},
-                {"targets":[6],"mData":'fecha_apartado'},
-                {"aTargets": [7], "mData" : function(o){
+                {"targets":[2],"mData":'anticipo'},
+                {"targets":[3],"mData":'restante'},
+                {"targets":[4],"mData":'fecha_apartado'},
+                {"aTargets": [5], "mData" : function(o){
                     return '<div class="dropdown">'+
                     '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
                         '<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu2">'+
                             '<li onclick="dao.pagar(' + o.id + ')"><button class="dropdown-item"><i class="fa-solid fa-cash-register" style="color: #1C85AA"></i>&nbsp;Abonar</button></li>'+
-                            // '<li onclick="dao.eliminar(' + o.id +','+o.area+')"><button class="dropdown-item"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Eliminar</button></li>'+
+                            '<li onclick="dao.verDetalles(' + o.id +')"><button class="dropdown-item"><i class="fa fa-eye" style="color: #D48D8D"></i>&nbsp;Detalles</button></li>'+
                         '</ul>'+
                     '</div>';
                 }},
@@ -37,14 +35,15 @@ dao = {
             dataType:'json',
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
+            let {rol,muebles} = response
             var select = $('#'+field);
             select.html('');
             select.append(new Option('Selecciona una opción'));
-            response.map(function (val,i) {
+            muebles.map(function (val,i) {
                 if (id != '' && id == val.id) {
-                    select.append(new Option(response[i].nombre,response[i].id, true, true));
+                    select.append(new Option(muebles[i].nombre,muebles[i].id, true, true));
                 }else{
-                    select.append(new Option(response[i].nombre,response[i].id, false, false));
+                    select.append(new Option(muebles[i].nombre,muebles[i].id, false, false));
                 }
             });
         })
@@ -220,7 +219,66 @@ dao = {
             _gen.error(error);
         });
 
-    }
+    },
+    verDetalles: function (id){
+        $.ajax({
+            url:'/get-detalles-apartado/'+id,
+            type:'get',
+            dataType:'json',
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')}
+        }).done(function (response) {
+            
+            let {detalle,productos,pagos} = response;
+            
+             // ====== Datos generales ======
+            document.getElementById('da_id_nota').innerText = `#${detalle.id_nota}`;
+            document.getElementById('da_cliente').innerText = detalle.cliente;
+            document.getElementById('da_tienda').innerText = detalle.tienda;
+            document.getElementById('da_usuario').innerText = detalle.name;
+
+            const total = Number(detalle.monto_anticipo) + Number(detalle.monto_restante);
+            document.getElementById('da_total').innerText = `$${total.toFixed(2)}`;
+            document.getElementById('da_anticipo').innerText = `$${detalle.monto_anticipo}`;
+            document.getElementById('da_restante').innerText = `$${detalle.monto_restante}`;
+            document.getElementById('da_envio').innerText = `$${detalle.costo_envio}`;
+            document.getElementById('da_fecha').innerText = detalle.fecha_apartado;
+
+            let productosHtml = '';
+            productos.forEach(p => {
+                const subtotal = p.cantidad * p.precio;
+                productosHtml += `
+                    <tr>
+                        <td>${p.mueble}</td>
+                        <td>${p.cantidad}</td>
+                        <td>$${p.precio}</td>
+                        <td>$${subtotal.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('da_productos').innerHTML =
+            productosHtml || `<tr><td colspan="4" class="text-center text-muted">Sin productos</td></tr>`;
+
+            // ====== Pagos ======
+            let pagosHtml = '';
+            pagos.forEach(p => {
+                pagosHtml += `
+                    <tr>
+                        <td>$${p.cantidad}</td>
+                        <td>${p.tipo_pago}</td>
+                        <td>${p.descripcion ?? '-'}</td>
+                        <td>${p.fecha}</td>
+                        <td>${p.usuario}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('da_pagos').innerHTML =
+                pagosHtml || `<tr><td colspan="5" class="text-center text-muted">Sin pagos</td></tr>`;
+
+                new bootstrap.Modal(
+                document.getElementById('modalDetalleApartado')
+            ).show();
+        })
+    },
 
 };
 

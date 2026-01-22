@@ -91,8 +91,28 @@
                             </div>
                         </div>
                     </div>
+                @else
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <div x-data="{ openDropdown: false }" class="relative hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                            <!-- Botón principal -->
+                            <button @click="openDropdown = !openDropdown"
+                                class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none transition duration-150 ease-in-out">
+                                Catalogos
+                                <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <!-- Dropdown -->
+                            <div x-show="openDropdown" @click.outside="openDropdown = false"
+                                x-transition
+                                class="absolute z-50 mt-2 w-48 bg-white rounded-md shadow-lg">
+                                <a href="{{ route('getMuebles') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    Muebles
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 @endif
-                
                 
             </div>
 

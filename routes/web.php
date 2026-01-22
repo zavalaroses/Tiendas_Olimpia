@@ -71,6 +71,7 @@ Route::middleware('auth')->controller(ApartadosController::class)->group(functio
     Route::get('/get-cantidad-restante/{id}','getMontoRestante')->name('getMontoRestante');
     Route::post('/post-pagar-adelanto','postAddAdelanto')->name('postAddAdelanto');
     Route::post('/post-add-pedido-especial','postAddPedido')->name('postAddPedido');
+    Route::get('/get-detalles-apartado/{id?}','getDetalleApartado')->name('getDetalleApartado');
 });
 // rutas de ventas
 Route::middleware('auth')->controller(VentasController::class)->group(function(){
@@ -95,7 +96,7 @@ Route::middleware(['auth','role'])->controller(CatalogoController::class)->group
     Route::get('/get-chofer-to-edit','getChoferById')->name('getChoferById');
     Route::post('/post-update-chofer','postAddChofer')->name('postAddChofer');
     Route::post('/delete-cat-chofer','postDeleteCatChofer')->name('postDeleteCatChofer');
-    Route::get('/get-muebles','getMuebles')->name('getMuebles');
+
     Route::post('/post-add-mueble','postAddMuble')->name('postAddMuble');
     Route::get('/get-mueble-by-id/{id?}','getMuebleByid')->name('getMuebleByid');
     Route::post('/post-update-mueble','postUpdateMueble')->name('postUpdateMueble');
@@ -107,9 +108,11 @@ Route::middleware(['auth','role'])->controller(CatalogoController::class)->group
     Route::post('/post-edit-proveedor','postUpdateProveedor')->name('postUpdateProveedor');
     Route::post('/delete-cat-proveedor','postDeleteProveedor')->name('postDeleteProveedor');
 });
+// rutas de catalogos para todos los usuarios
 Route::middleware(['auth'])->controller(CatalogoController::class)->group(function(){
     Route::get('/get-data-cat-proveedores','getDataProveedores')->name('getDataProveedores');
     Route::get('/get-data-muebles','getDataMuebles')->name('getDataMuebles');
+    Route::get('/get-muebles','getMuebles')->name('getMuebles');
 });
 // rutas de caja 
 Route::middleware('auth')->controller(CajaController::class)->group(function(){
@@ -127,6 +130,7 @@ Route::middleware(['auth','role'])->controller(CajaController::class)->group(fun
     Route::get('/get-index-historial-cajas','getHistorialCajas')->name('getHistorialCajas');
     Route::get('/get-data-cuenta/{tienda?}','getDataCuenta')->name('getDataCuenta');
     Route::post('/post-add-ingresos','postAddIngresoCuenta')->name('postAddIngresoCuenta');
+    Route::get('/get-detalle-transaccion/{id?}','getDetalleTransaccion')->name('getDetalleTransaccion');
 });
 
 require __DIR__.'/auth.php';

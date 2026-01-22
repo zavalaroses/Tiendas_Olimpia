@@ -69,14 +69,14 @@ var dao = {
             // ---- Datos del corte ----
             let resumen = `
                 <div class="row mb-2">
-                    <div class="col-md-3"><strong>Corte:</strong> ${res.corte.id}</div>
+                    <div class="col-md-3"><strong>Total entrada:</strong> ${res.totalEntrada}</div>
                     <div class="col-md-3"><strong>Tienda:</strong> ${res.corte.tienda}</div>
                     <div class="col-md-3"><strong>Usuario:</strong> ${res.corte.usuario}</div>
                     <div class="col-md-3"><strong>Fecha:</strong> ${res.corte.fecha}</div>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-3"><strong>Total General:</strong> $${res.corte.total_general}</div>
+                    <div class="col-md-3"><strong>Total salida:</strong> $${res.totalSalida}</div>
                     <div class="col-md-3"><strong>Efectivo Esperado:</strong> $${res.corte.total_efectivo}</div>
                     <div class="col-md-3"><strong>Efectivo Contado:</strong> $${res.corte.efectivo_contado}</div>
                     <div class="col-md-3"><strong>Diferencia:</strong> 
@@ -94,14 +94,29 @@ var dao = {
                 filas = `<tr><td colspan="6">No hay transacciones</td></tr>`;
             } else {
                 res.transacciones.forEach(t => {
+                    let tipoHtml = '';
+                    if (t.tipo === 'entrada') {
+                        tipoHtml = '<span class="badge bg-success">Ingreso</span>';
+                    } else if (t.tipo === 'salida') {
+                        tipoHtml = '<span class="badge bg-danger">Egreso</span>';
+                    } else {
+                        tipoHtml = `<span class="badge bg-secondary">${t.tipo}</span>`;
+                    }
+
                     filas += `
                     <tr>
                         <td>${t.id}</td>
-                        <td>${t.tipo}</td>
+                        <td>${tipoHtml}</td>
                         <td>$${t.monto}</td>
                         <td>${t.pago}</td>
+                        <td>${t.cliente}</td>
                         <td>${t.fecha}</td>
                         <td>${t.usuario}</td>
+                        <td>
+                            <button class="btn btn-sm btnAgregar" onClick="dao.detalleTransaccion(${t.id_transaccion})">
+                            <i class="fa fa-eye"></i>
+                            </button>
+                        </td>
                     </tr>`;
                 });
             }
@@ -113,6 +128,33 @@ var dao = {
             modalDetalleCorte.show();
         })
         
+    },
+    detalleTransaccion: function(id){
+        $.ajax({
+            url:'/get-detalle-transaccion/'+id,
+            type:'get',
+            dataType:'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            document.getElementById('dt_nota').innerText = response.id_nota ?? '-';
+            document.getElementById('dt_tienda').innerText = response.tienda ?? '-';
+            document.getElementById('dt_tipo_movimiento').innerText = response.tipo_movimiento ?? '-';
+            document.getElementById('dt_monto').innerText = `$${response.monto ?? '0.00'}`;
+            document.getElementById('dt_tipo_pago').innerText = response.tipo_pago ?? '-';
+            document.getElementById('dt_descripcion').innerText = response.descripcion ?? '-';
+            document.getElementById('dt_cliente').innerText = response.cliente ?? '-';
+            document.getElementById('dt_usuario').innerText = response.usuario ?? '-';
+            document.getElementById('dt_muebles').innerHTML = response.muebles ?? '-';
+            document.getElementById('dt_total').innerText = `$${response.total_nota}`;
+            document.getElementById('dt_pagado').innerText = `$${response.monto_anticipo}`;
+            document.getElementById('dt_restante').innerText = `$${response.monto_restante}`;
+            document.getElementById('dt_envio').innerText = `$${response.costo_envio}`;
+            document.getElementById('dt_fecha_apartado').innerText = response.fecha_apartado ?? '-';
+            document.getElementById('dt_liquidado').innerText = response.liquidado_at ?? '-';   
+
+            const modalDetalleTransaccion = new bootstrap.Modal(document.getElementById('modalDetalleTransaccion'));
+            modalDetalleTransaccion.show();
+        });
     }
 
 };

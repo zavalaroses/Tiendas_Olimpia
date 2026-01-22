@@ -103,6 +103,7 @@ class InventarioController extends Controller
                 't.id as id_tienda',
                 'm.nombre as mueble',
                 'm.id as id_mueble',
+                'm.precio',
                 'e.estatus as estatus',
                 'inventario_tienda.cantidad_stock',
                 'inventario_tienda.cantidad_apartados',

@@ -59,6 +59,7 @@
     </div>
 </div>
 @include('historial.modalDetalleCorte')
+@include('historial.modalDetalleTransaccion')
 <script src="/js/utilerias.js"></script>
 <script src="/js/historial/init.js"></script>
 

@@ -143,7 +143,7 @@ class ApartadosController extends Controller
                     'monto'=>$request->anticipo,  
                     'tipo_movimiento'=>'entrada',
                     'concepto'=>$transaccionRef,       
-                    'referencia'=> $transaccion,     
+                    'referencia'=> $transaccion->id,     
                     'descripcion'=>'Monto de anticipo',           
                 ]); 
             }
@@ -172,12 +172,8 @@ class ApartadosController extends Controller
             $idTienda = $tienda ? $tienda : Auth::user()->tienda_id;
             $apartados = DB::table('apartados as a')
                 ->leftJoin('clientes as c','c.id','=','a.cliente_id')
-                ->leftJoin('apartado_muebles as am','am.id_apartado','=','a.id')
-                ->leftJoin('muebles as m','m.id','=','am.id_mueble')
                 ->select(
                     DB::raw("CONCAT(c.nombre,' ',c.apellidos) as cliente"),
-                    'm.nombre as mueble',
-                    'am.cantidad as cantidad',
                     'a.monto_anticipo as anticipo',
                     'a.monto_restante as restante',
                     'a.fecha_apartado',
@@ -256,7 +252,7 @@ class ApartadosController extends Controller
                     'monto'=>$request->adelanto,  
                     'tipo_movimiento'=>'entrada',
                     'concepto'=>$transaccionRef,       
-                    'referencia'=> $transaccion,     
+                    'referencia'=> $transaccion->id,     
                     'descripcion'=>'Abono o adelanto',           
                 ]); 
             }
@@ -432,7 +428,7 @@ class ApartadosController extends Controller
                     'monto'=>$request->anticipo,  
                     'tipo_movimiento'=>'entrada',
                     'concepto'=>$transaccionRef,       
-                    'referencia'=> $transaccion,     
+                    'referencia'=> $transaccion->id,
                     'descripcion'=>'Monto de anticipo',           
                 ]); 
             }
@@ -455,5 +451,49 @@ class ApartadosController extends Controller
             ];
             return response()->json($response,500);
         }
+    }
+    public function getDetalleApartado($id){
+        $detalle = Apartado::leftJoin('clientes as c','c.id','=','apartados.cliente_id')
+            ->leftjoin('tiendas as t','t.id','=','apartados.tienda_id')
+            ->leftJoin('users as u','u.id','=','apartados.usuario_id')
+            ->select(
+                'apartados.id as id_nota',
+                'apartados.monto_anticipo',
+                'apartados.monto_restante',
+                'apartados.costo_envio',
+                'apartados.fecha_apartado',
+                DB::raw("CONCAT(c.nombre,' ',c.apellidos) as cliente"),
+                'u.name',
+                't.nombre as tienda',
+            )
+            ->where('apartados.id',$id)
+        ->first();
+        $productos = ApartadoMueble::leftJoin('muebles as m','m.id','=','apartado_muebles.id_mueble')
+            ->select(
+                'm.nombre as mueble',
+                'apartado_muebles.cantidad',
+                'm.precio'
+            )
+            ->where('apartado_muebles.id_apartado',$id)
+        ->get();
+
+        $pagos = Transaccion::withTrashed()
+            ->leftJoin('users as u','u.id','=','movimientos_tienda.user_id')
+            ->select(
+                'cantidad',
+                'tipo_pago',
+                'descripcion',
+                'movimientos_tienda.created_at as fecha',
+                'u.name as usuario'
+            )
+            ->where('tipo_movimiento','entrada')
+            ->where('venta_id',$id)
+        ->get();
+        $data = [
+            'detalle'=>$detalle,
+            'productos'=>$productos,
+            'pagos'=>$pagos
+        ];
+        return response()->json($data,200);
     }
 }

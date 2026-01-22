@@ -32,13 +32,14 @@ class VentasController extends Controller
                 ->leftJoin('muebles as m','m.id','=','sp.id_mueble')
                 ->leftJoin('clientes as c','c.id','=','salidas.cliente_id')
                 ->leftJoin('tiendas as t','t.id','=','sp.id_tienda')
+                ->leftJoin('apartados as a','a.id','=','salidas.apartado_id')
                 ->select(
-                    'salidas.id',
+                    'a.id',
                     't.nombre as tienda',
                     'm.nombre as mueble',
                     'salidas.estatus as estatus',
                     'sp.cantidad as cantidad',
-                    DB::raw("CONCAT(c. nombre,' ',c.apellidos) as cliente"),
+                    DB::raw("CONCAT(c.nombre,' ',c.apellidos) as cliente"),
                     'salidas.fecha_entrega',
                     'm.id as id_mueble',
                     'sp.id_tienda'
@@ -46,7 +47,7 @@ class VentasController extends Controller
                 ->when($idTienda, function($q) use($idTienda){
                     $q->where('sp.id_tienda',$idTienda);
                 })
-                ->orderBy('salidas.id','desc')
+                ->orderBy('a.id','desc')
             ->get();
 
             return response()->json($salidas,200);
@@ -222,7 +223,7 @@ class VentasController extends Controller
             }
             $transaccion = Transaccion::create([
                 'tienda_id' =>$idtienda,
-                'venta_id'=>$salida->id,
+                'venta_id'=>$apartado->id,
                 'cantidad'=>$request->total,
                 'tipo_pago'=>$request->forma_pago,
                 'tipo_movimiento'=>'entrada',
@@ -243,7 +244,7 @@ class VentasController extends Controller
                     'monto'=>$request->total,  
                     'tipo_movimiento'=>'entrada',
                     'concepto'=>$transaccionRef,       
-                    'referencia'=> $transaccion,     
+                    'referencia'=> $transaccion->id,   
                     'descripcion'=>'Venta',           
                 ]); 
             }
