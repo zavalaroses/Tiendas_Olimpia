@@ -208,7 +208,7 @@ class ApartadosController extends Controller
             ]);
             DB::beginTransaction();
             // asignamos el id de la tienda
-            $idtienda = $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id;
+            // $idtienda = $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id;
             $idtienda = Apartado::where('id',$request->id_apartado)->value('tienda_id');
 
             // validamos que la cantidad de pago no revase la cantidad restante
@@ -272,7 +272,7 @@ class ApartadosController extends Controller
                     ->where('apartados.id',$request->id_apartado)
                 ->get(); 
               
-                Apartado::where('id')->update(['liquidado_at'=>Carbon::now()->toDateString()]);
+                Apartado::where('id',$request->id_apartado)->update(['liquidado_at'=>Carbon::now()->toDateString()]);
                 Apartado::where('id',$request->id_apartado)->delete();
 
                 $salida = Salida::create([

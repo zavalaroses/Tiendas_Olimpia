@@ -28,9 +28,10 @@ class GarantiasController extends Controller
         return response()->json($muebles,200);
     }
     public function postAddGarantia(Request $request){
+         // si no viene id_salida es por inventario
         try {
             DB::beginTransaction();
-            $cliente = null;
+            $venta = null;
             if (!$request->id_salida) {
                 # si no viene de una venta verificamos que sea de un inventario 
                 $exist = DB::table('inventario_tienda')
@@ -66,12 +67,12 @@ class GarantiasController extends Controller
                     return response()->json($response,200);
                 }
                 // en la garantia registramos el id de salida como el cliente para no modificar la BD...
-                $cliente = $request->id_salida;
+                $venta = $request->id_salida;
             }
             $newGarantia = Garantias::create([
                 'mueble_id'=>$request->id_mueble,
                 'tienda_id'=>$request->tienda,
-                'cliente_id'=>$cliente,
+                'venta_id'=>$venta,
                 'motivo'=>$request->descripcion,
                 'cantidad'=>$request->cantidad,
                 'usuario_id'=>Auth::user()->id,
@@ -115,7 +116,7 @@ class GarantiasController extends Controller
         $garantias = Garantias::leftJoin('tiendas as t','t.id','=','garantias.tienda_id')
             ->leftJoin('muebles as m','m.id','=','garantias.mueble_id')
             ->leftJoin('users as u','u.id','=','garantias.usuario_id')
-            ->leftJoin('salidas as s','s.id','=','garantias.cliente_id')
+            ->leftJoin('salidas as s','s.id','=','garantias.venta_id')
             ->leftJoin('clientes as c','c.id','=','s.cliente_id')
             ->select(
                 'garantias.id',
@@ -142,7 +143,7 @@ class GarantiasController extends Controller
     
             $deleteRow = Garantias::where('id',$request->id)->delete();
 
-            if (!$old->cliente_id && $deleteRow) {
+            if (!$old->venta_id && $deleteRow) {
                 # si no tiene cliente entonces viene de tienda por lo que regresamos el stock...
                 $decrement =  InventarioTienda::where('tienda_id',$old->tienda_id)
                     ->where('mueble_id',$old->mueble_id)
@@ -152,11 +153,11 @@ class GarantiasController extends Controller
                     ->where('mueble_id',$old->mueble_id)
                 ->increment('cantidad_stock',$old->cantidad);
             }
-            if ($old->cliente_id && $deleteRow) {
+            if ($old->venta_id && $deleteRow) {
                 # si viene de una venta regresamos el estatus a entregado...
-                // recuerda que old->cliente_id es el id de la salida importante eso...
+                // recuerda que old->venta_id es el id de la salida importante eso...
                 $update = Salida::join('salida_producto as sp','sp.id_salida','=','salidas.id')
-                    ->where('salidas.id',$old->cliente_id)
+                    ->where('salidas.id',$old->venta_id)
                     ->where('sp.id_tienda',$old->tienda_id)
                     ->where('sp.id_mueble',$old->mueble_id)
                 ->update([

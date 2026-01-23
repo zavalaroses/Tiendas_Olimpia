@@ -82,6 +82,8 @@ Route::middleware('auth')->controller(VentasController::class)->group(function()
     Route::post('/post-agendar-salida','postAgendarSalida')->name('postAgendarSalida');
     Route::post('/post-agregar-venta','postAddVenta')->name('postAddVenta');
     Route::post('/finalizar-venta','postFinalizarVenta')->name('postFinalizarVenta');
+    Route::get('/get-detalles-venta/{id?}','getDetalleVenta')->name('getDetalleVenta');
+    Route::get('/get-datos-garantia-venta/{id?}','getDatosGarantiaVenta')->name('getDatosGarantiaVenta');
     
 });
 // rutas de catalogos
