@@ -28,24 +28,22 @@ class VentasController extends Controller
 
             $idTienda = $tienda ? $tienda : Auth::user()->tienda_id;
 
-            $salidas = Salida::leftJoin('salida_producto as sp','sp.id_salida','=','salidas.id')
-                ->leftJoin('muebles as m','m.id','=','sp.id_mueble')
-                ->leftJoin('clientes as c','c.id','=','salidas.cliente_id')
-                ->leftJoin('tiendas as t','t.id','=','sp.id_tienda')
+            $salidas = Salida::leftJoin('clientes as c','c.id','=','salidas.cliente_id')
                 ->leftJoin('apartados as a','a.id','=','salidas.apartado_id')
+                ->leftJoin('tiendas as t','t.id','=','a.tienda_id')
                 ->select(
                     'a.id',
                     't.nombre as tienda',
-                    'm.nombre as mueble',
+                    't.id as id_tienda',
                     'salidas.estatus as estatus',
-                    'sp.cantidad as cantidad',
+                    'a.monto_anticipo',
+                    'a.monto_restante',
                     DB::raw("CONCAT(c.nombre,' ',c.apellidos) as cliente"),
                     'salidas.fecha_entrega',
-                    'm.id as id_mueble',
-                    'sp.id_tienda'
+                    'salidas.id as id_salida',
                 )
                 ->when($idTienda, function($q) use($idTienda){
-                    $q->where('sp.id_tienda',$idTienda);
+                    $q->where('a.tienda_id',$idTienda);
                 })
                 ->orderBy('a.id','desc')
             ->get();
@@ -70,7 +68,7 @@ class VentasController extends Controller
         try {
             $salidas = Salida::leftJoin('apartados as a','a.id','=','salidas.apartado_id')
             ->leftJoin('clientes as c','c.id','=','salidas.cliente_id')
-            ->where('salidas.id',$id)->first();
+            ->where('a.id',$id)->first();
 
             $choferes = Chofer::select('id',DB::raw("CONCAT(nombre,' ',apellidos) as chofer"))
             ->where('tienda_id',$salidas->tienda_id ? $salidas->tienda_id : Auth::user()->tienda_id)
@@ -94,7 +92,7 @@ class VentasController extends Controller
 
             DB::beginTransaction();
 
-            Salida::where('id',$request->id)->update([
+            Salida::where('apartado_id',$request->id)->update([
                 'fecha_entrega'=>$request->fechaSalida,
                 'chofer_id'=>$request->chofer
             ]);
@@ -278,7 +276,7 @@ class VentasController extends Controller
             $salida = Salida::join('apartados as a','a.id','=','salidas.apartado_id')
                 ->join('apartado_muebles as ap','ap.id_apartado','=','a.id')
                 ->select('a.tienda_id','ap.id_mueble','ap.cantidad')
-                ->where('salidas.id',$request->id)
+                ->where('salidas.apartado_id',$request->id)
             ->get();
             
             foreach ($salida as  $mueble) {
@@ -288,7 +286,7 @@ class VentasController extends Controller
                     'mueble_id'=>$mueble->id_mueble,
                 ])->decrement('por_entregar',$mueble->cantidad);
             }
-            Salida::where('id',$request->id)->update([
+            Salida::where('apartado_id',$request->id)->update([
                 'estatus'=>'Entregado',
             ]);
             DB::commit();
@@ -299,15 +297,77 @@ class VentasController extends Controller
             ];
             return response()->json($response,200);
             
-
         } catch (\Throwable $th) {
             DB::rollBack();
             throw $th;
         }
     }
     public static function checkChoferAsignado($idVenta){
-        $chofer = Salida::where('id', $idVenta)->value('chofer_id');
+        $chofer = Salida::where('apartado_id', $idVenta)->value('chofer_id');
         return $chofer;
+    }
+    public function getDetalleVenta($id){
+        $detalle = Salida::leftJoin('clientes as c','c.id','=','salidas.cliente_id')
+            ->leftJoin('choferes as ch','ch.id','=','salidas.chofer_id')
+            ->leftJoin('users as u','u.id','=','salidas.usuario_id')
+            ->leftJoin('apartados as a','a.id','=','salidas.apartado_id')
+            ->leftJoin('tiendas as t','t.id','=','a.tienda_id')
+            ->select(
+                'a.id as id_nota',
+                DB::raw("CONCAT(c.nombre,' ',c.apellidos) as cliente"),
+                't.nombre as tienda',
+                'ch.nombre as chofer',
+                'a.monto_anticipo',
+                'a.monto_restante',
+                'a.costo_envio',
+                'salidas.fecha_entrega as fecha',
+                'a.liquidado_at',
+                'salidas.estatus',
+                'u.name as usuario'
+            )
+            ->where('salidas.apartado_id',$id)
+        ->first();
+
+        $productos = SalidaProducto::leftJoin('salidas as s','s.id','=','salida_producto.id_salida')
+            ->leftJoin('muebles as m','m.id','=','salida_producto.id_mueble')
+            ->select(
+                'm.nombre as mueble',
+                'salida_producto.cantidad',
+                'm.precio'
+            )
+            ->where('s.apartado_id',$id)
+        ->get();
+
+        $pagos = Transaccion::withTrashed()
+            ->leftJoin('users as u','u.id','=','movimientos_tienda.user_id')
+            ->select(
+                'cantidad',
+                'tipo_pago',
+                'descripcion',
+                'movimientos_tienda.created_at as fecha',
+                'u.name as usuario'
+            )
+            ->where('tipo_movimiento','entrada')
+            ->where('venta_id',$id)
+        ->get();
+
+        $response = [
+            'detalle'=>$detalle,
+            'productos'=>$productos,
+            'pagos'=>$pagos
+        ];
+        return response()->json($response,200);
+    }
+    public function getDatosGarantiaVenta($id){
+        $data = Salida::leftJoin('salida_producto as sp','sp.id_salida','=','salidas.id')
+            ->leftJoin('muebles as m','m.id','=','sp.id_mueble')
+            ->select(
+                'm.id as id_mueble',
+                'm.nombre as mueble',
+            )
+            ->where('salidas.apartado_id',$id)
+        ->get();
+        return response()->json($data,200);
     }
     
 }

@@ -12,10 +12,10 @@ class Garantias extends Model
     use SoftDeletes;
     protected $table = 'garantias';
     protected $fillable = [
-        					
+        			
+        'venta_id',
         'mueble_id',
         'tienda_id',
-        'cliente_id',
         'motivo',
         'cantidad',
         'usuario_id',

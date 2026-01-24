@@ -12,8 +12,7 @@ dao = {
             const columns = [
                 {"targets":[0],"mData":'id'},
                 {"targets":[1],"mData":'tienda'},
-                {"targets":[2],"mData":'mueble'},
-                {"targets":[3],"mData":function (o) {
+                {"targets":[2],"mData":function (o) {
                     if (o.estatus == 'Por entregar') {
                         return `<span class="yellow" style="font-size:0.875rem !important; max-width: 100px;">${o.estatus}</span>`;
                     }else if (o.estatus == 'Entregado') {
@@ -22,9 +21,12 @@ dao = {
                         return `<span class="blue" style="font-size:0.875rem !important; max-width: 100px;">${o.estatus}</span>`;
                     }
                 }},
-                {"targets":[4],"mData":'cantidad'},
-                {"targets":[5],"mData":'cliente'},
-                {"targets":[6],"mData":function (o) {
+                {"targets":[3],"mData":function (o) {
+                   const total = parseFloat(o.monto_anticipo) + parseFloat(o.monto_restante);
+                   return `$ ${total.toFixed(2)}`; 
+                }},
+                {"targets":[4],"mData":'cliente'},
+                {"targets":[5],"mData":function (o) {
                     const fechaStr = o.fecha_entrega; // "2025-11-11"
                     const [year, month, day] = fechaStr.split('-').map(Number);
                     const fecha_entrega = new Date(year, month - 1, day); // <-- crea fecha local correctamente
@@ -53,20 +55,22 @@ dao = {
                         }
                     }
                 }},
-                {"aTargets": [7], "mData" : function(o){
+                {"aTargets": [6], "mData" : function(o){
                     if (o.estatus == 'Entregado') {
-                        return `
-                        <button class="dropdown-item" onclick="dao.modalGarantia(${o.id_mueble},${o.id_tienda},'${o.mueble}',${o.id})">
-                            <i class="fas fa-shield-alt" style="color:#7C0A20"></i>&nbsp;Garantía
-                        </button>
-                    `;
-                    
+                        return '<div class="dropdown">'+
+                            '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
+                                '<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu2">'+
+                                    '<li onclick="dao.modalGarantia(' + o.id + ', ' + o.id_salida + ','+o.id_tienda+')"><button class="dropdown-item"><i class="fas fa-shield-alt" style="color:#7C0A20"></i>&nbsp;Garantía</button></li>'+
+                                    '<li onclick="dao.verDetalles(' + o.id +')"><button class="dropdown-item"><i class="fa fa-eye" style="color: #7C0A20"></i>&nbsp;Detalles</button></li>'+
+                                '</ul>'+
+                            '</div>';
                     }else{
                         return '<div class="dropdown">'+
                             '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
                                 '<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu2">'+
                                     '<li onclick="dao.darSalida(' + o.id + ')"><button class="dropdown-item"><i class="fas fa-shipping-fast" style="color: #7C0A20"></i>&nbsp;Dar salida</button></li>'+
                                     '<li onclick="dao.finalizarVenta(' + o.id +')"><button class="dropdown-item"><i class="fa-solid fa-house-circle-check" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Entregado</button></li>'+
+                                    '<li onclick="dao.verDetalles(' + o.id +')"><button class="dropdown-item"><i class="fa fa-eye" style="color: #7C0A20"></i>&nbsp;Detalles</button></li>'+
                                 '</ul>'+
                             '</div>';
                     }
@@ -288,16 +292,28 @@ dao = {
             }
         })  
     },
-    modalGarantia: function (id_mueble,tienda,mueble,salida) {
-        document.getElementById('mueble_g').value = mueble ? mueble : '';
-        document.getElementById('id_mueble_g').value = id_mueble ? id_mueble : '';
-        document.getElementById('tienda_g').value = tienda ? tienda : '';
-        document.getElementById('id_salida_g').value = salida ? salida : '';
-        const modalAddGarantia = new bootstrap.Modal(document.getElementById('modalAddGarantia'));
-        modalAddGarantia.show();
+    modalGarantia: function (id,id_salida,id_tienda) {
+        $.ajax({
+            url:'/get-datos-garantia-venta/'+id,
+            type:'get',
+            dataType:'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            let select = $('#mueble_select_g');
+            select.html('');
+            response.map(function(val,i) {
+                select.append(new Option(response[i].mueble,response[i].id_mueble,false,false));
+            });
+            document.getElementById('tienda_venta_garantia').value = id_tienda;
+            document.getElementById('id_salida_garantia').value = id;
+            document.getElementById('id_salida_garantia').value = id_salida;
+            const modalAddGarantiaVenta = new bootstrap.Modal(document.getElementById('modalAddGarantiaVenta'));
+            modalAddGarantiaVenta.show();
+        })
+        
     },
     postAddGarantia: function() {
-        var form = $('#frm_add_garantia')[0];
+        var form = $('#frm_add_garantia_venta')[0];
         var data = new FormData(form);
         $.ajax({
             url:'/post-add-garantia',
@@ -316,7 +332,7 @@ dao = {
             });
             const tienda = document.getElementById('tiendas');
             if (response.icon == 'success') {
-                closeModal('modalAddGarantia','frm_add_garantia','');
+                closeModal('modalAddGarantiaVenta','frm_add_garantia_venta','');
                 if (tienda) {
                     dao.getDataSalidas(tienda.value);
                 }else{
@@ -324,6 +340,66 @@ dao = {
                 }
                 
             }
+        });
+    },
+    verDetalles: function (id){
+        $.ajax({
+            url:'/get-detalles-venta/'+id,
+            type:'get',
+            dataType:'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function(response){
+            
+            let {detalle,productos,pagos} = response;
+            // ====== Datos generales ======
+            document.getElementById('da_id_nota').innerText = `#${detalle.id_nota}`;
+            document.getElementById('da_cliente').innerText = detalle.cliente;
+            document.getElementById('da_tienda').innerText = detalle.tienda;
+            document.getElementById('da_usuario').innerText = detalle.usuario;
+
+            const total = Number(detalle.monto_anticipo) + Number(detalle.monto_restante);
+            document.getElementById('da_total').innerText = `$${total.toFixed(2)}`;
+            document.getElementById('da_liquidado_at').innerText = detalle.liquidado_at || '-';
+            document.getElementById('da_chofer').innerText = detalle.chofer || 'Sin chofer asignado';
+            document.getElementById('da_envio').innerText = `$${detalle.costo_envio}`;
+            document.getElementById('da_fecha').innerText = detalle.fecha;
+            document.getElementById('da_estatus').innerText = detalle.estatus;
+
+            let productosHtml = '';
+            productos.forEach(p => {
+                const subtotal = p.cantidad * p.precio;
+                productosHtml += `
+                    <tr>
+                        <td>${p.mueble}</td>
+                        <td>${p.cantidad}</td>
+                        <td>$${p.precio}</td>
+                        <td>$${subtotal.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('da_productos').innerHTML =
+            productosHtml || `<tr><td colspan="4" class="text-center text-muted">Sin productos</td></tr>`;
+
+            // ====== Pagos ======
+            let pagosHtml = '';
+            pagos.forEach(p => {
+                pagosHtml += `
+                    <tr>
+                        <td>$${p.cantidad}</td>
+                        <td>${p.tipo_pago}</td>
+                        <td>${p.descripcion ?? '-'}</td>
+                        <td>${p.fecha}</td>
+                        <td>${p.usuario}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('da_pagos').innerHTML =
+                pagosHtml || `<tr><td colspan="5" class="text-center text-muted">Sin pagos</td></tr>`;
+
+                new bootstrap.Modal(
+                document.getElementById('modalVerDetalleVenta')
+            ).show();
+
         });
     },
 };
@@ -527,10 +603,10 @@ $(document).ready(function () {
         document.getElementById('tituto_tienda').innerText = tienda;
         dao.getDataSalidas(this.value);
     });
-    $('#btn_ad_garantia').on('click', function (e) {
+    $('#btn_ada_garantia_venta').on('click', function (e) {
         e.preventDefault();
-        init.validateG($('#frm_add_garantia'));
-        if ($('#frm_add_garantia').valid()) {
+        init.validateG($('#frm_add_garantia_venta'));
+        if ($('#frm_add_garantia_venta').valid()) {
         dao.postAddGarantia();
         }
     });

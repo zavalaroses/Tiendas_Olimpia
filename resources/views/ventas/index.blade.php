@@ -30,11 +30,10 @@
                 </caption>
                 <thead>
                     <tr>
-                        <th scope="col">ID</th>
+                        <th scope="col">ID Nota</th>
                         <th scope="col">Tienda</th>
-                        <th scope="col">Mueble</th>
                         <th scope="col">Estatus</th>
-                        <th scope="col">Cantidad</th>
+                        <th scope="col">Total</th>
                         <th scope="col">Cliente</th>
                         <th scope="col">Fecha entrega</th>
                         <th scope="col">Acciones</th>
@@ -48,6 +47,8 @@
 </div>
 @include('ventas.modalAddVentas')
 @include('ventas.modalDarSalida')
+@include('ventas.modalVerDetalleVenta')
+@include('ventas.modalAddGarantiaVenta')
 <script src="/js/utilerias.js"></script>
 <script src="/js/salidas/init.js"></script>
 <script>
