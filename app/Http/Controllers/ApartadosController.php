@@ -496,4 +496,57 @@ class ApartadosController extends Controller
         ];
         return response()->json($data,200);
     }
+    public function getDataEditarApartado($id){
+        try {
+            $apartado = Apartado::leftJoin('clientes as c','c.id','=','apartados.cliente_id')
+                ->leftJoin('movimientos_tienda as mt','mt.venta_id','=','apartados.id')
+                ->select(
+                    'apartados.id as id_apartado',
+                    'c.nombre',
+                    'c.apellidos',
+                    'c.telefono',
+                    'c.direccion',
+                    'apartados.monto_anticipo',
+                    'apartados.monto_restante',
+                    'apartados.costo_envio',
+                    'mt.tipo_pago',
+                    DB::raw("DATE_FORMAT(apartados.fecha_apartado,'%d/%m/%Y') as fecha_apartado")
+                )
+                ->where('apartados.id',$id)
+            ->first();
+            $productos = ApartadoMueble::leftJoin('muebles as m','m.id','=','apartado_muebles.id_mueble')
+                ->select(
+                    'm.id as id_mueble',
+                    'm.nombre as mueble',
+                    'apartado_muebles.cantidad',
+                    'm.precio'
+                )
+                ->where('apartado_muebles.id_apartado',$id)
+            ->get();
+            $data = [
+                'apartado'=>$apartado,
+                'muebles'=>$productos
+            ];
+            return response()->json($data,200);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+    public function postEditApartado(Request $request){
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'apellidos' => 'required|string|max:255',
+            'telefono' => 'required',
+            'direccion' => 'required|string|max:255',
+            'total' => 'required',
+            'id' => 'required|array|min:1',
+            'id.*' => 'required|integer',
+            'producto' => 'required|array|min:1',
+            'producto.*' => 'required|string|max:255',
+            'cantidad' => 'required|array|min:1',
+            'cantidad.*' => 'required|numeric|min:1',
+            'envio' => 'nullable|numeric|min:0',
+        ]);
+        
+    }
 }

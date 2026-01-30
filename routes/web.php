@@ -72,6 +72,8 @@ Route::middleware('auth')->controller(ApartadosController::class)->group(functio
     Route::post('/post-pagar-adelanto','postAddAdelanto')->name('postAddAdelanto');
     Route::post('/post-add-pedido-especial','postAddPedido')->name('postAddPedido');
     Route::get('/get-detalles-apartado/{id?}','getDetalleApartado')->name('getDetalleApartado');
+    Route::get('/get-data-editar-apartado/{id?}','getDataEditarApartado')->name('getDataEditarApartado');
+    Route::post('/post-edit-apartado','postEditApartado')->name('postEditApartado');
 });
 // rutas de ventas
 Route::middleware('auth')->controller(VentasController::class)->group(function(){

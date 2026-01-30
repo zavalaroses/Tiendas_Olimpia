@@ -54,4 +54,5 @@
 @include('apartados.modalPagarAdelanto')
 @include('apartados.modalAddPedido')
 @include('apartados.modalDetalleApartado')
+@include('apartados.modalEditApartados')
 @endsection
