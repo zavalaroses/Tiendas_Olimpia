@@ -301,7 +301,7 @@ dao = {
             totalMuebles = 0;
             costoEnvio = Number(apartado.costo_envio) || 0;
             
-            document.getElementById('id_edit_apartado').value = apartado.id;
+            document.getElementById('id_edit_apartado').value = id;
             document.getElementById('nombre_edit').value = apartado.nombre;
             document.getElementById('apellidos_edit').value = apartado.apellidos;
             document.getElementById('telefono_edit').value = apartado.telefono;
@@ -397,14 +397,17 @@ dao = {
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
             Swal.fire({
-                icon:'success',
-                title:'Éxito',
-                text:'Apartado actualizado correctamente.',
-            }).then(function () {
-                closeModal('modalAddApartados','frm_add_apartado','tbl_add_list_apartados');
+                icon:response.icon,
+                title:response.title,
+                text:response.text,
+            });
+            if (response.icon == 'success') {
+                closeModal('modalEditApartados','frm_edit_apartado','tbl_edit_list_apartados');
                 let idT = tienda ? tienda.value : '';
                 dao.getData(idT);
-            });
+            }
+                
+            
         }).fail(function (error) {
             _gen.error(error);
         });
