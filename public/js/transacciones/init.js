@@ -153,6 +153,45 @@ var dao = {
             
         })
     },
+    postDepositoCuenta: function (idT) {
+        Swal.fire({
+            title: '¿Confirmar depósito?',
+            text: 'Este movimiento afectara la caja y la cuenta bancaria.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, depositar',
+            cancelButtonText: 'Cancelar'
+        }).then((result)=>{
+            if (result.isConfirmed) {
+                var form = $('#frm_depocito_cuenta')[0];
+                var data = new FormData(form);
+                data.append('tienda',idT);
+                $.ajax({
+                    url:'/post-deposito-cuenta',
+                    type:'post',
+                    data:data,
+                    enctype:'multipart/form-data',
+                    contentType:false,
+                    processData:false,
+                    cache:false,
+                    headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
+                }).done(function (response) {
+                    Swal.fire({
+                        icon:response.icon,
+                        title:response.title,
+                        text:response.text,
+                    });
+                    if (response.icon == 'success') {
+                        closeModal('modalDepositoCuenta','frm_depocito_cuenta','');
+                        dao.getData(idT);
+                        dao.getResumenCorte(idT);
+                    }
+                    
+                });
+            }
+        })
+    }
+
 
 
 
@@ -180,6 +219,16 @@ var init = {
           }
         })
     },
+    validateDepositoCuenta: function(form){
+        _gen.validate(form,{
+            rules:{
+                monto: {required: true},
+            },
+            messages: {
+                monto: {required: 'Este campo es requerido'},
+            }
+        })
+    }
 };
 function formatoMoneda(valor) {
     return '$ ' + Number(valor).toLocaleString('es-MX', {
@@ -269,6 +318,39 @@ $(document).ready(function () {
             let idT = tienda ? tienda.value : '';
             dao.postAddEgreso(idT);
         }
+    });
+    $('#btnDepositoCuenta').on('click',function (e) {
+        e.preventDefault();
+        const modalDepositoCuenta = new bootstrap.Modal(document.getElementById('modalDepositoCuenta'));
+        modalDepositoCuenta.show();
+    });
+    $('#btnGuardarDeposito').on('click',function (e) {
+        e.preventDefault();
+        const tienda = document.getElementById('tiendas');
+        if (tienda && tienda.value == '') {
+            Swal.fire({
+                icon:'warning',
+                title:'Advertencia!',
+                text:'Selecciona una tienda',
+            });
+            return;
+        }
+        let idT = tienda ? tienda.value : '';
+        
+        init.validateDepositoCuenta($('#frm_depocito_cuenta'));
+        if ($('#frm_depocito_cuenta').valid()) {
+            const mon = $('#monto').val();
+            if (mon <= 0) {
+                Swal.fire({
+                    icon:'warning',
+                    title:'Advertencia!',
+                    text:'Ingresa un monto válido.',
+                });
+                return;
+            }
+            dao.postDepositoCuenta(idT);
+        }
+        
     });
 
     

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Transaccion;
 use App\Models\Corte;
 use App\Models\Cuenta;
+use App\Models\DepositoCuenta;
 use Carbon\Carbon;
 use Log;
 
@@ -143,7 +144,7 @@ class CajaController extends Controller
             ];
             return response()->json($response,200);
         } catch (\Throwable $th) {
-           DB::rollback();
+           DB::rollBack();
             throw $th;
         }
     }
@@ -381,6 +382,95 @@ class CajaController extends Controller
             ->groupBy('a.id','a.monto_anticipo','a.monto_restante','a.costo_envio','a.fecha_apartado','a.liquidado_at','mt.cantidad','mt.tipo_pago','mt.tipo_movimiento','mt.descripcion','t.nombre','c.nombre','c.apellidos','u.name')
         ->first();
         return response()->json($transaccion,200);
+    }
+    public function postDepositoCuenta(Request $request){
+        $request->validate([
+            'monto'=>'required|numeric',
+            'observaciones'=>'nullable|string',
+        ]);
+        try {
+            DB::beginTransaction();
+
+            
+            $idTienda = $request->tienda != '' ? $request->tienda : Auth::user()->tienda_id;
+            
+            $efectivoApertura = CajaController::getEfectivoApertura($idTienda);
+            $movimientosEfectivo = CajaController::getMovimientoEfectivoEnCaja($idTienda);
+
+            $efectivoDispobible = $efectivoApertura + $movimientosEfectivo;
+            if ($request->monto > $efectivoDispobible) {
+                # regresamos validacion de montos no aceptados...
+                $response = [
+                    'title'=>'Advertencia!',
+                    'icon' => 'warning',
+                    'text' => 'El monto a depocitar excede el efectivo disponible.'
+                ];
+                return response()->json($response,200);
+            }
+            // registro en caja
+            $transaccion = Transaccion::create([
+                'tienda_id'=>$idTienda,
+                'venta_id'=>null,
+                'cantidad'=>$request->monto,
+                'tipo_pago'=>'efectivo',
+                'tipo_movimiento'=>'salida',
+                'descripcion'=>'Deposito a cuenta. '.$request->observaciones,
+                'user_id'=>Auth::user()->id,
+            ]);
+            // registro a cuenta
+            $cuenta = Cuenta::create([
+                'tienda_id'=>$idTienda,
+                'user_id'=>Auth::user()->id,
+                'monto'=>$request->monto,
+                'tipo_movimiento'=>'entrada',
+                'concepto'=>'transferencia',
+                'descripcion'=>$request->observaciones,
+                'referencia'=>null,
+            ]);
+
+            DepositoCuenta::create([
+                'tienda_id'=>$idTienda,
+                'movimiento_tienda_id'=>$transaccion->id,
+                'movimiento_cuenta_id'=>$cuenta->id,
+                'user_id'=>Auth::user()->id,
+                'monto'=>$request->monto,
+                'estatus'=>'aplicado',
+                'descripcion'=>$request->observaciones,
+            ]);
+
+            DB::commit();
+            $response = [
+                'title'=>'Exito',
+                'icon'=>'success',
+                'text'=>'Movimiento realizado con exito.'
+            ];
+            return response()->json($response,200);
+
+        } catch (\Throwable $th) {
+            //throw $th;
+            DB::rollBack();
+            Log::debug(json_encode($th));
+            $response = [
+                'title'=>'error',
+                'icon'=>'error',
+                'text'=>'Ocurrio un error interno, contacte al administrador.'
+            ];
+            return response()->json($response,500);
+        }
+    }
+    public static function getEfectivoApertura($idTienda){
+        return Corte::where('tienda_id',$idTienda)
+            ->orderByDesc('id')
+            ->value('saldo_final') ?? 0;
+    }
+    public static function getMovimientoEfectivoEnCaja($idTienda){
+        return Transaccion::where('tienda_id',$idTienda)
+            ->where('tipo_pago','efectivo')
+            ->selectRaw("
+                SUM(CASE WHEN tipo_movimiento = 'entrada' THEN cantidad ELSE 0 END) -
+                SUM(CASE WHEN tipo_movimiento = 'salida' THEN cantidad ELSE 0 END) as  total
+            ")
+            ->value('total') ?? 0;
     }
 
 

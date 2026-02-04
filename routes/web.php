@@ -125,6 +125,7 @@ Route::middleware('auth')->controller(CajaController::class)->group(function(){
     Route::get('/get-resumen-corte/{tienda?}','getResumenCorte')->name('getResumenCorte');
     Route::post('/cerrar-corte','cerrarCorte')->name('cerrarCorte');
     Route::post('/post-add-egresos','postAddEgreso')->name('postAddEgreso');
+    Route::post('/post-deposito-cuenta','postDepositoCuenta')->name('postDepositoCuenta');
 });
 // rutas caja solo admin
 Route::middleware(['auth','role'])->controller(CajaController::class)->group(function(){
