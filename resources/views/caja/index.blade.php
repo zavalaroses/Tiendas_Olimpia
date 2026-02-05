@@ -9,7 +9,7 @@
     <style>
         :root{--bg:#f6f7f9;--card:#fff;--muted:#6b7280;--accent:#10b981;--danger:#ef4444;--glass:rgba(0,0,0,0.04)}
         html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, 'Helvetica Neue', Arial;color:#111827;background:var(--bg)}
-        .container{max-width:1100px;margin:28px auto;padding:20px}
+        .container{max-width:1200px;margin:28px auto;padding:20px}
 
 
         /* Header */
@@ -37,14 +37,26 @@
 
 
         /* Main area */
-        .main{display:flex;gap:16px;margin-top:18px}
-        .left{flex:1}
-        .right{width:360px}
+        .main{display:flex;gap:16px;margin-top:18px;min-width: 0;}
+        .left{flex:1;min-width: 0;}
+        .right{width:360px;flex-shrink: 0;}
 
 
         /* Transactions table */
-        .table-wrap{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 1px 2px var(--glass)}
+        .table-wrap{
+            background:var(--card);
+            border-radius:10px;
+            padding:12px;
+            box-shadow:0 1px 2px var(--glass);
+            overflow-x:auto;
+            max-width: 100%;
+        }
         table{width:100%;border-collapse:collapse;font-size:13px}
+        table td {
+            white-space: normal;
+            word-break: break-word;
+            max-width: 300px;
+        }
         thead th{font-weight:700;text-align:left;padding:10px 8px;border-bottom:1px solid #eef2f7;color:var(--muted)}
         tbody td{padding:10px 8px;border-bottom:1px dashed #f1f5f9}
         .muted{color:var(--muted);font-size:12px}
