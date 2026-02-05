@@ -448,6 +448,8 @@ var _gen = {
                 scrollY: height,
                 scrollCollapse: false,
                 scrollX: true,
+                responsive:false,
+                autoWidth:false,
 
                 buttons: [
                     {
@@ -485,7 +487,6 @@ var _gen = {
                 data: datelist,
                 columnDefs: columnDefs,
 
-                responsive: true,
 
                 initComplete: function () {
                     let otable = tabla.DataTable().columns.adjust().draw();
