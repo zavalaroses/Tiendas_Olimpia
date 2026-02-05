@@ -15,18 +15,20 @@ return new class extends Migration
 
             
             if (Schema::hasColumn('garantias', 'cliente_id')) {
-                $table->dropForeign(['cliente_id']);
+                // $table->dropForeign(['cliente_id']);
                 $table->dropColumn('cliente_id');
             }
 
            
-            $table->unsignedBigInteger('venta_id')->nullable()->after('id');
 
            
-            $table->foreign('venta_id')
-                  ->references('id')
-                  ->on('apartados')
-                  ->nullOnDelete();
+            // $table->unsignedBigInteger('venta_id')->nullable()->after('id');
+
+           
+            // $table->foreign('venta_id')
+            //       ->references('id')
+            //       ->on('apartados')
+            //       ->nullOnDelete();
         });
         
         

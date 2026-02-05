@@ -167,5 +167,13 @@ $(document).ready(function () {
     $('#filtro_tienda').on('change',function (e) {
         e.preventDefault();
         dao.getData();
-    })
+    });
+    $('#filtro_inicio').on('change',function (e){
+        e.preventDefault();
+        dao.getData();
+    });
+    $('#filtro_fin').on('change', function (e) {
+        e.preventDefault();
+        dao.getData();
+    });
 });

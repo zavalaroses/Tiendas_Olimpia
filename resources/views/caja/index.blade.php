@@ -23,9 +23,9 @@
         /* Controls */
         .controls{display:flex;gap:8px;align-items:center}
         .controls input[type="date"], .controls select{padding:8px 10px;border-radius:6px;border:1px solid #e5e7eb;background:#fff}
-        .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
-        .btn.ghost{background:transparent;border:1px solid #e5e7eb;color:var(--muted)}
-        .btn.danger{background:var(--danger)}
+        .btn1{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+        .btn1.ghost{background:transparent;border:1px solid #e5e7eb;color:var(--muted)}
+        .btn1.danger.danger{background:var(--danger)}
 
 
         /* Quick summary cards */
@@ -123,7 +123,10 @@
                     
 
                     <div style="margin-top:12px;display:flex;gap:8px">
-                        <button class="btn" id="btnCerrarCorte">Cerrar corte</button>
+                        <button class="btn btn1 btn-success" id="btnCerrarCorte"><i class="fas fa-times-circle"></i>&nbsp;Cerrar corte</button>
+                        <button type="button" class="btn btn1 btn-success" id="btnDepositoCuenta">
+                            <i class="fas fa-university"></i>&nbsp;Depositar a cuenta
+                        </button>
                     </div>
                 </div>
             </aside>
@@ -132,6 +135,7 @@
 </body>
 @include('caja.modalCerrarCorte')
 @include('caja.modalAddEgreso')
+@include('caja.modalDepositoCuenta')
 <script src="/js/utilerias.js"></script>
 <script src="/js/transacciones/init.js"></script>
 <script>

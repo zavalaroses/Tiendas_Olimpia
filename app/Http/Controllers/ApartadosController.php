@@ -496,4 +496,158 @@ class ApartadosController extends Controller
         ];
         return response()->json($data,200);
     }
+    public function getDataEditarApartado($id){
+        try {
+            $apartado = Apartado::leftJoin('clientes as c','c.id','=','apartados.cliente_id')
+                ->leftJoin('movimientos_tienda as mt','mt.venta_id','=','apartados.id')
+                ->select(
+                    'apartados.id as id_apartado',
+                    'c.nombre',
+                    'c.apellidos',
+                    'c.telefono',
+                    'c.direccion',
+                    'apartados.monto_anticipo',
+                    'apartados.monto_restante',
+                    'apartados.costo_envio',
+                    'mt.tipo_pago',
+                    DB::raw("DATE_FORMAT(apartados.fecha_apartado,'%d/%m/%Y') as fecha_apartado")
+                )
+                ->where('apartados.id',$id)
+            ->first();
+            $productos = ApartadoMueble::leftJoin('muebles as m','m.id','=','apartado_muebles.id_mueble')
+                ->select(
+                    'm.id as id_mueble',
+                    'm.nombre as mueble',
+                    'apartado_muebles.cantidad',
+                    'm.precio'
+                )
+                ->where('apartado_muebles.id_apartado',$id)
+            ->get();
+            $data = [
+                'apartado'=>$apartado,
+                'muebles'=>$productos
+            ];
+            return response()->json($data,200);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+    public function postEditApartado(Request $request){
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'apellidos' => 'required|string|max:255',
+            'telefono' => 'required',
+            'direccion' => 'required|string|max:255',
+            'total' => 'required',
+            'id' => 'required|array|min:1',
+            'id.*' => 'required|integer',
+            'producto' => 'required|array|min:1',
+            'producto.*' => 'required|string|max:255',
+            'cantidad' => 'required|array|min:1',
+            'cantidad.*' => 'required|numeric|min:1',
+            'envio' => 'nullable|numeric|min:0',
+        ]);
+        try {
+            DB::beginTransaction();
+            // verificamos que no este liquidado el apartado
+            $apartado = Apartado::where('id',$request->id_edit_apartado)->first();
+            if ($apartado && $apartado->liquidado_at) {
+                # retornamos un mensaje de que el apartado ya esta liquidado...
+                return response()->json([
+                    'icon'=>'warning',
+                    'title'=>'Advertencia',
+                    'text' => 'Este apartado ya esta liquidado'
+                ],200);
+            }
+
+            $nuevoTotal = (float) $request->total;
+            $anticipo = (float) $request->anticipo;
+
+            if ($nuevoTotal < $anticipo) {
+                # retornamos mensaje de erro de validacion...
+                return respone()->json([
+                    'icon'=>'warning',
+                    'title'=>'Advertencia',
+                    'text'=>'El total no puede ser menor al anticipo',
+                ], 200);
+            }
+
+            // Editamos el cliente si es que algo cambio...
+            Cliente::where('id',$apartado->cliente_id)->update([
+                'nombre'=>$request->nombre,
+                'apellidos'=>$request->apellidos,
+                'telefono' =>$request->telefono,
+                'direccion'=>$request->direccion
+            ]);
+
+            // Revertir el inventario anterior...
+            $mueblesActuales = ApartadoMueble::where('id_apartado',$apartado->id)->get();
+
+            foreach ($mueblesActuales as $item) {
+                $inventario = InventarioTienda::where(
+                    [
+                        'tienda_id'=>$apartado->tienda_id,
+                        'mueble_id'=>$item->id_mueble
+                    ]
+                )->first();
+                if ($inventario) {
+                    # sie el inventario existe revertimos los numeros...
+                    $inventario->increment('cantidad_stock',$item->cantidad);
+                    $inventario->decrement('cantidad_apartados',$item->cantidad);
+                }
+            }
+
+            // eliminamos los muebles anteriores...
+            ApartadoMueble::where('id_apartado',$apartado->id)->delete();
+
+            // insertar nuevos muebles...
+            for ($i=0; $i < count($request->id) ; $i++) { 
+                ApartadoMueble::create([
+                    'id_apartado'=>$apartado->id,
+                    'id_mueble'=>$request->id[$i],
+                    'cantidad'=>$request->cantidad[$i],
+                    'estatus'=>'Apartado'
+                ]);
+                $inventario = InventarioTienda::firstOrCreate(
+                    [
+                        'tienda_id'=>$apartado->tienda_id,
+                        'mueble_id'=>$request->id[$i],
+                    ],
+                    [
+                        'estatus_id'=>1,
+                        'cantidad_stock'=>0,
+                        'cantidad_apartados'=>0
+                    ]
+                );
+
+                $inventario->decrement('cantidad_stock',$request->cantidad[$i]);
+                $inventario->increment('cantidad_apartados',$request->cantidad[$i]);
+            }
+
+            // editamos las cantidades del apartado...
+            Apartado::where('id',$apartado->id)->update([
+                'costo_envio'=>$request->envio ?? 0,
+                'monto_restante'=>$nuevoTotal - $anticipo
+            ]);
+            DB::commit();
+
+            return response()->json([
+                'icon' => 'success',
+                'title' => 'Éxito',
+                'text' => 'Apartado actualizado correctamente.'
+            ], 200);
+
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Error update apartado: '.$th->getMessage());
+
+            return response()->json([
+                'icon' => 'error',
+                'title' => 'Oops',
+                'text' => 'Ocurrió un error al actualizar el apartado.'
+            ], 500);
+        }
+        
+    }
 }

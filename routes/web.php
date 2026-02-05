@@ -72,6 +72,8 @@ Route::middleware('auth')->controller(ApartadosController::class)->group(functio
     Route::post('/post-pagar-adelanto','postAddAdelanto')->name('postAddAdelanto');
     Route::post('/post-add-pedido-especial','postAddPedido')->name('postAddPedido');
     Route::get('/get-detalles-apartado/{id?}','getDetalleApartado')->name('getDetalleApartado');
+    Route::get('/get-data-editar-apartado/{id?}','getDataEditarApartado')->name('getDataEditarApartado');
+    Route::post('/post-edit-apartado','postEditApartado')->name('postEditApartado');
 });
 // rutas de ventas
 Route::middleware('auth')->controller(VentasController::class)->group(function(){
@@ -123,6 +125,7 @@ Route::middleware('auth')->controller(CajaController::class)->group(function(){
     Route::get('/get-resumen-corte/{tienda?}','getResumenCorte')->name('getResumenCorte');
     Route::post('/cerrar-corte','cerrarCorte')->name('cerrarCorte');
     Route::post('/post-add-egresos','postAddEgreso')->name('postAddEgreso');
+    Route::post('/post-deposito-cuenta','postDepositoCuenta')->name('postDepositoCuenta');
 });
 // rutas caja solo admin
 Route::middleware(['auth','role'])->controller(CajaController::class)->group(function(){
