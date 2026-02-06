@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Entrada;
 use App\Models\DetalleInv;
 use App\Models\InventarioTienda;
+use App\Models\catalogos\Mueble;
 use Carbon\Carbon;
 use Log;
 
@@ -123,6 +124,17 @@ class InventarioController extends Controller
         } catch (\Throwable $th) {
             throw $th;
         }
+    }
+    public function getPrecioCompra($id){
+        $precio = Mueble::where('id', $id)
+            ->selectRaw('
+                CASE 
+                    WHEN precio_compra > 0 THEN precio_compra
+                    ELSE precio
+                END as precio
+            ')
+        ->value('precio');
+        return response()->json($precio,200);
     }
 
 }
