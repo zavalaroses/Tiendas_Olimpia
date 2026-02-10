@@ -29,6 +29,7 @@ return new class extends Migration
                 'tarjeta',
             ]);
             $table->date('fecha');
+            $table->string('descripcion')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

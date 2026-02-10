@@ -8,7 +8,11 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Entrada;
 use App\Models\DetalleInv;
 use App\Models\InventarioTienda;
+use App\Models\PagoIngresoInventario;
+use App\Models\Transaccion;
+use App\Models\Cuenta;
 use App\Models\catalogos\Mueble;
+use App\Http\Controllers\CajaController;
 use Carbon\Carbon;
 use Log;
 
@@ -29,8 +33,13 @@ class InventarioController extends Controller
     
                 'cantidad' => 'required|array|min:1',
                 'cantidad.*' => 'required|numeric|min:1',
+
+                'precio' => 'required|array|min:1',
+                'precio.*'=> 'required|numeric|min:0.01',
+
                 'proveedor'=>'required',
                 'fecha_ingreso'=>'required',
+                'total'=> 'required|numeric|min:0.01',
             ]);
             if (Auth::user()->tienda_id == null && !$request->id_tienda && $request->id_tienda == null) {
                 # code...
@@ -52,6 +61,9 @@ class InventarioController extends Controller
                 'usuario_id'=>Auth::user()->id,
                 'fecha'=> $request->fecha_ingreso,
                 'codigo_trazabilidad'=>$codigo,
+                'total_compra'=>$request->total,
+                'total_pagado'=>0,
+                'estatus_pagado'=>'pendiente',
             ]);
             
             foreach ($request->id as $index => $muebleId) {
@@ -59,6 +71,7 @@ class InventarioController extends Controller
                     'ingreso_id' => $entrada->id,
                     'mueble_id' => $muebleId,
                     'cantidad' => $request->cantidad[$index],
+                    'precio_compra'=>$request->precio[$index],
                 ]);
                 $inventarioExist = InventarioTienda::where('tienda_id',$idTienda)->where('mueble_id',$muebleId)->exists();
                 if ($inventarioExist) {
@@ -135,6 +148,179 @@ class InventarioController extends Controller
             ')
         ->value('precio');
         return response()->json($precio,200);
+    }
+    public function getPagos(){
+        return view('pagos.index');
+    }
+    public function getDataPagos($idTienda = null){
+        $tienda = $idTienda ? $idTienda : Auth::user()->tienda_id;
+        $pagos = Entrada::leftJoin('tiendas as t','t.id','=','ingresos_inventario.tienda_id')
+            ->leftJoin('proveedores as p','p.id','=','ingresos_inventario.proveedor_id')
+            ->leftJoin('users as u','u.id','=','ingresos_inventario.usuario_id')
+            ->select(
+                'ingresos_inventario.id',
+                't.nombre as tienda',
+                'ingresos_inventario.fecha',    
+                'p.nombre as proveedor',
+                'ingresos_inventario.codigo_trazabilidad',
+                'total_compra',
+                'total_pagado',
+                'estatus_pago',
+                'u.name as usuario',
+            )
+            ->when($tienda, function($q) use($tienda){
+                $q->where('ingresos_inventario.tienda_id',$tienda);
+            })
+        ->get();
+        return response()->json($pagos,200);
+    }
+    public function postPagarMercancia(Request $request){
+        $request->validate([
+            'entrada_id' => 'required',
+            'monto' => 'required|numeric|min:1',
+            'tipo_pago' => 'required|in:efectivo,transferencia'
+        ]);
+        try {
+            DB::beginTransaction();
+
+            $entrada = Entrada::lockForUpdate()->find($request->entrada_id);
+
+            $saldo = $entrada->total_compra - $entrada->total_pagado;
+
+            if ($request->tipo_pago == 'efectivo') {
+                # validamos que cuente con el efectivo necesario...
+                $efectivoApertura = CajaController::getEfectivoApertura($entrada->tienda_id);
+                $movimientosEfectivo = CajaController::getMovimientoEfectivoEnCaja($entrada->tienda_id);
+
+                $efectivoDispobible = $efectivoApertura + $movimientosEfectivo;
+                if ($request->monto > $efectivoDispobible) {
+                    # regresamos validacion de montos no aceptados...
+                    $response = [
+                        'title'=>'Advertencia!',
+                        'icon' => 'warning',
+                        'text' => 'No cuentas con esta cantidad en efectivo.'
+                    ];
+                    return response()->json($response,200);
+                }
+            }
+
+            if ($request->monto > $saldo) {
+                return response()->json([
+                    'icon'=>'warning',
+                    'title'=>'Error',
+                    'text'=>'El monto excede el saldo'
+                ],200);
+            }
+            PagoIngresoInventario::create([
+                'ingreso_id' => $entrada->id,
+                'tienda_id'=>$entrada->tienda_id,
+                'usuario_id' => Auth::user()->id,
+                'monto' => $request->monto,
+                'metodo_pago' => $request->tipo_pago,
+                'descripcion' => $request->observacion,
+                'fecha' => Carbon::now('America/Mexico_City')->format('Y-m-d'),
+            ]);
+
+            // 2️⃣ Actualizar totales
+            $entrada->total_pagado += $request->monto;
+            $entrada->estatus_pago = 
+                $entrada->total_pagado >= $entrada->total_compra
+                ? 'pagado'
+                : 'parcial';
+            $entrada->save();
+
+            
+            // registramos la transaccion en la caja
+            Transaccion::create([
+                'tienda_id' =>$entrada->tienda_id,
+                'venta_id'=>$entrada->id,
+                'cantidad'=>$request->monto,
+                'tipo_pago'=>$request->tipo_pago,
+                'tipo_movimiento'=>'salida',
+                'descripcion'=>'Pago inventario',
+                'user_id'=>Auth::user()->id,
+            ]);
+            if ($request->tipo_pago != 'efectivo') {
+                # agregamos el movimiento a la cuenta...
+                Cuenta::create([
+                    'tienda_id'=>$entrada->tienda_id,     
+                    'user_id'=>Auth::user()->id,  
+                    'monto'=>$request->monto,  
+                    'tipo_movimiento'=>'salida',
+                    'concepto'=>'transferencia',       
+                    'referencia'=> $entrada->id,     
+                    'descripcion'=>'Pago inventario',           
+                ]); 
+            }
+            DB::commit();
+
+            return response()->json([
+                'icon'=>'success',
+                'title'=>'Pago registrado',
+                'text'=>'El pago se registró correctamente'
+            ],200);
+
+        } catch (\Throwable $th) {
+            //throw $th;
+            DB::rollBack();
+            DB::rollBack();
+            Log::debug('exp '.$th->getMessage());
+            $response = [
+                'icon'=>'error',
+                'title'=>'Oops.',
+                'text'=>'A ocurrido un error al registrar.',
+            ];
+            return response()->json($response,200);
+        }
+    }
+    public function getDataEntradaById($id){
+        $detalle = Entrada::leftJoin('tiendas as t','t.id','=','ingresos_inventario.tienda_id')
+            ->leftJoin('proveedores as p','p.id','=','ingresos_inventario.proveedor_id')
+            ->leftJoin('users as u','u.id','=','ingresos_inventario.usuario_id')
+            ->select(
+                'ingresos_inventario.id',
+                't.nombre as tienda',
+                'ingresos_inventario.fecha',    
+                'p.nombre as proveedor',
+                'ingresos_inventario.codigo_trazabilidad',
+                'total_compra',
+                'total_pagado',
+                'estatus_pago',
+                'u.name as usuario',
+            )
+            ->where('ingresos_inventario.id',$id)
+        ->first();
+
+        $muebles = Entrada::leftJoin('detalle_ingresos as di','di.ingreso_id','=','ingresos_inventario.id')
+            ->leftJoin('muebles as m','m.id','=','di.mueble_id')
+            ->select(
+                'm.nombre as mueble',
+                'di.cantidad',
+                'di.precio_compra',
+            )
+            ->where('ingresos_inventario.id',$id)
+            ->orderBy('m.nombre')
+        ->get();
+
+        $pagos = Entrada::join('pagos_ingresos_inventario as pi','pi.ingreso_id','=','ingresos_inventario.id')
+            ->leftJoin('users as u','u.id','=','pi.usuario_id')
+            ->select(
+                'u.name as usuario',
+                'pi.monto',
+                'pi.metodo_pago',
+                'pi.fecha',
+                'pi.descripcion',
+            )
+            ->orderBy('pi.id')
+            ->where('ingresos_inventario.id',$id)
+        ->get();
+        $response = [
+            'detalle'=>$detalle,
+            'muebles'=>$muebles,
+            'pagos'=>$pagos
+        ];
+
+        return response()->json($response,200);
     }
 
 }

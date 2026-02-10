@@ -6,17 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class DetalleInv extends Model
+class PagoIngresoInventario extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    protected $table = 'detalle_ingresos';
+    protected $table = 'pagos_ingresos_inventario';
     protected $fillable = [
         'ingreso_id',
-        'mueble_id',
-        'cantidad',
-        'precio_compra',
-    ];  
+        'tienda_id',
+        'usuario_id',
+        'monto',
+        'metodo_pago',
+        'fecha',
+        'descripcion',
+    ];
     protected $hidden = [
         'created_at',
         'updated_at',

@@ -73,6 +73,7 @@ dao = {
         var tabla = document.getElementById('tbl_lista_entrada');
         // obtener el cuerpo de la tabla...
         var tbody = tabla.querySelector("tbody");
+        
         // obtener todas las filas del cuerpo de la tabla...
         var filas = tbody.querySelectorAll("tr");
         // Validar que haya al menos un registro
@@ -91,11 +92,15 @@ dao = {
             var id = celdas[0].textContent;
             var nombre = celdas[1].textContent;
             var cantidad = celdas[2].textContent;
+            var precio = celdas[3].textContent;
             // agregar los valores al formData...
             data.append("id[]",id);
             data.append("nombre[]",nombre);
             data.append("cantidad[]",cantidad);
+            data.append("precio[]",precio);
         });
+        const total = document.getElementById('total').value;
+        data.append('total',total);
         const tienda = document.getElementById('tiendas');
         if (tienda) {
             data.append("id_tienda", tienda.value);
@@ -189,7 +194,6 @@ dao = {
             dataType:'json',
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')}
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
             document.getElementById('inpPrecioUnit').value = response;
             document.getElementById('precioUnit').innerHTML = '$ '+response;
         });
@@ -251,7 +255,10 @@ function addListaMubles() {
     var iconoEliminar = document.createElement('i');
     iconoEliminar.className = "far fa-trash-alt";
     iconoEliminar.style.cursor = "pointer";
+    iconoEliminar.dataset.total = subTotal;
     iconoEliminar.addEventListener("click", function() {
+        let subTotalFila = parseFloat(this.dataset.total);
+        actualizarTotalAlEliminar(subTotalFila);
         fila.remove(); // Elimina la fila al hacer clic en el icono de eliminar
     });
     celdaProducto.textContent = producto;
@@ -291,6 +298,12 @@ function cerrarModalEntrada(modalId, formId, tableId) {
     // Limpia inputs relacionados
     document.getElementById('total').value = '0.00';
     document.getElementById('tdTotal').innerHTML = '';
+}
+function actualizarTotalAlEliminar(subTotal) {
+    totalMuebles -= Number(subTotal) || 0;
+    if (totalMuebles < 0) totalMuebles = 0;
+    $('#total').val(totalMuebles);
+    document.getElementById('tdTotal').innerHTML = totalMuebles;
 }
 
 $(document).ready(function () {
