@@ -171,6 +171,7 @@ class InventarioController extends Controller
             ->when($tienda, function($q) use($tienda){
                 $q->where('ingresos_inventario.tienda_id',$tienda);
             })
+            ->orderBy('ingresos_inventario.id', 'desc')
         ->get();
         return response()->json($pagos,200);
     }
