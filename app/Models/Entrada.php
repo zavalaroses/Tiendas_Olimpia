@@ -17,6 +17,9 @@ class Entrada extends Model
         'usuario_id',
         'fecha',
         'codigo_trazabilidad',
+        'total_compra',
+        'total_pagado',
+        'estatus_pago',
     ];
     protected $hidden = [
         'created_at',

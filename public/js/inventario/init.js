@@ -1,3 +1,4 @@
+let totalMuebles = 0;
 dao = {
     getData: function ($tiendaId) {
         $.ajax({
@@ -72,6 +73,7 @@ dao = {
         var tabla = document.getElementById('tbl_lista_entrada');
         // obtener el cuerpo de la tabla...
         var tbody = tabla.querySelector("tbody");
+        
         // obtener todas las filas del cuerpo de la tabla...
         var filas = tbody.querySelectorAll("tr");
         // Validar que haya al menos un registro
@@ -90,11 +92,15 @@ dao = {
             var id = celdas[0].textContent;
             var nombre = celdas[1].textContent;
             var cantidad = celdas[2].textContent;
+            var precio = celdas[3].textContent;
             // agregar los valores al formData...
             data.append("id[]",id);
             data.append("nombre[]",nombre);
             data.append("cantidad[]",cantidad);
+            data.append("precio[]",precio);
         });
+        const total = document.getElementById('total').value;
+        data.append('total',total);
         const tienda = document.getElementById('tiendas');
         if (tienda) {
             data.append("id_tienda", tienda.value);
@@ -181,6 +187,17 @@ dao = {
             }
         });
     },
+    getPrecioByIdMueble: function (id) {
+        $.ajax({
+            url:'/get-precio-compra-by-idMueble/'+id,
+            type:'get',
+            dataType:'json',
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')}
+        }).done(function (response) {
+            document.getElementById('inpPrecioUnit').value = response;
+            document.getElementById('precioUnit').innerHTML = '$ '+response;
+        });
+    }
 };
 
 init = {
@@ -215,6 +232,8 @@ function addListaMubles() {
     
     let inputProducto = 'producto';
     let intputCAntidad = 'cantidad';
+    let inputPrecio = 'inpPrecioUnit';
+    let subTotal = 0;
 
     let idTabla = 'tbl_lista_entrada';
 
@@ -222,27 +241,30 @@ function addListaMubles() {
     let cantidad = document.getElementById(intputCAntidad).value;
     let select = document.getElementById(inputProducto);
     let producto = select.options[select.selectedIndex].text;
-    // let precio = document.getElementById(inputPrecio).value;
+    let precio = document.getElementById(inputPrecio).value;
     let idProducto = document.getElementById(inputProducto).value;
-    // total = parseInt(cantidad) * parseFloat(precio);
+    subTotal = parseInt(cantidad) * parseFloat(precio);
     // crear una nueva fila y celdas...
     var fila = document.createElement('tr');
     var celdaId = document.createElement('td');
     var celdaProducto = document.createElement('td')
     var celdaCantidad = document.createElement('td');
-    // var celdaPrecio = document.createElement('td');
-    // var celdaTotal = document.createElement('td');
+    var celdaPrecio = document.createElement('td');
+    var celdaTotal = document.createElement('td');
     var celdaEliminar = document.createElement('td');
     var iconoEliminar = document.createElement('i');
     iconoEliminar.className = "far fa-trash-alt";
     iconoEliminar.style.cursor = "pointer";
+    iconoEliminar.dataset.total = subTotal;
     iconoEliminar.addEventListener("click", function() {
+        let subTotalFila = parseFloat(this.dataset.total);
+        actualizarTotalAlEliminar(subTotalFila);
         fila.remove(); // Elimina la fila al hacer clic en el icono de eliminar
     });
     celdaProducto.textContent = producto;
     celdaCantidad.textContent = cantidad;
-    // celdaPrecio.textContent = precio;
-    // celdaTotal.textContent  = total;
+    celdaPrecio.textContent = precio;
+    celdaTotal.textContent  = subTotal;
     celdaId.textContent = idProducto;
     celdaEliminar.appendChild(iconoEliminar);
 
@@ -250,16 +272,40 @@ function addListaMubles() {
     fila.appendChild(celdaId);
     fila.appendChild(celdaProducto);
     fila.appendChild(celdaCantidad);
-    // fila.appendChild(celdaPrecio);
-    // fila.appendChild(celdaTotal);
+    fila.appendChild(celdaPrecio);
+    fila.appendChild(celdaTotal);
     fila.appendChild(celdaEliminar);
     // agregar fila a la tabla...
     document.getElementById(idTabla).getElementsByTagName('tbody')[0].appendChild(fila);
     $('#'+idTabla).show(true);
     document.getElementById(intputCAntidad).value = '';
     document.getElementById(inputProducto).value = '';
+    document.getElementById('precioUnit').innerHTML = '';
+    calcularTotal(subTotal);
 
 }
+function calcularTotal(subTotal) {
+    totalMuebles += Number(subTotal) || 0;
+    $('#total').val(totalMuebles);
+    document.getElementById('tdTotal').innerHTML = totalMuebles;
+
+};
+function cerrarModalEntrada(modalId, formId, tableId) {
+    // Tu lógica actual
+    closeModal(modalId, formId, tableId);
+
+    totalMuebles = 0;
+    // Limpia inputs relacionados
+    document.getElementById('total').value = '0.00';
+    document.getElementById('tdTotal').innerHTML = '';
+}
+function actualizarTotalAlEliminar(subTotal) {
+    totalMuebles -= Number(subTotal) || 0;
+    if (totalMuebles < 0) totalMuebles = 0;
+    $('#total').val(totalMuebles);
+    document.getElementById('tdTotal').innerHTML = totalMuebles;
+}
+
 $(document).ready(function () {
     dao.getData('');
     dao.getCatTiendas('tiendas','');
@@ -307,6 +353,10 @@ $(document).ready(function () {
         if ($('#frm_add_garantia').valid()) {
         dao.postAddGarantia();
         }
+    });
+    $('#producto').on('change',function(e){
+        e.preventDefault();
+        dao.getPrecioByIdMueble(this.value);
     });
     
 });

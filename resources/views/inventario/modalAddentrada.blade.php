@@ -4,7 +4,7 @@
             <div class="modal-header captionModal">
               <div class="row" style="width: 100%">
                 <div class="col-md-12" style="display: flex; justify-content:right; margin-top:0%; margin-bottom:0%;">
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('modalAddEntrada','frm_add_entrada','tbl_lista_entrada');">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="cerrarModalEntrada('modalAddEntrada','frm_add_entrada','tbl_lista_entrada');">
                     <h5><span aria-hidden="true">&times;</span></h5>
                   </button>
                 </div>
@@ -31,7 +31,12 @@
                     <label for="producto" class="form-label">Producto</label>
                     <select name="producto" id="producto" class="form-control"></select>
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-2">
+                    <label for="precioUnit" class="form-label">Precio unitaro</label>
+                    <p id="precioUnit"></p>
+                    <input type="hidden" name="inpPrecioUnit" id="inpPrecioUnit">
+                  </div>
+                  <div class="col-md-2">
                     <label for="cantidad" class="form-label">Cantidad</label>
                     <input type="number" class="form-control" id="cantidad" name="cantidad" step="1">
                   </div>
@@ -47,17 +52,27 @@
                         <th>ID</th>
                         <th>Producto</th>
                         <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Subtotal</th>
                       </thead>
                       <tbody></tbody>
+                      <tfoot>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>Total:</th>
+                        <th id="tdTotal"></th>
+                      </tfoot>
                     </table>
                   </div>
+                  <input type="hidden" name="total" id="total">
                 </form>
             </div>
             <div class="modal-footer" style="display: flex; justify-content:center">
                   <div class="col-md-6">
                     <div class="input-group">
                       <div class="col-md-5">
-                        <button type="reset" class="form-control btnCancel" onclick="closeModal('modalAddEntrada','frm_add_entrada','tbl_lista_entrada');">CANCELAR</button>
+                        <button type="reset" class="form-control btnCancel" onclick="cerrarModalEntrada('modalAddEntrada','frm_add_entrada','tbl_lista_entrada');">CANCELAR</button>
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-5">
