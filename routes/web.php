@@ -9,6 +9,7 @@ use App\Http\Controllers\ApartadosController;
 use App\Http\Controllers\VentasController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CajaController;
+use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 
 /*
@@ -141,6 +142,15 @@ Route::middleware(['auth','role'])->controller(CajaController::class)->group(fun
     Route::get('/get-data-cuenta/{tienda?}','getDataCuenta')->name('getDataCuenta');
     Route::post('/post-add-ingresos','postAddIngresoCuenta')->name('postAddIngresoCuenta');
     Route::get('/get-detalle-transaccion/{id?}','getDetalleTransaccion')->name('getDetalleTransaccion');
+});
+
+Route::middleware(['auth','role'])->controller(ReportesController::class)->group(function(){
+    Route::get('/get-index-reportes','getReportes')->name('getReportes');
+    Route::get('/reportes/resumen','getDataResumen')->name('getDataResumen');
+    Route::get('/get-data-tabla-ventas','getVentas')->name('getVentas');
+    Route::get('/get-data-tabla-gastos','getGastos')->name('getGastos');
+    Route::get('/get-data-tabla-inventario','getInventario')->name('getInventario');
+    Route::get('/get-data-resumen-proveedores','getProveedores')->name('getProveedores');
 });
 
 require __DIR__.'/auth.php';

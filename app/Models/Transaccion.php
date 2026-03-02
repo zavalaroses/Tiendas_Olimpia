@@ -20,9 +20,9 @@ class Transaccion extends Model
         'tipo_movimiento',
         'descripcion',
         'user_id',
+        'created_at',
     ];
     protected $hidden = [
-        'created_at',
         'updated_at',
         'deleted_at',
     ];
