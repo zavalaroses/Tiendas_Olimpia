@@ -147,10 +147,10 @@ Route::middleware(['auth','role'])->controller(CajaController::class)->group(fun
 Route::middleware(['auth','role'])->controller(ReportesController::class)->group(function(){
     Route::get('/get-index-reportes','getReportes')->name('getReportes');
     Route::get('/reportes/resumen','getDataResumen')->name('getDataResumen');
-    Route::get('/get-data-tabla-ventas','getVentas')->name('getVentas');
-    Route::get('/get-data-tabla-gastos','getGastos')->name('getGastos');
-    Route::get('/get-data-tabla-inventario','getInventario')->name('getInventario');
-    Route::get('/get-data-resumen-proveedores','getProveedores')->name('getProveedores');
+    Route::get('/get-data-tabla-ventas','getVentas')->name('getVentasResumen');
+    Route::get('/get-data-tabla-gastos','getGastos')->name('getGastosResumen');
+    Route::get('/get-data-tabla-inventario','getInventario')->name('getInventarioResumen');
+    Route::get('/get-data-resumen-proveedores','getProveedores')->name('getProveedoresResumen');
 });
 
 require __DIR__.'/auth.php';
