@@ -12,67 +12,67 @@
 
                 <!-- Navigation Links -->
                 {{-- link para caja --}}
-                <div class="hidden space-x-4 sm:-my-px sm:ms-5 sm:flex">
+                <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
                     <x-nav-link :href="route('getCajas')" :active="request()->routeIs('getCajas')">
                         {{ 'Caja' }}
                     </x-nav-link>
                 </div>
-                <div class="hidden space-x-4 sm:-my-px sm:ms-5 sm:flex">
+                <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
                     <x-nav-link :href="route('getPagos')" :active="request()->routeIs('getPagos')">
                         {{ 'Entradas' }}
                     </x-nav-link>
                 </div>
                 
                 {{-- link para inventarios --}}
-                <div class="hidden space-x-4 sm:-my-px sm:ms-5 sm:flex">
+                <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
                     <x-nav-link :href="route('getInventario')" :active="request()->routeIs('getInventario')">
                         {{ 'Inventario' }}
                     </x-nav-link>
                 </div>
 
                 {{-- link para apartados --}}
-                <div class="hidden space-x-4 sm:-my-px sm:ms-5 sm:flex">
+                <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
                     <x-nav-link :href="route('getApartados')" :active="request()->routeIs('getApartados')">
                         {{ 'Apartados' }}
                     </x-nav-link>
                 </div>
 
                 {{-- link para ventas --}}
-                <div class="hidden space-x-4 sm:-my-px sm:ms-5 sm:flex">
+                <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
                     <x-nav-link :href="route('getVentas')" :active="request()->routeIs('getVentas')">
                         {{ 'Ventas' }}
                     </x-nav-link>
                 </div>
 
                 {{-- link para garantias --}}
-                <div class="hidden space-x-4 sm:-my-px sm:ms-5 sm:flex">
+                <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
                     <x-nav-link :href="route('getGarantias')" :active="request()->routeIs('getGarantias')">
                         {{ 'Garantias' }}
                     </x-nav-link>
                 </div>
                 {{-- apartado de catalogos --}}
                 @if(Auth::user()->rol == 1)
-                    <div class="hidden space-x-4 sm:-my-px sm:ms-5 sm:flex">
+                    <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
                         <x-nav-link :href="route('getUsuarios')" :active="request()->routeIs('getUsuarios')">
                             {{ 'Usuarios' }}
                         </x-nav-link>
                     </div>
-                    <div class="hidden space-x-4 sm:-my-px sm:ms-5 sm:flex">
+                    <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
                         <x-nav-link :href="route('getHistorialCajas')" :active="request()->routeIs('getHistorialCajas')">
                             {{ 'Historial cajas' }}
                         </x-nav-link>
                     </div>
-                    <div class="hidden space-x-4 sm:-my-px sm:ms-5 sm:flex">
+                    <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
                         <x-nav-link :href="route('getManejoCuenta')" :active="request()->routeIs('getManejoCuenta')">
                             {{ 'Cuenta' }}
                         </x-nav-link>
                     </div>
-                    <div class="hidden space-x-4 sm:-my-px sm:ms-5 sm:flex">
+                    <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
                         <x-nav-link :href="route('getReportes')" :active="request()->routeIs('getReportes')">
                             {{ 'Reportes' }}
                         </x-nav-link>
                     </div>
-                    <div class="hidden space-x-4 sm:-my-px sm:ms-5 sm:flex">
+                    <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
                         <div x-data="{ openDropdown: false }" class="relative hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                             <!-- Botón principal -->
                             <button @click="openDropdown = !openDropdown"
@@ -102,7 +102,7 @@
                         </div>
                     </div>
                 @else
-                    <div class="hidden space-x-4 sm:-my-px sm:ms-5 sm:flex">
+                    <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
                         <div x-data="{ openDropdown: false }" class="relative hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                             <!-- Botón principal -->
                             <button @click="openDropdown = !openDropdown"
