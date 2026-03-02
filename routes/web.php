@@ -150,6 +150,7 @@ Route::middleware(['auth','role'])->controller(ReportesController::class)->group
     Route::get('/get-data-tabla-ventas','getVentas')->name('getVentas');
     Route::get('/get-data-tabla-gastos','getGastos')->name('getGastos');
     Route::get('/get-data-tabla-inventario','getInventario')->name('getInventario');
+    Route::get('/get-data-resumen-proveedores','getProveedores')->name('getProveedores');
 });
 
 require __DIR__.'/auth.php';

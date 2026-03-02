@@ -13,12 +13,12 @@
             <div class="row align-items-end">
                 <div class="col-md-3">
                     <label>Fecha inicio</label>
-                    <input type="date" id="fecha_inicio" class="form-control">
+                    <input type="date" id="fecha_inicio" name="inicio" class="form-control">
                 </div>
 
                 <div class="col-md-3">
                     <label>Fecha fin</label>
-                    <input type="date" id="fecha_fin" class="form-control">
+                    <input type="date" id="fecha_fin" name="fin" class="form-control">
                 </div>
 
                 @if(Auth::user()->rol == 1)
@@ -32,7 +32,7 @@
                 @endif
 
                 <div class="col-md-3">
-                    <button class="btn btn-primary w-100" onclick="cargarReportes()">
+                    <button class="btn btn-primary w-100" onclick="cargarReportes()" disabled>
                         Generar reporte
                     </button>
                 </div>
@@ -193,7 +193,15 @@
                 {{-- Proveedores --}}
                 <div class="tab-pane fade" id="tabProveedores">
                     <div id="tablaProveedores">
-                        <table class="table table-sm table-striped" id="tbl_proveedores"></table>
+                        <table class="table table-sm table-striped" id="tbl_proveedores">
+                            <thead> 
+                                <th>Proveedor</th>
+                                <th>Total compra</th>
+                                <th>Total pagado</th>
+                                <th>Adeudo</th>
+                                <th>Estatus</th>
+                            </thead>
+                        </table>
                     </div>
                 </div>
 

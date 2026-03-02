@@ -121,7 +121,7 @@ class ReportesController extends Controller
         $fin = $request->fin;
 
          // helper filtro fechas
-        $filtroFecha = function ($q, $col = 'created_at') use ($inicio, $fin){
+        $filtroFecha = function ($q, $col = 'movimientos_tienda.created_at') use ($inicio, $fin){
             if ($inicio) $q->whereDate($col, '>=', $inicio);
             if ($fin) $q->whereDate($col, '<=', $fin);
         };
@@ -136,7 +136,7 @@ class ReportesController extends Controller
                 'u.name as usuario',
             )
             ->where('tipo_movimiento','salida')
-            ->when($tiendaId, fn($q)=>$q->where('tienda_id',$tiendaId))
+            ->when($tiendaId, fn($q)=>$q->where('movimientos_tienda.tienda_id',$tiendaId))
             ->when($inicio || $fin, fn($q) => $filtroFecha($q))
             ->orderByDesc('movimientos_tienda.id')
         ->get();
@@ -149,7 +149,7 @@ class ReportesController extends Controller
         $fin = $request->fin;
 
         // helper filtros fechas
-        $filtroFecha = function ($q, $col = 'created_at') use ($inicio, $fin){
+        $filtroFecha = function ($q, $col = 'inventario_tienda.created_at') use ($inicio, $fin){
             if ($inicio) $q->whereDate($col, '>=', $inicio);
             if ($fin) $q->whereDate($col, '<=', $fin);
         };
@@ -174,7 +174,7 @@ class ReportesController extends Controller
         $fin = $request->fin;
 
         // helper filtros fechas
-        $filtroFecha = function ($q, $col = 'created_at') use ($inicio, $fin){
+        $filtroFecha = function ($q, $col = 'ingresos_inventario.created_at') use ($inicio, $fin){
             if ($inicio) $q->whereDate($col, '>=', $inicio);
             if ($fin) $q->whereDate($col, '<=', $fin);
         };
