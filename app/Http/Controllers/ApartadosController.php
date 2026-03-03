@@ -269,7 +269,7 @@ class ApartadosController extends Controller
                         'am.id_mueble',
                         'am.cantidad',
                     )
-                    ->whereNull('apartado_muebles.deleted_at')
+                    ->whereNull('am.deleted_at')
                     ->where('apartados.id',$request->id_apartado)
                 ->get(); 
               
