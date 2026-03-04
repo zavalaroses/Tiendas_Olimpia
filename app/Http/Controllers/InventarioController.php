@@ -187,6 +187,7 @@ class InventarioController extends Controller
             $entrada = Entrada::lockForUpdate()->find($request->entrada_id);
 
             $saldo = $entrada->total_compra - $entrada->total_pagado;
+            $monto = $request->monto;
 
             if ($request->tipo_pago == 'efectivo') {
                 # validamos que cuente con el efectivo necesario...
@@ -194,7 +195,7 @@ class InventarioController extends Controller
                 $movimientosEfectivo = CajaController::getMovimientoEfectivoEnCaja($entrada->tienda_id);
 
                 $efectivoDispobible = $efectivoApertura + $movimientosEfectivo;
-                if ($request->monto > $efectivoDispobible) {
+                if ($monto > $efectivoDispobible) {
                     # regresamos validacion de montos no aceptados...
                     $response = [
                         'title'=>'Advertencia!',
@@ -205,25 +206,60 @@ class InventarioController extends Controller
                 }
             }
 
-            if ($request->monto > $saldo) {
-                return response()->json([
-                    'icon'=>'warning',
-                    'title'=>'Error',
-                    'text'=>'El monto excede el saldo'
-                ],200);
+            if ($monto <= $saldo) {
+                # Pago normal...
+                PagoIngresoInventario::create([
+                    'ingreso_id' => $entrada->id,
+                    'proveedor_id'=>$entrada->proveedor_id,
+                    'tienda_id'=>$entrada->tienda_id,
+                    'usuario_id' => Auth::user()->id,
+                    'monto' => $request->monto,
+                    'metodo_pago' => $request->tipo_pago,
+                    'descripcion' => $request->observacion,
+                    'fecha' => Carbon::now('America/Mexico_City')->format('Y-m-d'),
+                    'tipo' => 'abono',
+                ]);
+
+                $entrada->total_pagado += $request->monto;
+            }else {
+                // Pago con excedente
+                $abonoReal = $saldo;
+                $saldoFavor = $monto - $saldo;
+                // cubrir deuda
+                if ($abonoReal > 0) {
+                    PagoIngresoInventario::create([
+                        'ingreso_id' => $entrada->id,
+                        'proveedor_id'=>$entrada->proveedor_id,
+                        'tienda_id'=>$entrada->tienda_id,
+                        'usuario_id' => Auth::user()->id,
+                        'monto' => $abonoReal,
+                        'metodo_pago' => $request->tipo_pago,
+                        'descripcion' => 'Pago completo de entrada',
+                        'fecha' => Carbon::now('America/Mexico_City')->format('Y-m-d'),
+                        'tipo' => 'abono',
+                    ]);
+                }
+
+                PagoIngresoInventario::create([
+                    'ingreso_id' => $entrada->id,
+                    'proveedor_id'=>$entrada->proveedor_id,
+                    'tienda_id'=>$entrada->tienda_id,
+                    'usuario_id' => Auth::user()->id,
+                    'monto' => $saldoFavor,
+                    'metodo_pago' => $request->tipo_pago,
+                    'descripcion' => 'Saldo a favor',
+                    'fecha' => Carbon::now('America/Mexico_City')->format('Y-m-d'),
+                    'tipo' => 'cargo',
+                ]);
+
+                $entrada->total_pagado = $entrada->total_compra;
             }
-            PagoIngresoInventario::create([
-                'ingreso_id' => $entrada->id,
-                'tienda_id'=>$entrada->tienda_id,
-                'usuario_id' => Auth::user()->id,
-                'monto' => $request->monto,
-                'metodo_pago' => $request->tipo_pago,
-                'descripcion' => $request->observacion,
-                'fecha' => Carbon::now('America/Mexico_City')->format('Y-m-d'),
-            ]);
+
+            
+            
 
             // 2️⃣ Actualizar totales
-            $entrada->total_pagado += $request->monto;
+            
             $entrada->estatus_pago = 
                 $entrada->total_pagado >= $entrada->total_compra
                 ? 'pagado'

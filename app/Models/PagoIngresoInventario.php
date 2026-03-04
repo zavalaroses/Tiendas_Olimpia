@@ -19,6 +19,8 @@ class PagoIngresoInventario extends Model
         'metodo_pago',
         'fecha',
         'descripcion',
+        'proveedor_id',
+        'tipo',
     ];
     protected $hidden = [
         'created_at',

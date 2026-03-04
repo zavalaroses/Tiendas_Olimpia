@@ -216,16 +216,6 @@ $(document).ready(function () {
         e.preventDefault();
         init.validatePAgo($('#frm_pagar_entrada'));
         if ($('#frm_pagar_entrada').valid()) {
-            let total = parseFloat(document.getElementById('total_compra').value);
-            let monto = parseFloat(document.getElementById('monto').value);
-            if (monto > total) {
-                Swal.fire({
-                    icon:'warning',
-                    title:'Advertencia!',
-                    text:'El monto no puede ser mayor que el total a pagar.'
-                });
-                return
-            }
             dao.postAddPagoEntrada();
         }
     });
