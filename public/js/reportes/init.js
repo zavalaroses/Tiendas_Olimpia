@@ -19,11 +19,12 @@ let dao = {
         }).done(function (response) {
             $('#kpi_ventas').text(money(response.ventas));
             $('#kpi_gastos').text(money(response.gastos));
-            $('#kpi_utilidad').text(money(response.utilidad));
+            $('#kpi_balance').text(money(response.balance));
             $('#kpi_inventario').text(money(response.inventario));
             $('#kpi_caja').text(money(response.caja));
             $('#kpi_cuenta').text(money(response.cuenta));
             $('#kpi_adeudo').text(money(response.adeudo));
+            $('#kpi_saldo_f').text(money(response.saldoFavor));
         });
         
     },
@@ -240,6 +241,14 @@ $(document).ready(function () {
         dao.cargarTablaInventario();
         dao.cargarTablaProveedores();
         dao.cargarTablaVentas();
+    });
+    $('#btnGeneraReporte').on('click', function (e) {
+        form = document.getElementById('formReporte');
+        form.method = "POST";
+        form.action = rutaPruebaPDF;
+        form.target = "_blank"; // abre en nueva pestaña
+        console.log(form.action);
+        form.submit(); 
     });
 
 });

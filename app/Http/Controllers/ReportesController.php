@@ -11,6 +11,9 @@ use App\Models\Transaccion;
 use App\Models\InventarioTienda;
 use App\Models\Cuenta;
 use App\Models\Entrada;
+use App\Models\Corte;
+use App\Models\PagoIngresoInventario;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportesController extends Controller
 {
@@ -56,13 +59,16 @@ class ReportesController extends Controller
         ->value('total') ?? 0;
 
         // Dinero en caja
-        $caja = Transaccion::when($tiendaId, fn($q)=>$q->where('tienda_id',$tiendaId))
+        $efectivoApertura = $this->getSaldoInicialCaja($tiendaId);
+        $movimientos = Transaccion::when($tiendaId, fn($q)=>$q->where('tienda_id',$tiendaId))
             ->selectRaw("
                 SUM(CASE WHEN tipo_movimiento = 'entrada' THEN cantidad ELSE 0 END ) -
                 SUM(CASE WHEN tipo_movimiento = 'salida' THEN cantidad ELSE 0 END )
             as total")
             ->where('tipo_pago','efectivo')
         ->value('total') ?? 0;
+
+        $caja = $efectivoApertura + $movimientos;
 
         // Cuenta 
         $cuenta = Cuenta::when($tiendaId, fn($q)=>$q->where('tienda_id',$tiendaId))
@@ -72,21 +78,38 @@ class ReportesController extends Controller
                 as total")
         ->value('total') ?? 0;
 
-        // Adeudo proveedores
-        $adeudo = Entrada::when($tiendaId,fn($q)=>$q->where('tienda_id',$tiendaId))
-            ->selectRaw('
-                SUM(total_compra - total_pagado) as total
-            ')
-        ->value('total') ?? 0;
+        //Total compras
+        $totalCompras = Entrada::when($tiendaId,fn($q)=>$q->where('tienda_id',$tiendaId))
+            ->when($inicio || $fin, fn($q)=>$filtroFecha($q))
+            ->sum('total_compra');
+        
+        //Total abonos
+        $totalAbonos = PagoIngresoInventario::where('tipo','abono')
+            ->when($tiendaId,fn($q)=>$q->where('tienda_id',$tiendaId))
+            ->when($inicio || $fin, fn($q)=>$filtroFecha($q,'fecha'))
+            ->sum('monto');
+        
+        // Total saldo a favor
+        $saldoFavor = PagoIngresoInventario::where('tipo','cargo')
+            ->when($tiendaId,fn($q)=>$q->where('tienda_id',$tiendaId))
+            ->when($inicio || $fin, fn($q)=>$filtroFecha($q,'fecha'))
+            ->sum('monto');
+        
+        // Deuda real
+        $adeudo = max($totalCompras - $totalAbonos, 0);
+       
+        
+        $balance = $inventario + $caja + $cuenta + $saldoFavor - $adeudo;
 
         return response()->json([
             'ventas'=>(float)$ventas,
             'gastos'=>(float)$gastos,
-            'utilidad'=>(float)$utilidad,
+            'balance'=>(float)$balance,
             'inventario'=>(float)$inventario,
             'caja'=>(float)$caja,
             'cuenta'=>(float)$cuenta,
-            'adeudo'=>(float)$adeudo
+            'adeudo'=>(float)$adeudo,
+            'saldoFavor'=>(float)$saldoFavor,
         ],200);
 
     }
@@ -193,6 +216,33 @@ class ReportesController extends Controller
         ->get();
 
         return response()->json($data,200);
+    }
+    public function getSaldoInicialCaja($tiendaId = null){
+        // 🔹 Si viene tienda específica
+        if ($tiendaId) {
+
+            return Corte::where('tienda_id', $tiendaId)
+                ->orderByDesc('id')
+                ->value('saldo_final') ?? 0;
+        }
+
+        // 🔹 Si es modo global (todas las tiendas)
+        return Corte::selectRaw('SUM(saldo_final) as total')
+            ->whereIn('id', function($query){
+                $query->selectRaw('MAX(id)')
+                    ->from('cortes')
+                    ->groupBy('tienda_id');
+            })
+            ->value('total') ?? 0;
+    }
+    
+    public function pruebaPDF(){
+        ini_set('memory_limit', '256M');
+        ini_set('max_execution_time', 300);
+
+        $pdf = Pdf::loadView('reportes.reportePDF');
+
+        return $pdf->stream('prueba.pdf');
     }
 
 

@@ -11,6 +11,8 @@
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <div class="row align-items-end">
+                <form class="d-flex" id="formReporte" method="POST">
+                    @csrf
                 <div class="col-md-3">
                     <label>Fecha inicio</label>
                     <input type="date" id="fecha_inicio" name="inicio" class="form-control">
@@ -32,10 +34,12 @@
                 @endif
 
                 <div class="col-md-3">
-                    <button class="btn btn-primary w-100" onclick="cargarReportes()" disabled>
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary w-100" type="button" id="btnGeneraReporte"  disabled>
                         Generar reporte
                     </button>
                 </div>
+            </form>
             </div>
         </div>
     </div>
@@ -65,8 +69,8 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-start border-primary border-4">
                 <div class="card-body">
-                    <small>Utilidad</small>
-                    <h4 id="kpi_utilidad">$0.00</h4>
+                    <small>Balance</small>
+                    <h4 id="kpi_balance">$0.00</h4>
                 </div>
             </div>
         </div>
@@ -108,6 +112,15 @@
                 <div class="card-body">
                     <small>Adeudo proveedores</small>
                     <h5 id="kpi_adeudo">$0.00</h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <small>Saldo a favor</small>
+                    <h5 id="kpi_saldo_f">$0.00</h5>
                 </div>
             </div>
         </div>
@@ -214,6 +227,9 @@
 
 <script src="/js/utilerias.js"></script>
 <script src="/js/reportes/init.js"></script>
+<script>
+    const rutaPruebaPDF = "{{ route('pruebaPDF') }}";
+</script>
 
 
 @endsection
