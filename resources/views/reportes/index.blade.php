@@ -35,7 +35,7 @@
 
                 <div class="col-md-3">
                     <label>&nbsp;</label>
-                    <button class="btn btn-primary w-100" type="button" id="btnGeneraReporte"  disabled>
+                    <button class="btn btn-primary w-100" type="button" id="btnGeneraReporte" >
                         Generar reporte
                     </button>
                 </div>
