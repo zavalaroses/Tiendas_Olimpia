@@ -26,92 +26,9 @@ class ReportesController extends Controller
         $inicio = $request->inicio;
         $fin = $request->fin;
 
-        // helper filtro fechas
-        $filtroFecha = function ($q, $col = 'created_at') use ($inicio, $fin){
-            if ($inicio) $q->whereDate($col, '>=', $inicio);
-            if ($fin) $q->whereDate($col, '<=', $fin);
-        };
+        $data = $this->calcularResumen($tiendaId,$inicio,$fin);
 
-        // Ventas
-        $ventas = Transaccion::where('tipo_movimiento','entrada')
-            ->when($tiendaId, fn($q) => $q->where('tienda_id',$tiendaId) )
-            ->when($inicio || $fin, fn($q) => $filtroFecha($q) )
-        ->sum('cantidad');
-
-        // Gastos
-        $gastos = Transaccion::where('tipo_movimiento','salida')
-            ->when($tiendaId, fn($q) => $q->where('tienda_id', $tiendaId) )
-            ->when($inicio || $fin, fn($q) => $filtroFecha($q))
-        ->sum('cantidad');
-
-        // Utilidad
-        $utilidad = $ventas - $gastos;
-
-        // Inventario
-        $inventario = InventarioTienda::join('muebles as m','m.id','=','inventario_tienda.mueble_id')
-            ->when($tiendaId, fn($q) => $q->where('inventario_tienda.tienda_id',$tiendaId) )
-            ->selectRaw('SUM(inventario_tienda.cantidad_stock * 
-                CASE
-                    WHEN m.precio_compra > 0 THEN m.precio_compra
-                    ELSE m.precio
-                END
-            ) as total')
-        ->value('total') ?? 0;
-
-        // Dinero en caja
-        $efectivoApertura = $this->getSaldoInicialCaja($tiendaId);
-        $movimientos = Transaccion::when($tiendaId, fn($q)=>$q->where('tienda_id',$tiendaId))
-            ->selectRaw("
-                SUM(CASE WHEN tipo_movimiento = 'entrada' THEN cantidad ELSE 0 END ) -
-                SUM(CASE WHEN tipo_movimiento = 'salida' THEN cantidad ELSE 0 END )
-            as total")
-            ->where('tipo_pago','efectivo')
-        ->value('total') ?? 0;
-
-        $caja = $efectivoApertura + $movimientos;
-
-        // Cuenta 
-        $cuenta = Cuenta::when($tiendaId, fn($q)=>$q->where('tienda_id',$tiendaId))
-            ->selectRaw("
-                SUM(CASE WHEN tipo_movimiento = 'entrada' THEN monto ELSE 0 END) -
-                SUM(CASE WHEN tipo_movimiento = 'salida' THEN monto ELSE 0 END)
-                as total")
-        ->value('total') ?? 0;
-
-        //Total compras
-        $totalCompras = Entrada::when($tiendaId,fn($q)=>$q->where('tienda_id',$tiendaId))
-            ->when($inicio || $fin, fn($q)=>$filtroFecha($q))
-            ->sum('total_compra');
-        
-        //Total abonos
-        $totalAbonos = PagoIngresoInventario::where('tipo','abono')
-            ->when($tiendaId,fn($q)=>$q->where('tienda_id',$tiendaId))
-            ->when($inicio || $fin, fn($q)=>$filtroFecha($q,'fecha'))
-            ->sum('monto');
-        
-        // Total saldo a favor
-        $saldoFavor = PagoIngresoInventario::where('tipo','cargo')
-            ->when($tiendaId,fn($q)=>$q->where('tienda_id',$tiendaId))
-            ->when($inicio || $fin, fn($q)=>$filtroFecha($q,'fecha'))
-            ->sum('monto');
-        
-        // Deuda real
-        $adeudo = max($totalCompras - $totalAbonos, 0);
-       
-        
-        $balance = $inventario + $caja + $cuenta + $saldoFavor - $adeudo;
-
-        return response()->json([
-            'ventas'=>(float)$ventas,
-            'gastos'=>(float)$gastos,
-            'balance'=>(float)$balance,
-            'inventario'=>(float)$inventario,
-            'caja'=>(float)$caja,
-            'cuenta'=>(float)$cuenta,
-            'adeudo'=>(float)$adeudo,
-            'saldoFavor'=>(float)$saldoFavor,
-        ],200);
-
+        return response()->json($data,200);
     }
     public function getVentas(Request $request){
         $tiendaId = $request->tienda ?: Auth::user()->tienda_id;
@@ -124,7 +41,7 @@ class ReportesController extends Controller
             if ($fin) $q->whereDate($col, '<=', $fin);
         };
 
-        $data = Transaccion::where('tipo_movimiento','entrada')
+        $data = Transaccion::withTrashed()->where('tipo_movimiento','entrada')
             ->select(
                 'created_at',
                 'descripcion',
@@ -149,7 +66,7 @@ class ReportesController extends Controller
             if ($fin) $q->whereDate($col, '<=', $fin);
         };
 
-        $data = Transaccion::leftJoin('users as u','u.id','=','movimientos_tienda.user_id')
+        $data = Transaccion::withTrashed()->leftJoin('users as u','u.id','=','movimientos_tienda.user_id')
             ->select(
                 'movimientos_tienda.cantidad',
                 'movimientos_tienda.tipo_movimiento',
@@ -171,11 +88,11 @@ class ReportesController extends Controller
         $inicio = $request->inicio;
         $fin = $request->fin;
 
-        // helper filtros fechas
-        $filtroFecha = function ($q, $col = 'inventario_tienda.created_at') use ($inicio, $fin){
-            if ($inicio) $q->whereDate($col, '>=', $inicio);
-            if ($fin) $q->whereDate($col, '<=', $fin);
-        };
+        // // helper filtros fechas
+        // $filtroFecha = function ($q, $col = 'inventario_tienda.created_at') use ($inicio, $fin){
+        //     if ($inicio) $q->whereDate($col, '>=', $inicio);
+        //     if ($fin) $q->whereDate($col, '<=', $fin);
+        // };
 
         $data = InventarioTienda::join('muebles as m','m.id','=','inventario_tienda.mueble_id')
             ->selectRaw("
@@ -184,7 +101,7 @@ class ReportesController extends Controller
                 m.precio_compra,
                 inventario_tienda.cantidad_stock * m.precio_compra as valor
             ")
-            ->when($inicio || $fin, fn($q) => $filtroFecha($q))
+            // ->when($inicio || $fin, fn($q) => $filtroFecha($q))
             ->when($tiendaId, fn($q)=>$q->where('inventario_tienda.tienda_id',$tiendaId))
             ->orderByDesc('valor')
         ->get();
@@ -235,16 +152,108 @@ class ReportesController extends Controller
             })
             ->value('total') ?? 0;
     }
+    private function calcularResumen($tiendaId,$inicio,$fin){
+        // helper filtro fechas
+        $filtroFecha = function ($q, $col = 'created_at') use ($inicio, $fin){
+            if ($inicio) $q->whereDate($col, '>=', $inicio);
+            if ($fin) $q->whereDate($col, '<=', $fin);
+        };
+        // Ventas
+        $ventas = Transaccion::withTrashed()->where('tipo_movimiento','entrada')
+            ->when($tiendaId, fn($q) => $q->where('tienda_id',$tiendaId) )
+            ->when($inicio || $fin, fn($q) => $filtroFecha($q) )
+        ->sum('cantidad');
+        // Gastos
+        $gastos = Transaccion::withTrashed()->where('tipo_movimiento','salida')
+            ->when($tiendaId, fn($q) => $q->where('tienda_id', $tiendaId) )
+            ->when($inicio || $fin, fn($q) => $filtroFecha($q))
+        ->sum('cantidad');
+        // Utilidad
+        $utilidad = $ventas - $gastos;
+        // Inventario
+        $inventario = InventarioTienda::join('muebles as m','m.id','=','inventario_tienda.mueble_id')
+            ->when($tiendaId, fn($q) => $q->where('inventario_tienda.tienda_id',$tiendaId) )
+            ->selectRaw('SUM(inventario_tienda.cantidad_stock * 
+                CASE
+                    WHEN m.precio_compra > 0 THEN m.precio_compra
+                    ELSE m.precio
+                END
+            ) as total')
+        ->value('total') ?? 0;
+        // Dinero en caja
+        $efectivoApertura = $this->getSaldoInicialCaja($tiendaId);
+        $movimientos = Transaccion::when($tiendaId, fn($q)=>$q->where('tienda_id',$tiendaId))
+            ->selectRaw("
+                SUM(CASE WHEN tipo_movimiento = 'entrada' THEN cantidad ELSE 0 END ) -
+                SUM(CASE WHEN tipo_movimiento = 'salida' THEN cantidad ELSE 0 END )
+            as total")
+            ->where('tipo_pago','efectivo')
+        ->value('total') ?? 0;
+
+        $caja = $efectivoApertura + $movimientos;
+
+        // Cuenta 
+        $cuenta = Cuenta::when($tiendaId, fn($q)=>$q->where('tienda_id',$tiendaId))
+            ->selectRaw("
+                SUM(CASE WHEN tipo_movimiento = 'entrada' THEN monto ELSE 0 END) -
+                SUM(CASE WHEN tipo_movimiento = 'salida' THEN monto ELSE 0 END)
+                as total")
+        ->value('total') ?? 0;
+
+        //Total compras
+        $totalCompras = Entrada::when($tiendaId,fn($q)=>$q->where('tienda_id',$tiendaId))
+            ->when($inicio || $fin, fn($q)=>$filtroFecha($q))
+            ->sum('total_compra');
+        
+        //Total abonos
+        $totalAbonos = PagoIngresoInventario::where('tipo','abono')
+            ->when($tiendaId,fn($q)=>$q->where('tienda_id',$tiendaId))
+            ->when($inicio || $fin, fn($q)=>$filtroFecha($q,'fecha'))
+            ->sum('monto');
+        
+        // Total saldo a favor
+        $saldoFavor = PagoIngresoInventario::where('tipo','cargo')
+            ->when($tiendaId,fn($q)=>$q->where('tienda_id',$tiendaId))
+            ->when($inicio || $fin, fn($q)=>$filtroFecha($q,'fecha'))
+            ->sum('monto');
+        
+        // Deuda real
+        $adeudo = max($totalCompras - $totalAbonos, 0);
+       
+        $balance = $inventario + $caja + $cuenta + $saldoFavor - $adeudo;
+
+        return compact(
+            'ventas',
+            'gastos',
+            'balance',
+            'inventario',
+            'caja',
+            'cuenta',
+            'adeudo',
+            'saldoFavor',
+        );
+
+    }
     
-    public function pruebaPDF(){
+    public function pruebaPDF(Request $request){
         ini_set('memory_limit', '256M');
         ini_set('max_execution_time', 300);
 
-        $pdf = Pdf::loadView('reportes.reportePDF');
+        $tiendaId = $request->tiendas ?: Auth::user()->tienda_id;
+        $inicio = $request->inicio;
+        $fin = $request->fin;
 
-        return $pdf->stream('prueba.pdf');
+        $tienda = DB::table('tiendas')->where('id',$tiendaId)->whereNull('deleted_at')->value('nombre');
+
+        $data = $this->calcularResumen($tiendaId,$inicio,$fin);
+
+        $data['inicio'] = $inicio;
+        $data['fin'] = $fin;
+        $data['tienda'] = $tienda ?: 'Todas las tiendas.';
+
+        $pdf = Pdf::loadView('reportes.reportePDF',$data);
+
+        return $pdf->stream('reporte_resumen_financiero.pdf');
     }
-
-
 
 }
