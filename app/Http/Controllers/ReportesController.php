@@ -41,7 +41,7 @@ class ReportesController extends Controller
             if ($fin) $q->whereDate($col, '<=', $fin);
         };
 
-        $data = Transaccion::where('tipo_movimiento','entrada')
+        $data = Transaccion::withTrashed()->where('tipo_movimiento','entrada')
             ->select(
                 'created_at',
                 'descripcion',
@@ -66,7 +66,7 @@ class ReportesController extends Controller
             if ($fin) $q->whereDate($col, '<=', $fin);
         };
 
-        $data = Transaccion::leftJoin('users as u','u.id','=','movimientos_tienda.user_id')
+        $data = Transaccion::withTrashed()->leftJoin('users as u','u.id','=','movimientos_tienda.user_id')
             ->select(
                 'movimientos_tienda.cantidad',
                 'movimientos_tienda.tipo_movimiento',
@@ -159,12 +159,12 @@ class ReportesController extends Controller
             if ($fin) $q->whereDate($col, '<=', $fin);
         };
         // Ventas
-        $ventas = Transaccion::where('tipo_movimiento','entrada')
+        $ventas = Transaccion::withTrashed()->where('tipo_movimiento','entrada')
             ->when($tiendaId, fn($q) => $q->where('tienda_id',$tiendaId) )
             ->when($inicio || $fin, fn($q) => $filtroFecha($q) )
         ->sum('cantidad');
         // Gastos
-        $gastos = Transaccion::where('tipo_movimiento','salida')
+        $gastos = Transaccion::withTrashed()->where('tipo_movimiento','salida')
             ->when($tiendaId, fn($q) => $q->where('tienda_id', $tiendaId) )
             ->when($inicio || $fin, fn($q) => $filtroFecha($q))
         ->sum('cantidad');
@@ -255,7 +255,5 @@ class ReportesController extends Controller
 
         return $pdf->stream('reporte_resumen_financiero.pdf');
     }
-
-
 
 }
