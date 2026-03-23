@@ -29,6 +29,7 @@
                         <th scope="col">Correo</th>
                         <th scope="col">Teléfono</th>
                         <th scope="col"></th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,4 +47,5 @@
 </script>
 @include('catalogos.proveedores.modalAddProveedor')
 @include('catalogos.proveedores.modalUpdateProveedor')
+@include('catalogos.proveedores.modalVerProveedor')
 @endsection

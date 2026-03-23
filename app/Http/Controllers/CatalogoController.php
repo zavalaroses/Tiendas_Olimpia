@@ -463,5 +463,93 @@ class CatalogoController extends Controller
             return response()->json($response,500);
         }
     }
+    public function getEstadoCuentaProveedor($id){
+        try {
+            $proveedor = Proveedor::where('id',$id)->first();
+
+            $adeudo = DB::table('ingresos_inventario')
+                ->where('proveedor_id',$id)
+                ->selectRaw("
+                    SUM(
+                        CASE 
+                            WHEN total_compra > total_pagado
+                            THEN total_compra - total_pagado
+                            ELSE 0
+                        END
+                    ) as total
+                ")
+                ->whereNull('deleted_at')
+            ->value('total') ?? 0;
+
+            $saldoFavor = DB::table('pagos_ingresos_inventario')
+                ->where('proveedor_id',$id)
+                ->where('tipo','cargo')
+            ->sum('monto');
+
+            $balnce = $saldoFavor - $adeudo;
+
+            $movimientos = DB::table(function ($query) use ($id){
+                $query->select(
+                    'e.id as referencia',
+                    'e.fecha',
+                    DB::raw("'Compra' as tipo"),
+                    DB::raw("CONCAT('Entrada #', e.id) as concepto"),
+                    DB::raw("e.total_compra as cargo"),
+                    DB::raw("0 as abono")
+                )
+                ->from('ingresos_inventario as e')
+                ->where('e.proveedor_id', $id);
+            })
+            ->unionAll(
+                DB::table('pagos_ingresos_inventario as p')
+                    ->select(
+                        'p.id as referencia',
+                        'p.fecha',
+                        DB::raw("
+                            CASE 
+                                WHEN p.tipo = 'abono' THEN 'Pago'
+                                WHEN p.tipo = 'cargo' THEN 'Saldo a favor'
+                            END as tipo
+                        "),
+                        DB::raw("
+                            CASE 
+                                WHEN p.tipo = 'abono' THEN CONCAT('Pago entrada #',p.ingreso_id)
+                                WHEN p.tipo = 'cargo' THEN 'Saldo a favor'
+                            END as concepto
+                        "),
+                        DB::raw("0 as cargo"),
+                        DB::raw("p.monto as abono")
+                    )
+                    ->where('p.proveedor_id',$id)
+            )
+            ->orderBy('fecha','asc')
+            ->orderBy('referencia','asc')
+            ->get();
+            $saldo = 0;
+            $movimientos = collect($movimientos)->map(function ($item)use (&$saldo){
+                $saldo = $saldo - $item->cargo + $item->abono;
+                $item->saldo = $saldo;
+                return $item;
+            });
+
+            return response()->json([
+                'proveedor' => $proveedor,
+                'resumen'=> [
+                    'adeudo'=>(float)$adeudo,
+                    'saldo_favor'=>(float)$saldoFavor,
+                    'balance'=>(float)$balnce
+                ],
+                'movimientos'=>$movimientos
+            ],200);
+
+        } catch (\Throwable $th) {
+            Log::debug(json_encode($th));
+            return response()->json([
+                'icon'=>'error',
+                'title'=>'Error',
+                'text'=>$th->getMessage()
+            ],500);
+        }
+    }
 
 }

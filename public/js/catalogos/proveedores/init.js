@@ -36,7 +36,12 @@ dao = {
                 {"targets": [1],"mData":'nombre'},
                 {"targets": [2],"mData":'contacto'},
                 {"targets": [3],"mData":'telefono'},
-                {"aTargets": [4], "mData" : function(o){
+                {"targets":[4],"mData":function (o) {
+                   return `<button class="btn btn-sm btnAgregar" onClick="dao.verProveedor(${o.id})">
+                        <i class="fa fa-eye"></i>
+                    </button>`
+                }},
+                {"aTargets": [5], "mData" : function(o){
                     return  '<button class="dropdown-item" onclick="dao.editar(' + o.id + ')"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i></button>'+
                             '<button class="dropdown-item" onclick="dao.eliminar(' + o.id +')"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i></button>';
                 }},
@@ -117,6 +122,53 @@ dao = {
             
             }
         }) 
+    },
+    verProveedor:function (id) {
+        $.ajax({
+            url:'/get-estado-cuenta-proveedor/'+id,
+            type:'GET',
+            dataType:'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (res) {
+            // 🟢 HEADER
+            $('#prov_nombre').text(res.proveedor.nombre);
+            $('#prov_info').text(res.proveedor.telefono ?? '');
+
+            $('#adeudo').text(money(res.resumen.adeudo));
+            $('#saldo_favor').text(money(res.resumen.saldo_favor));
+
+            let balance = res.resumen.balance;
+            $('#balance').text(money(balance));
+
+            // 🔥 COLOR
+            if (balance >= 0) {
+                $('#balance').removeClass().addClass('text-success fw-bold');
+            } else {
+                $('#balance').removeClass().addClass('text-danger fw-bold');
+            }
+            // 🟣 TABLA
+            let html = '';
+
+            res.movimientos.forEach(m => {
+
+                let color = m.saldo >= 0 ? 'text-success' : 'text-danger';
+
+                html += `
+                    <tr>
+                        <td>${m.fecha}</td>
+                        <td>${m.concepto}</td>
+                        <td>${money(m.cargo)}</td>
+                        <td>${money(m.abono)}</td>
+                        <td class="${color}">${money(m.saldo)}</td>
+                    </tr>
+                `;
+            });
+
+            $('#tablaEstadoCuenta').html(html);
+            
+        })
+        const modalVerProveedor = new bootstrap.Modal(document.getElementById('modalVerProveedor'));
+        modalVerProveedor.show();
     }
     
 };
@@ -136,6 +188,12 @@ init = {
         })
     }
 };
+function money(n) {
+    return new Intl.NumberFormat('es-MX',{
+        style:'currency',
+        currency:'MXN',
+    }).format(n || 0 );
+}
 $(document).ready(function () {
     $('#btnAddProveedor').on('click',function (e) {
         e.preventDefault();

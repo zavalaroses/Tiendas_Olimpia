@@ -224,3 +224,7 @@ height: 30px;
     position: fixed !important;
     z-index: 9999 !important;
 }
+.headerModalCustom {
+    background: linear-gradient(90deg, #f1c6c6, #f7dede);
+    border-bottom: 1px solid #e0b4b4;
+}
