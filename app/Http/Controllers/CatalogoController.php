@@ -10,6 +10,9 @@ use App\Models\catalogos\Tiendas;
 use App\Models\catalogos\Chofer;
 use App\Models\catalogos\Mueble;
 use App\Models\catalogos\Proveedor;
+use App\Models\PagoIngresoInventario;
+use App\Models\Transaccion;
+use App\Models\Cuenta;
 use Log;
 
 class CatalogoController extends Controller
@@ -463,34 +466,21 @@ class CatalogoController extends Controller
             return response()->json($response,500);
         }
     }
-    public function getEstadoCuentaProveedor($id){
+    public function getEstadoCuentaProveedor(Request $request){
         try {
-            $proveedor = Proveedor::where('id',$id)->first();
+            $proveedorId = $request->id;
+            $tiendaId = $request->tienda;
+            $inicio = $request->inicio;
+            $fin = $request->fin;
 
-            $adeudo = DB::table('ingresos_inventario')
-                ->where('proveedor_id',$id)
-                ->selectRaw("
-                    SUM(
-                        CASE 
-                            WHEN total_compra > total_pagado
-                            THEN total_compra - total_pagado
-                            ELSE 0
-                        END
-                    ) as total
-                ")
-                ->whereNull('deleted_at')
-            ->value('total') ?? 0;
+            $proveedor = Proveedor::find($proveedorId);
 
-            $saldoFavor = DB::table('pagos_ingresos_inventario')
-                ->where('proveedor_id',$id)
-                ->where('tipo','cargo')
-            ->sum('monto');
-
-            $balnce = $saldoFavor - $adeudo;
-
-            $movimientos = DB::table(function ($query) use ($id){
+            // 🟢 BASE MOVIMIENTOS (UNION)
+            $base = DB::table(function ($query) use ($proveedorId, $tiendaId){
                 $query->select(
                     'e.id as referencia',
+                    'e.proveedor_id',
+                    'e.tienda_id',
                     'e.fecha',
                     DB::raw("'Compra' as tipo"),
                     DB::raw("CONCAT('Entrada #', e.id) as concepto"),
@@ -498,58 +488,147 @@ class CatalogoController extends Controller
                     DB::raw("0 as abono")
                 )
                 ->from('ingresos_inventario as e')
-                ->where('e.proveedor_id', $id);
-            })
-            ->unionAll(
-                DB::table('pagos_ingresos_inventario as p')
-                    ->select(
-                        'p.id as referencia',
-                        'p.fecha',
-                        DB::raw("
-                            CASE 
-                                WHEN p.tipo = 'abono' THEN 'Pago'
-                                WHEN p.tipo = 'cargo' THEN 'Saldo a favor'
-                            END as tipo
-                        "),
-                        DB::raw("
-                            CASE 
-                                WHEN p.tipo = 'abono' THEN CONCAT('Pago entrada #',p.ingreso_id)
-                                WHEN p.tipo = 'cargo' THEN 'Saldo a favor'
-                            END as concepto
-                        "),
-                        DB::raw("0 as cargo"),
-                        DB::raw("p.monto as abono")
-                    )
-                    ->where('p.proveedor_id',$id)
-            )
-            ->orderBy('fecha','asc')
-            ->orderBy('referencia','asc')
-            ->get();
-            $saldo = 0;
-            $movimientos = collect($movimientos)->map(function ($item)use (&$saldo){
+                ->where('e.proveedor_id', $proveedorId)
+                ->whereNull('e.deleted_at')
+                ->when($tiendaId, fn($q)=> $q->where('e.tienda_id',$tiendaId))
+
+                ->unionAll(
+
+                    DB::table('pagos_ingresos_inventario as p')
+                        ->select(
+                            'p.id as referencia',
+                            'p.proveedor_id',
+                            'p.tienda_id',
+                            'p.fecha',
+                            DB::raw("
+                                CASE 
+                                    WHEN p.tipo = 'abono' THEN 'Pago'
+                                    WHEN p.tipo = 'cargo' THEN 'Saldo a favor'
+                                END as tipo
+                            "),
+                            DB::raw("
+                                CASE 
+                                    WHEN p.tipo = 'abono' THEN CONCAT('Pago entrada #',p.ingreso_id)
+                                    WHEN p.tipo = 'cargo' THEN 'Saldo a favor'
+                                END as concepto
+                            "),
+                            DB::raw("0 as cargo"),
+                            DB::raw("p.monto as abono")
+                        )
+                        ->where('p.proveedor_id',$proveedorId)
+                        ->when($tiendaId, fn($q)=> $q->where('p.tienda_id',$tiendaId))
+                );
+            });
+
+            // 🟡 SALDO INICIAL
+            $saldoInicial = DB::table(DB::raw("({$base->toSql()}) as movimientos"))
+                ->mergeBindings($base)
+                ->when($inicio, fn($q)=> $q->whereDate('fecha','<',$inicio))
+                ->selectRaw("SUM(abono - cargo) as saldo")
+                ->value('saldo') ?? 0;
+
+            // 🟣 MOVIMIENTOS EN RANGO
+            $movimientos = DB::table(DB::raw("({$base->toSql()}) as movimientos"))
+                ->mergeBindings($base)
+                ->when($inicio, fn($q)=> $q->whereDate('fecha','>=',$inicio))
+                ->when($fin, fn($q)=> $q->whereDate('fecha','<=',$fin))
+                ->orderBy('fecha','asc')
+                ->orderBy('referencia','asc')
+                ->get();
+
+            // 🔵 CALCULAR SALDOS Y TOTALES
+            $saldo = $saldoInicial;
+            $totalCargos = 0;
+            $totalAbonos = 0;
+
+            $movimientos = collect($movimientos)->map(function ($item) use (&$saldo, &$totalCargos, &$totalAbonos){
                 $saldo = $saldo - $item->cargo + $item->abono;
+
+                $totalCargos += $item->cargo;
+                $totalAbonos += $item->abono;
+
                 $item->saldo = $saldo;
                 return $item;
             });
 
+            $saldoFinal = $saldo;
+
             return response()->json([
                 'proveedor' => $proveedor,
                 'resumen'=> [
-                    'adeudo'=>(float)$adeudo,
-                    'saldo_favor'=>(float)$saldoFavor,
-                    'balance'=>(float)$balnce
+                    'saldo_inicial'=>(float)$saldoInicial,
+                    'total_cargos'=>(float)$totalCargos,
+                    'total_abonos'=>(float)$totalAbonos,
+                    'saldo_final'=>(float)$saldoFinal
                 ],
                 'movimientos'=>$movimientos
             ],200);
 
         } catch (\Throwable $th) {
-            Log::debug(json_encode($th));
+            Log::debug($th);
             return response()->json([
                 'icon'=>'error',
-                'title'=>'Error',
                 'text'=>$th->getMessage()
             ],500);
         }
     }
+    public function postAddSaldoProveedor(Request $request){
+        $request->validate([
+            'proveedor_id' => 'required',
+            'monto' => 'required|numeric|min:1',
+            'metodo_pago' => 'required'
+        ]);
+        try {
+            DB::beginTransaction();
+            $proveedor = Proveedor::findOrFail($request->proveedor_id);
 
+            PagoIngresoInventario::create([
+                'ingreso_id' => null,
+                'proveedor_id' => $proveedor->id,
+                'tienda_id' => $request->tienda ? $request->tienda : Auth::user()->tienda_id,
+                'usuario_id' => Auth::user()->id,
+                'monto' => $request->monto,
+                'metodo_pagp' => $request->metodo_pago,
+                'tipo' => 'cargo',
+                'descripcion' => $request->descripcion ? $request->descripcion : null,
+                'fecha' => now()
+            ]);
+            // Afectar caja
+            Transaccion::create([
+                'tienda_id' => $request->tienda ? $request->tienda : Auth::user()->tienda_id,
+                'cantidad' => $request->monto,
+                'tipo_pago' => $request->metodo_pago,
+                'tipo_movimiento' => 'salida',
+                'descripcion' => 'Saldo a favor proveedor',
+                'user_id' => Auth::user()->id
+            ]);
+            // afectamos a la cuenta si es de cuenta
+            if ($request->metodo_pago !== 'efectivo') {
+                Cuenta::create([
+                    'tienda_id' => $request->tienda ? $request->tienda : Auth::user()->tienda_id,
+                    'user_id' => Auth::user()->id,
+                    'monto' => $request->monto,
+                    'tipo_movimiento' => 'salida',
+                    'concepto' => 'transferencia',
+                    'descripcion' => 'Saldo a favor proveedor'
+                ]);
+            }
+
+            DB::commit();
+            return response()->json([
+            'icon' => 'success',
+            'title' => 'Exito',
+            'text' => 'Saldo agregado correctamente'
+            ]);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return response()->json([
+                'icon'=>'error',
+                'title'=>'Error',
+                'text'=>$th->getMessage()
+            ]);
+        }
+    }
 }

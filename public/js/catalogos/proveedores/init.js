@@ -39,7 +39,8 @@ dao = {
                 {"targets":[4],"mData":function (o) {
                    return `<button class="btn btn-sm btnAgregar" onClick="dao.verProveedor(${o.id})">
                         <i class="fa fa-eye"></i>
-                    </button>`
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="dao.abrirSaldoFavor(${o.id})">+ Saldo</button>`
                 }},
                 {"aTargets": [5], "mData" : function(o){
                     return  '<button class="dropdown-item" onclick="dao.editar(' + o.id + ')"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i></button>'+
@@ -124,32 +125,54 @@ dao = {
         }) 
     },
     verProveedor:function (id) {
+        let idTienda = null;
+        let inicio = null;
+        let fin = null;
+        const tienda = document.getElementById('tiendas');
+        const i = document.getElementById('inicio');
+        const f = document.getElementById('fin');
+        if (tienda) {
+            idTienda = tienda.value;
+        }
+        if (i) {
+            inicio = i.value;
+        }
+        if (f) {
+            fin = f.value;
+        }
+        
         $.ajax({
-            url:'/get-estado-cuenta-proveedor/'+id,
+            url:'/get-estado-cuenta-proveedor',
             type:'GET',
+            data:{
+                id:id,
+                tienda:idTienda,
+                inicio:inicio,
+                fin:fin
+            },
             dataType:'json',
             headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-        }).done(function (res) {
+        }).done(function (data) {
             // 🟢 HEADER
-            $('#prov_nombre').text(res.proveedor.nombre);
-            $('#prov_info').text(res.proveedor.telefono ?? '');
+            $('#prov_nombre').text(data.proveedor.nombre);
+            // $('#contacto').text(data.proveedor.contacto);
+            // $('#telefono').text(data.proveedor.telefono);
+            document.getElementById('contact').innerText = data.proveedor.contacto;
+            document.getElementById('tel').innerText = data.proveedor.telefono;
+            
+             // 🟢 RESUMEN
+            $('#saldo_inicial').text(money(data.resumen.saldo_inicial));
+            $('#total_cargos').text(money(data.resumen.total_cargos));
+            $('#total_abonos').text(money(data.resumen.total_abonos));
+            $('#saldo_final').text(money(data.resumen.saldo_final));
 
-            $('#adeudo').text(money(res.resumen.adeudo));
-            $('#saldo_favor').text(money(res.resumen.saldo_favor));
+            let colorFinal = data.resumen.saldo_final >= 0 ? 'text-success' : 'text-danger';
+            $('#saldo_final').attr('class','fw-bold '+colorFinal);
 
-            let balance = res.resumen.balance;
-            $('#balance').text(money(balance));
-
-            // 🔥 COLOR
-            if (balance >= 0) {
-                $('#balance').removeClass().addClass('text-success fw-bold');
-            } else {
-                $('#balance').removeClass().addClass('text-danger fw-bold');
-            }
             // 🟣 TABLA
             let html = '';
 
-            res.movimientos.forEach(m => {
+            data.movimientos.forEach(m => {
 
                 let color = m.saldo >= 0 ? 'text-success' : 'text-danger';
 
@@ -169,6 +192,67 @@ dao = {
         })
         const modalVerProveedor = new bootstrap.Modal(document.getElementById('modalVerProveedor'));
         modalVerProveedor.show();
+    },
+    getCatTiendas: function (field,id) {
+        $.ajax({
+            url:'/get-catalogo-tiendas',
+            type:'get',
+            dataType:'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            var select = $('#'+field);
+            select.html('');
+            select.append(new Option('Selecciona una tienda',''));
+            response.map(function (val,i) {
+                if (id !='' && id == val.id) {
+                    select.append(new Option(response[i].nombre,response[i].id, true, true));
+                }else{
+                    select.append(new Option(response[i].nombre,response[i].id, false,false));
+                }
+            });
+        })
+    },
+    abrirSaldoFavor: function (id) {
+        console.log('id para agregar',id);
+        $('#proveedor_id').val(id);
+        const modalAddSaldo = new bootstrap.Modal(document.getElementById('modalAddSaldo'));
+        modalAddSaldo.show();
+    },
+    addSaldoProveedor: function (){
+        let data = new FormData($('#frm_add_saldo')[0]);
+        let tienda = document.getElementById('tiendas');
+        if (tienda &&  !tienda.value) {
+            Swal.fire({
+                icon:'warning',
+                title:'Advertencia!',
+                text:'Selecciona una tienda',
+            });
+            return;
+        }else{
+            data.append('tienda',tienda.value);
+        }
+        
+        
+        $.ajax({
+            url:'/post-add-saldo-proveedor',
+            type:'POST',
+            data:data,
+            processData:false,
+            contentType:false,
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+        }).done(function (response) {
+            console.log("🚀 ~ response:", response)
+            Swal.fire({
+                icon:response.icon,
+                title:response.title,
+                text:response.text
+            });
+            if (response.icon == 'success') {
+                dao.getDataProveedores();
+                closeModal('modalAddSaldo','frm_add_saldo','');
+            }
+            
+        })
     }
     
 };
@@ -186,7 +270,19 @@ init = {
                 telefono:{required:'Este campo es requerido'},
             }
         })
-    }
+    },
+    validateAddSaldo:function (form) {
+        _gen.validate(form,{
+            rules:{
+                monto:{required:true},
+                metodo_pago:{required:true},
+            },
+            messages:{
+                monto:{required:'Este campo es requerido'},
+                metodo_pago:{required:'Este campo es requerido'},
+            }
+        })
+    } 
 };
 function money(n) {
     return new Intl.NumberFormat('es-MX',{
@@ -195,6 +291,7 @@ function money(n) {
     }).format(n || 0 );
 }
 $(document).ready(function () {
+    dao.getCatTiendas('tiendas');
     $('#btnAddProveedor').on('click',function (e) {
         e.preventDefault();
         const modalAddProveedor = new bootstrap.Modal(document.getElementById('modalAddProveedor'));
@@ -212,6 +309,14 @@ $(document).ready(function () {
         init.validateProveedor($('#frm_update_proveedor'));
         if ($('#frm_update_proveedor')) {
             dao.postEditarProveedor();
+        }
+    })
+    $('#btn_add_saldo').on('click', function (e) {
+        e.preventDefault();
+        init.validateAddSaldo($('#frm_add_saldo'));
+        if ($('#frm_add_saldo').valid()) {
+            
+            dao.addSaldoProveedor();
         }
     })
 });

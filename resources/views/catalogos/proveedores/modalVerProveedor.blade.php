@@ -18,13 +18,49 @@
 
                     <div class="col-md-6 text-end">
                         <div>
-                            <strong>Adeudo:</strong> <span id="adeudo"></span><br>
-                            <strong>Saldo a favor:</strong> <span id="saldo_favor"></span><br>
-                            <strong>Todal:</strong> 
-                            <span id="balance" class="fw-bold"></span>
+                            <strong>Contacto:</strong> <span id="contact"></span><br>
+                            <strong>Telefono:</strong> <span id="tel"></span><br>
                         </div>
                     </div>
                 </div>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <small>Saldo inicial</small>
+                                <h6 id="saldo_inicial"></h6>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <small>Total cargos</small>
+                                <h6 id="total_cargos" class="text-danger"></h6>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <small>Total abonos</small>
+                                <h6 id="total_abonos" class="text-success"></h6>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <small>Saldo final</small>
+                                <h6 id="saldo_final" class="fw-bold"></h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
 
                 <!-- 🟣 TABLA -->
                 <table class="table table-bordered table-sm">

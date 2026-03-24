@@ -123,7 +123,8 @@ Route::middleware(['auth'])->controller(CatalogoController::class)->group(functi
     Route::get('/get-data-cat-proveedores','getDataProveedores')->name('getDataProveedores');
     Route::get('/get-data-muebles','getDataMuebles')->name('getDataMuebles');
     Route::get('/get-muebles','getMuebles')->name('getMuebles');
-    Route::get('/get-estado-cuenta-proveedor/{id?}','getEstadoCuentaProveedor')->name('getEstadoCuentaProveedor');
+    Route::get('/get-estado-cuenta-proveedor','getEstadoCuentaProveedor')->name('getEstadoCuentaProveedor');
+    Route::post('/post-add-saldo-proveedor','postAddSaldoProveedor')->name('postAddSaldoProveedor');
 });
 // rutas de caja 
 Route::middleware('auth')->controller(CajaController::class)->group(function(){
