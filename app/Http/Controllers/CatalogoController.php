@@ -520,12 +520,17 @@ class CatalogoController extends Controller
                 );
             });
 
+            $saldoInicial = 0;
             // 🟡 SALDO INICIAL
-            $saldoInicial = DB::table(DB::raw("({$base->toSql()}) as movimientos"))
-                ->mergeBindings($base)
-                ->when($inicio, fn($q)=> $q->whereDate('fecha','<',$inicio))
-                ->selectRaw("SUM(abono - cargo) as saldo")
+            if ($inicio) {
+                # si venimos con una fecha si agregamos el saldo inicial...
+                $saldoInicial = DB::table(DB::raw("({$base->toSql()}) as movimientos"))
+                    ->mergeBindings($base)
+                    ->when($inicio, fn($q)=> $q->whereDate('fecha','<',$inicio))
+                    ->selectRaw("SUM(abono - cargo) as saldo")
                 ->value('saldo') ?? 0;
+            }
+            
 
             // 🟣 MOVIMIENTOS EN RANGO
             $movimientos = DB::table(DB::raw("({$base->toSql()}) as movimientos"))
