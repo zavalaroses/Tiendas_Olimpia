@@ -7,7 +7,17 @@
 <div class="container">
  <!-- Content here -->
      <div class="row">
-         <div class="col-md-10"></div>
+         <div class="col-md-10 d-flex">
+            @if(Auth::user()->rol == 1)
+                <div class="col-md-4">
+                    <select name="tiendas" id="tiendas" class="form-control"></select> 
+                </div>
+                <div class="col-md-6 d-flex">
+                    <input type="date" id="inicio" name="inicio" class="form-control">
+                    <input type="date" name="fin" id="fin" class="form-control">
+                </div>
+            @endif
+         </div>
          <div class="col-md-2">
              <button id="btnAddProveedor" type="button" name="btnAddProveedor" class="btnNuevoUsuario">Agregar</button>
          </div>
@@ -29,6 +39,7 @@
                         <th scope="col">Correo</th>
                         <th scope="col">Teléfono</th>
                         <th scope="col"></th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,4 +57,6 @@
 </script>
 @include('catalogos.proveedores.modalAddProveedor')
 @include('catalogos.proveedores.modalUpdateProveedor')
+@include('catalogos.proveedores.modalVerProveedor')
+@include('catalogos.proveedores.modalAddSaldo')
 @endsection

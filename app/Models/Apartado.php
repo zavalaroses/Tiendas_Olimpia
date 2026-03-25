@@ -23,6 +23,8 @@ class Apartado extends Model
         'liquidado_at',
         'recibo_pdf',
         'costo_envio',
+        'folio_tienda',
+        'clave',
     ];
     protected $hidden = [
         'created_at',

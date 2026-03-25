@@ -14,6 +14,8 @@ use App\Models\Cliente;
 use App\Models\Transaccion;
 use App\Models\Cuenta;
 use App\Models\catalogos\Chofer;
+use App\Models\catalogos\Tiendas;
+
 use Log;
 use Carbon\Carbon;
 
@@ -33,6 +35,7 @@ class VentasController extends Controller
                 ->leftJoin('tiendas as t','t.id','=','a.tienda_id')
                 ->select(
                     'a.id',
+                    'a.clave',
                     't.nombre as tienda',
                     't.id as id_tienda',
                     'salidas.estatus as estatus',
@@ -159,6 +162,17 @@ class VentasController extends Controller
                 $idCliente = $newCliente->id;
             }
 
+            // tomamos el nuevo folio para el apartado...
+            $folio = DB::transaction(function()use($idtienda){
+                return Apartado::where('tienda_id',$idtienda)
+                    ->lockForUpdate()
+                    ->selectRaw('COALESCE(MAX(folio_tienda),0) as max')
+                    ->value('max') + 1;
+            });
+            $tien = Tiendas::find($idtienda);
+            $iniciales = strtoupper(substr($tien->nombre,0,3));
+            $clave = $iniciales . '-' . str_pad($folio, 4, '0', STR_PAD_LEFT);
+
             $apartado =  Apartado::create([
                 'cliente_id'=>$idCliente,
                 'tienda_id'=>$idtienda,
@@ -167,6 +181,8 @@ class VentasController extends Controller
                 'usuario_id'=>Auth::user()->id,
                 'fecha_apartado'=>Carbon::now()->toDateString(),
                 'costo_envio' => $request->envio ?? 0,
+                'folio_tienda'=>$folio,
+                'clave'=>$clave
             ]);
             for ($i=0; $i < count($request->id) ; $i++) { 
                 ApartadoMueble::create([

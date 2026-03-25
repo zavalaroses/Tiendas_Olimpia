@@ -10,7 +10,13 @@ dao = {
         }).done(function (response) {
             const table = $('#tbl_apartados');
             const columns = [
-                {"targets":[0],"mData":'id'},
+                {"targets":[0],"mData":function (o) {
+                    if (o.clave == null) {
+                        return 'OLD-'+o.id;
+                    }else{
+                        return o.clave;
+                    }
+                }},
                 {"targets":[1],"mData":'cliente'},
                 {"targets":[2],"mData":'anticipo'},
                 {"targets":[3],"mData":'restante'},

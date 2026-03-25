@@ -50,6 +50,7 @@ class InventarioController extends Controller
                 ];
                 return response()->json($response,200);
             }
+            $total = floatval($request->total) + floatval($request->envio);
             $idTienda = $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id;
             $proveedor = DB::table('proveedores')->where('id',$request->proveedor)->whereNull('deleted_at')->value('nombre');
             $horaMx = Carbon::now('America/Mexico_City')->format('H:i:s');
@@ -61,7 +62,7 @@ class InventarioController extends Controller
                 'usuario_id'=>Auth::user()->id,
                 'fecha'=> $request->fecha_ingreso,
                 'codigo_trazabilidad'=>$codigo,
-                'total_compra'=>$request->total,
+                'total_compra'=>$total,
                 'total_pagado'=>0,
                 'estatus_pagado'=>'pendiente',
             ]);

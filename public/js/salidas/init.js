@@ -10,7 +10,13 @@ dao = {
         }).done(function (response) {
             const table = $('#tbl_ventas');
             const columns = [
-                {"targets":[0],"mData":'id'},
+                {"targets":[0],"mData":function (o) {
+                    if (o.clave == null) {
+                        return 'OLD-'+o.id;
+                    }else{
+                        return o.clave;
+                    }
+                }},
                 {"targets":[1],"mData":'tienda'},
                 {"targets":[2],"mData":function (o) {
                     if (o.estatus == 'Por entregar') {

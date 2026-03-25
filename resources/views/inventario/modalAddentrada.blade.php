@@ -23,9 +23,13 @@
                     <label for="proveedor" class="form-label">Proveedor</label>
                     <select name="proveedor" id="proveedor" class="form-control"></select>
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-3">
                     <label for="fecha_ingreso" class="form-label">Fecha de Ingreso</label>
                     <input type="date" class="form-control" id="fecha_ingreso" name="fecha_ingreso" readonly>
+                  </div>
+                  <div class="col-md-3">
+                    <label for="envio" class="form-label">Costo flete</label>
+                    <input type="number" class="form-control" id="envio" name="envio">
                   </div>
                   <div class="col-md-6">
                     <label for="producto" class="form-label">Producto</label>

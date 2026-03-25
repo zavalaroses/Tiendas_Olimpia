@@ -14,6 +14,7 @@ use App\Models\Salida;
 use App\Models\SalidaProducto;
 use App\Models\Transaccion;
 use App\Models\Cuenta;
+use App\Models\catalogos\Tiendas;
 
 use Log;
 use Carbon\Carbon;
@@ -81,6 +82,18 @@ class ApartadosController extends Controller
                 ]);
                 $idCliente = $newCliente->id;
             }
+            // tomamos el nuevo folio para el apartado...
+            $folio = DB::transaction(function()use($idtienda){
+                return Apartado::where('tienda_id',$idtienda)
+                    ->lockForUpdate()
+                    ->selectRaw('COALESCE(MAX(folio_tienda),0) as max')
+                    ->value('max') + 1;
+            });
+            $tien = Tiendas::find($idtienda);
+            $iniciales = strtoupper(substr($tien->nombre,0,3));
+            $clave = $iniciales . '-' . str_pad($folio, 4, '0', STR_PAD_LEFT);
+    
+
             // calcular el monto restante
             $restante = (float)$request->total - (float)$request->anticipo;
             // registramos el apartado
@@ -92,6 +105,8 @@ class ApartadosController extends Controller
                 'monto_restante'=>$restante,
                 'usuario_id'=>Auth::user()->id,
                 'fecha_apartado'=>Carbon::createFromFormat('d/m/Y', $request->fecha)->format('Y-m-d'),
+                'folio_tienda'=>$folio,
+                'clave'=>$clave
             ]);
 
             for ($i=0; $i < count($request->id) ; $i++) { 
@@ -177,7 +192,8 @@ class ApartadosController extends Controller
                     'a.monto_anticipo as anticipo',
                     'a.monto_restante as restante',
                     'a.fecha_apartado',
-                    'a.id as id'
+                    'a.id as id',
+                    'a.clave'
                 )
                 ->whereNull('a.deleted_at')
                 ->when($idTienda, function($q)use($idTienda){
@@ -386,6 +402,16 @@ class ApartadosController extends Controller
                 'precio_compra'=>$request->compra ?? 0,
                 'estatus'=>'InActivo'
             ]);
+            // tomamos el nuevo folio para el apartado...
+            $folio = DB::transaction(function()use($idtienda){
+                return Apartado::where('tienda_id',$idtienda)
+                    ->lockForUpdate()
+                    ->selectRaw('COALESCE(MAX(folio_tienda),0) as max')
+                    ->value('max') + 1;
+            });
+            $tien = Tiendas::find($idtienda);
+            $iniciales = strtoupper(substr($tien->nombre,0,3));
+            $clave = $iniciales . '-' . str_pad($folio, 4, '0', STR_PAD_LEFT);
 
             // guardamos el apartado
             $apartado =  Apartado::create([
@@ -396,6 +422,8 @@ class ApartadosController extends Controller
                 'monto_restante'=>$restante,
                 'usuario_id'=>Auth::user()->id,
                 'fecha_apartado'=>Carbon::createFromFormat('d/m/Y', $request->fecha)->format('Y-m-d'),
+                'folio_tienda'=>$folio,
+                'clave'=>$clave
             ]);
 
             ApartadoMueble::create([
