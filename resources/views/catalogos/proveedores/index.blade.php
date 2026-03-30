@@ -49,8 +49,9 @@
                             <th scope="col">Nombre</th>
                             <th scope="col">Total de compras</th>
                             <th scope="col">Total pagado</th>
+                            <th scope="col">Saldo a favor</th>
                             <th scope="col">Saldo final</th>
-                            <th scope="col"></th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                 </table>
@@ -82,8 +83,7 @@
                             <th scope="col">Nombre</th>
                             <th scope="col">Correo</th>
                             <th scope="col">Teléfono</th>
-                            <th scope="col"></th>
-                            <th scope="col"></th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
