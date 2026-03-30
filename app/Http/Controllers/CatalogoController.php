@@ -636,4 +636,31 @@ class CatalogoController extends Controller
             ]);
         }
     }
+    public function getCuentasProveedores(Request $request){
+        $compras = DB::table('ingresos_inventario')
+            ->select(
+                'proveedor_id',
+                DB::raw("SUM(total_compra) as total_compras")
+            )
+            ->when($request->tienda, fn($q)=> $q->where('tienda_id',$request->tienda))
+            ->when($request->inicio, fn($q)=> $q->whereDate('fecha','>=',$request->inicio))
+            ->whene($request->fin, fn($q)=> $q->whereDate('fecha','<=',$request->fin))
+        ->groupBy('proveedor_id');
+
+        $pagos = DB::table('pagos_ingresos_inventario')
+            ->select(
+                'proveedor_id',
+                DB::raw("
+                    SUM(CASE WHEN tipo = 'abono' THEN monto ELSE 0 END) as total_pagado
+                "),
+                DB::raw("
+                    SUM(CASE WHEN tipo = 'cargo' THEN monto ELSE 0 END as saldo_favor)
+                ")
+            )
+            ->when($request->tienda, fn($q)=> $q->where('tienda_id', $request->tienda))
+            ->when($request->inicio, fn($q)=> $q->whereDate('fecha','>=', $request->inicio))
+            ->when($request->fin, fn($q)=> $q->whereDate('fecha','<=', $request->fin))
+        ->groupBy('proveedor_id');
+
+    }
 }

@@ -253,6 +253,27 @@ dao = {
             }
             
         })
+    },
+    getCuentasProveedores: function () {
+        let tienda = document.getElementById('tiendas');
+        let inicio = document.getElementById('inicio');
+        let fin = document.getElementById('fin');
+        let data = {}
+
+        if (tien && tienda.value) data.append('tienda',tienda.value);
+        if (inicio && inicio.value) data.append('inicio', inicio.value);
+        if (fin && fin.value) data.append('fin',fin.value);
+         
+        $.ajax({
+            url:'/get-cuentas-proveedores',
+            type:'get',
+            data:data,
+            dataType:'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            console.log("🚀 ~ response:", response)
+            
+        })
     }
     
 };
@@ -292,6 +313,7 @@ function money(n) {
 }
 $(document).ready(function () {
     dao.getCatTiendas('tiendas');
+    dao.getCuentasProveedores();
     $('#btnAddProveedor').on('click',function (e) {
         e.preventDefault();
         const modalAddProveedor = new bootstrap.Modal(document.getElementById('modalAddProveedor'));
@@ -310,7 +332,7 @@ $(document).ready(function () {
         if ($('#frm_update_proveedor')) {
             dao.postEditarProveedor();
         }
-    })
+    });
     $('#btn_add_saldo').on('click', function (e) {
         e.preventDefault();
         init.validateAddSaldo($('#frm_add_saldo'));
@@ -318,5 +340,6 @@ $(document).ready(function () {
             
             dao.addSaldoProveedor();
         }
-    })
+    });
+    
 });
