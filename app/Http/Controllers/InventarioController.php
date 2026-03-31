@@ -52,6 +52,31 @@ class InventarioController extends Controller
             }
             $total = floatval($request->total) + floatval($request->envio);
             $idTienda = $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id;
+            $usadoSaldo = 0;
+            $totalPagado = 0;
+            $estatus = 'pendiente';
+
+            // obtenemos es saldo a favor
+            $saldoFavor = PagoIngresoInventario::where('proveedor_id',$request->proveedor)
+                ->where('tipo','cargo')
+                ->when($idTienda, fn($q)=>$q->where('tienda_id',$idTienda))
+            ->sum('monto');
+            if ($saldoFavor > 0) {
+                if ($saldoFavor >= $total) {
+                    $usadoSaldo = $total;
+                    $totalPagado = $total;
+                    $estatus = 'pagado';
+                }else {
+                    $usadoSaldo = $saldoFavor;
+                    $totalPagado = $saldoFavor;
+                    $estatus = 'parcial';
+                }
+            }else {
+                $totalPagado = 0;
+                $estatus = 'pendiente';
+            }
+
+            
             $proveedor = DB::table('proveedores')->where('id',$request->proveedor)->whereNull('deleted_at')->value('nombre');
             $horaMx = Carbon::now('America/Mexico_City')->format('H:i:s');
             $c1 = $proveedor ? $proveedor : 'NP'; 
@@ -63,9 +88,10 @@ class InventarioController extends Controller
                 'fecha'=> $request->fecha_ingreso,
                 'codigo_trazabilidad'=>$codigo,
                 'total_compra'=>$total,
-                'total_pagado'=>0,
-                'estatus_pagado'=>'pendiente',
+                'total_pagado'=>$totalPagado,
+                'estatus_pagado'=>$estatus,
             ]);
+            
             
             foreach ($request->id as $index => $muebleId) {
                 DetalleInv::create([
@@ -88,6 +114,40 @@ class InventarioController extends Controller
                         'cantidad_stock'=>$request->cantidad[$index]
                     ]);
                 }
+            }
+            // descontar saldo si es que se uso
+            if ($usadoSaldo > 0) {
+                $cargos = PagoIngresoInventario::where('proveedor_id',$request->proveedor)
+                    ->when($idTienda, fn($q)=> $q->where('tienda_id',$idTienda))
+                    ->where('tipo','cargo')
+                    ->where('monto','>',0)
+                    ->orderBy('id')
+                ->get();
+                $restante = $usadoSaldo;
+                 foreach ($cargos as $cargo) {
+                    if ($restante <= 0) break;
+
+                    if ($cargo->moto <= $restante) {
+                        $restante -= $cargo->monto;
+                        $cargo->monto = 0;
+                    }else {
+                        $cargo->monto -= $restante;
+                        $restante = 0;
+                    }
+                    $cargo->save();
+                }
+
+                PagoIngresoInventario::create([
+                    'ingreso_id' => $entrada->id,
+                    'proveedor_id' => $request->proveedor,
+                    'tienda_id' => $idTienda,
+                    'usuario_id' => Auth::user()->id,
+                    'monto' => $usadoSaldo,
+                    'tipo' => 'abono',
+                    'metodo_pago' => 'transferencia',
+                    'descripcion' => 'Pago aplicado con saldo a favor automàticamente.',
+                    'fecha' => $request->fecha_ingreso,
+                ]);
             }
             DB::commit();
 
