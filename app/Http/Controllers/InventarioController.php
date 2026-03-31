@@ -51,7 +51,9 @@ class InventarioController extends Controller
                 return response()->json($response,200);
             }
             $total = floatval($request->total) + floatval($request->envio);
+
             $idTienda = $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id;
+            
             $usadoSaldo = 0;
             $totalPagado = 0;
             $estatus = 'pendiente';
@@ -122,17 +124,32 @@ class InventarioController extends Controller
                     ->where('tipo','cargo')
                     ->where('monto','>',0)
                     ->orderBy('id')
+                    ->lockForUpdate()
                 ->get();
-                $restante = $usadoSaldo;
+                $restante = (float) $usadoSaldo;
                  foreach ($cargos as $cargo) {
                     if ($restante <= 0) break;
 
-                    if ($cargo->moto <= $restante) {
-                        $restante -= $cargo->monto;
+                    if (!isset($cargo->monto)) {
+                        Log::error('Cargo sin monto',['cargo_id'=>$cargo->id]);
+                        continue;
+                    }
+                    $montoCargo = (float) $cargo->monto;
+                    if ($montoCargo <= 0) {
+                        Log::error('Cargo con monto no válido',['cargo_id'=>$cargo->id]);
+                        continue;
+                    }
+
+                    if ($montoCargo <= $restante) {
+                        $restante -= $montoCargo;
                         $cargo->monto = 0;
                     }else {
-                        $cargo->monto -= $restante;
+                        $cargo->monto = $montoCargo - $restante;
                         $restante = 0;
+                    }
+                    if ($cargo->monto < 0) {
+                        # por seguridad evitamos negativos...
+                        $cargo->monto = 0;
                     }
                     $cargo->save();
                 }

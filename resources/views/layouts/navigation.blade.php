@@ -1,106 +1,97 @@
 <nav x-data="{ open: false }" class="border-b border-gray-100" style="background-color: #EDC9C9;">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 lg:px-8">
         <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <img src="{{ asset('img/logoMO.jpeg') }}" alt="Logo" class="h-12 w-auto">
-                    </a>
-                </div>
-
-                <!-- Navigation Links -->
+            <!-- Logo -->
+            <div class="shrink-0 flex items-center">
+                <a href="{{ route('dashboard') }}">
+                    <img src="{{ asset('img/logoMO.jpeg') }}" alt="Logo" class="h-12 w-auto">
+                </a>
+            </div>
+            <div class="hidden sm:flex sm:items-center sm:ms-7 gap-3 flex-wrap">
+                
                 {{-- link para caja --}}
-                <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
-                    <x-nav-link :href="route('getCajas')" :active="request()->routeIs('getCajas')">
-                        {{ 'Caja' }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
-                    <x-nav-link :href="route('getPagos')" :active="request()->routeIs('getPagos')">
-                        {{ 'Entradas' }}
-                    </x-nav-link>
-                </div>
+                <x-nav-link :href="route('getCajas')" :active="request()->routeIs('getCajas')">
+                    {{ 'Caja' }}
+                </x-nav-link>
+
+                {{-- link para pagos --}}
+                <x-nav-link :href="route('getPagos')" :active="request()->routeIs('getPagos')">
+                    {{ 'Entradas' }}
+                </x-nav-link>
                 
                 {{-- link para inventarios --}}
-                <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
-                    <x-nav-link :href="route('getInventario')" :active="request()->routeIs('getInventario')">
-                        {{ 'Inventario' }}
-                    </x-nav-link>
-                </div>
-
+                <x-nav-link :href="route('getInventario')" :active="request()->routeIs('getInventario')">
+                    {{ 'Inventario' }}
+                </x-nav-link>
+        
                 {{-- link para apartados --}}
-                <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
-                    <x-nav-link :href="route('getApartados')" :active="request()->routeIs('getApartados')">
-                        {{ 'Apartados' }}
-                    </x-nav-link>
-                </div>
+                <x-nav-link :href="route('getApartados')" :active="request()->routeIs('getApartados')">
+                    {{ 'Apartados' }}
+                </x-nav-link>
+                
 
                 {{-- link para ventas --}}
-                <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
-                    <x-nav-link :href="route('getVentas')" :active="request()->routeIs('getVentas')">
-                        {{ 'Ventas' }}
-                    </x-nav-link>
-                </div>
-
+                <x-nav-link :href="route('getVentas')" :active="request()->routeIs('getVentas')">
+                    {{ 'Ventas' }}
+                </x-nav-link>
+                
                 {{-- link para garantias --}}
-                <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
-                    <x-nav-link :href="route('getGarantias')" :active="request()->routeIs('getGarantias')">
-                        {{ 'Garantias' }}
-                    </x-nav-link>
-                </div>
+                <x-nav-link :href="route('getGarantias')" :active="request()->routeIs('getGarantias')">
+                    {{ 'Garantias' }}
+                </x-nav-link>
+                
                 {{-- apartado de catalogos --}}
                 @if(Auth::user()->rol == 1)
-                    <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
-                        <x-nav-link :href="route('getUsuarios')" :active="request()->routeIs('getUsuarios')">
-                            {{ 'Usuarios' }}
-                        </x-nav-link>
-                    </div>
-                    <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
-                        <x-nav-link :href="route('getHistorialCajas')" :active="request()->routeIs('getHistorialCajas')">
-                            {{ 'Historial cajas' }}
-                        </x-nav-link>
-                    </div>
-                    <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
-                        <x-nav-link :href="route('getManejoCuenta')" :active="request()->routeIs('getManejoCuenta')">
-                            {{ 'Cuenta' }}
-                        </x-nav-link>
-                    </div>
-                    <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
-                        <x-nav-link :href="route('getReportes')" :active="request()->routeIs('getReportes')">
-                            {{ 'Reportes' }}
-                        </x-nav-link>
-                    </div>
-                    <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
-                        <div x-data="{ openDropdown: false }" class="relative hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                            <!-- Botón principal -->
-                            <button @click="openDropdown = !openDropdown"
-                                class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none transition duration-150 ease-in-out">
-                                Catalogos
-                                <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                            <!-- Dropdown -->
-                            <div x-show="openDropdown" @click.outside="openDropdown = false"
-                                x-transition
-                                class="absolute z-50 mt-2 w-48 bg-white rounded-md shadow-lg">
-                                <a href="{{ route('getMuebles') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    Muebles
-                                </a>
-                                <a href="{{ route('getChoferes') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    Choferes
-                                </a>
-                                <a href="{{ route('getTiendas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    Tiendas
-                                </a>
-                                <a href="{{ route('getProveedores') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    Proveedores
-                                </a>
-                            </div>
+                    {{-- link para usuarios --}}
+                    <x-nav-link :href="route('getUsuarios')" :active="request()->routeIs('getUsuarios')">
+                        {{ 'Usuarios' }}
+                    </x-nav-link>
+                    
+                    {{-- link para historial de cajas --}}
+                    <x-nav-link :href="route('getHistorialCajas')" :active="request()->routeIs('getHistorialCajas')">
+                        {{ 'Historial cajas' }}
+                    </x-nav-link>
+                    
+                   {{-- link para manejo de cuenta --}}
+                    <x-nav-link :href="route('getManejoCuenta')" :active="request()->routeIs('getManejoCuenta')">
+                        {{ 'Cuenta' }}
+                    </x-nav-link>
+                   
+                    {{-- link para reportes --}}
+                    <x-nav-link :href="route('getReportes')" :active="request()->routeIs('getReportes')">
+                        {{ 'Reportes' }}
+                    </x-nav-link>
+                   
+                    {{-- dropdown para catalogos --}}
+                    <div x-data="{ openDropdown: false }" class="relative">
+                        <!-- Botón principal -->
+                        <button @click="openDropdown = !openDropdown"
+                            class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none transition duration-150 ease-in-out">
+                            Catalogos
+                            <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <!-- Dropdown -->
+                        <div x-show="openDropdown" @click.outside="openDropdown = false"
+                            x-transition
+                            class="absolute z-50 mt-2 w-48 bg-white rounded-md shadow-lg">
+                            <a href="{{ route('getMuebles') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Muebles
+                            </a>
+                            <a href="{{ route('getChoferes') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Choferes
+                            </a>
+                            <a href="{{ route('getTiendas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Tiendas
+                            </a>
+                            <a href="{{ route('getProveedores') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Proveedores
+                            </a>
                         </div>
                     </div>
+                    
                 @else
                     <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
                         <div x-data="{ openDropdown: false }" class="relative hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">

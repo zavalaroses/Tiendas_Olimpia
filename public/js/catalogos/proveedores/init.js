@@ -226,7 +226,6 @@ dao = {
             data.append('tienda',tienda.value);
         }
         
-        
         $.ajax({
             url:'/post-add-saldo-proveedor',
             type:'POST',
@@ -235,14 +234,13 @@ dao = {
             contentType:false,
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
             Swal.fire({
                 icon:response.icon,
                 title:response.title,
                 text:response.text
             });
             if (response.icon == 'success') {
-                dao.getDataProveedores();
+                dao.getCuentasProveedores();
                 closeModal('modalAddSaldo','frm_add_saldo','');
             }
             
@@ -265,7 +263,6 @@ dao = {
             dataType:'json',
             headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
             const table = $('#tbl_cuentas_proveedores');
             const columns = [
                 {"targets": [0],"mData":'id'},
@@ -366,7 +363,7 @@ $(document).ready(function () {
             dao.addSaldoProveedor();
         }
     });
-    $('#tiendas, #inicio,#fin').on('change', function (e) {
+    $('#tiendas').on('change', function (e) {
         e.preventDefault();
         dao.getCuentasProveedores();
     });
