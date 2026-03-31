@@ -36,13 +36,7 @@ dao = {
                 {"targets": [1],"mData":'nombre'},
                 {"targets": [2],"mData":'contacto'},
                 {"targets": [3],"mData":'telefono'},
-                {"targets":[4],"mData":function (o) {
-                   return `<button class="btn btn-sm btnAgregar" onClick="dao.verProveedor(${o.id})">
-                        <i class="fa fa-eye"></i>
-                    </button>
-                    <button class="btn btn-success btn-sm" onclick="dao.abrirSaldoFavor(${o.id})">+ Saldo</button>`
-                }},
-                {"aTargets": [5], "mData" : function(o){
+                {"aTargets": [4], "mData" : function(o){
                     return  '<button class="dropdown-item" onclick="dao.editar(' + o.id + ')"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i></button>'+
                             '<button class="dropdown-item" onclick="dao.eliminar(' + o.id +')"><i class="far fa-trash-alt" style="color: #7C0A20; opacity: 1;"></i></button>';
                 }},
@@ -232,7 +226,6 @@ dao = {
             data.append('tienda',tienda.value);
         }
         
-        
         $.ajax({
             url:'/post-add-saldo-proveedor',
             type:'POST',
@@ -241,17 +234,67 @@ dao = {
             contentType:false,
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
             Swal.fire({
                 icon:response.icon,
                 title:response.title,
                 text:response.text
             });
             if (response.icon == 'success') {
-                dao.getDataProveedores();
+                dao.getCuentasProveedores();
                 closeModal('modalAddSaldo','frm_add_saldo','');
             }
             
+        })
+    },
+    getCuentasProveedores: function () {
+        let tienda = document.getElementById('tiendas');
+        let inicio = document.getElementById('inicio');
+        let fin = document.getElementById('fin');
+        let data = {};
+
+        if (tienda && tienda.value) data.tienda = tienda.value;
+        if (inicio && inicio.value) data.inicio = inicio.value;
+        if (fin && fin.value) data.fin = fin.value;
+
+        $.ajax({
+            url:'/get-cuentas-proveedores',
+            type:'get',
+            data:data,
+            dataType:'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            const table = $('#tbl_cuentas_proveedores');
+            const columns = [
+                {"targets": [0],"mData":'id'},
+                {"targets": [1],"mData":'nombre'},
+                {"targets": [2],"mData":function (o) {
+                    return money(o.total_compras);
+                }},
+                {"targets": [3],"mData":function (o) {
+                    return money(o.total_pagado);
+                }},
+                {"targets": [4],"mData":function (o) {
+                    return money(o.saldo_favor);
+                }},
+                {"targets": [5],"mData": function (o) {
+                    if (o.saldo_actual < 0){
+                        return `<span class="text-danger fw-bold">${money(o.saldo_actual)}</span>`;
+                    }else if (o.saldo_actual > 0){
+                        return `<span class="text-primary fw-bold">${money(o.saldo_actual)}</span>`;
+                    }else if (o.saldo_actual == 0){
+                        return `<span class="text-success fw-bold">${money(o.saldo_actual)}</span>`;
+                    }else{
+                        return money(o.saldo_actual);
+                    }
+                }},
+                {"targets": [6],"mData": function (o){
+                     return `<button class="btn btn-sm btnAgregar" onClick="dao.verProveedor(${o.id})">
+                        <i class="fa fa-eye"></i>
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="dao.abrirSaldoFavor(${o.id})">+ Saldo</button>`
+                }}
+            ];
+            _gen.setTableScrollEspecial2(table,columns,response);
         })
     }
     
@@ -292,6 +335,7 @@ function money(n) {
 }
 $(document).ready(function () {
     dao.getCatTiendas('tiendas');
+    dao.getCuentasProveedores();
     $('#btnAddProveedor').on('click',function (e) {
         e.preventDefault();
         const modalAddProveedor = new bootstrap.Modal(document.getElementById('modalAddProveedor'));
@@ -310,7 +354,7 @@ $(document).ready(function () {
         if ($('#frm_update_proveedor')) {
             dao.postEditarProveedor();
         }
-    })
+    });
     $('#btn_add_saldo').on('click', function (e) {
         e.preventDefault();
         init.validateAddSaldo($('#frm_add_saldo'));
@@ -318,5 +362,10 @@ $(document).ready(function () {
             
             dao.addSaldoProveedor();
         }
-    })
+    });
+    $('#tiendas').on('change', function (e) {
+        e.preventDefault();
+        dao.getCuentasProveedores();
+    });
+    
 });

@@ -636,4 +636,45 @@ class CatalogoController extends Controller
             ]);
         }
     }
+    public function getCuentasProveedores(Request $request){
+        $compras = DB::table('ingresos_inventario')
+            ->select(
+                'proveedor_id',
+                DB::raw("SUM(total_compra) as total_compras")
+            )
+            ->when($request->tienda, fn($q)=> $q->where('tienda_id',$request->tienda))
+            ->when($request->inicio, fn($q)=> $q->whereDate('fecha','>=',$request->inicio))
+            ->when($request->fin, fn($q)=> $q->whereDate('fecha','<=',$request->fin))
+        ->groupBy('proveedor_id');
+
+        $pagos = DB::table('pagos_ingresos_inventario')
+            ->select(
+                'proveedor_id',
+                DB::raw("
+                    SUM(CASE WHEN tipo = 'abono' THEN monto ELSE 0 END) as total_pagado
+                "),
+                DB::raw("
+                    SUM(CASE WHEN tipo = 'cargo' THEN monto ELSE 0 END) as saldo_favor
+                ")
+            )
+            ->when($request->tienda, fn($q)=> $q->where('tienda_id', $request->tienda))
+            ->when($request->inicio, fn($q)=> $q->whereDate('fecha','>=', $request->inicio))
+            ->when($request->fin, fn($q)=> $q->whereDate('fecha','<=', $request->fin))
+        ->groupBy('proveedor_id');
+        
+        $data = DB::table('proveedores as p')
+            ->leftJoinSub($compras, 'c', 'c.proveedor_id','=','p.id')
+            ->leftJoinSub($pagos, 'pa', 'pa.proveedor_id','=','p.id')
+            ->select(
+                'p.id',
+                'p.nombre',
+                DB::raw('COALESCE(c.total_compras,0) as total_compras'),
+                DB::raw('COALESCE(pa.total_pagado,0) as total_pagado'),
+                DB::raw('COALESCE(pa.saldo_favor,0) as saldo_favor'),
+                DB::raw('(COALESCE(pa.total_pagado,0) - COALESCE(c.total_compras,0)  + COALESCE(pa.saldo_favor,0)) as saldo_actual')
+            )
+        ->get();
+
+        return response()->json($data,200);
+    }
 }

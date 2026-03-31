@@ -37,7 +37,7 @@
                     <tr>
                         <th scope="col">ID</th>
                         <th scope="col">Tienda</th>
-                        <th scope="col">Trasabilidad</th>
+                        <th scope="col">Trazabilidad</th>
                         <th scope="col">Total compra</th>
                         <th scope="col">Total pagado</th>
                         <th scope="col">Estatus</th>
