@@ -73,18 +73,19 @@ Route::middleware('auth')->controller(ApartadosController::class)->group(functio
     Route::get('/get-apartados','getApartados')->name('getApartados');
     Route::get('/get-precio-by-idMueble/{id?}','getPreciosById')->name('getPreciosById');
     Route::post('/post-add-apartado','postAddPartido')->name('postAddPartido');
-    Route::get('/get-data-apartados/{tienda?}','getDataApartados')->name('getDataApartados');
+    Route::post('/get-data-apartados','getDataApartados')->name('getDataApartados');
     Route::get('/get-cantidad-restante/{id}','getMontoRestante')->name('getMontoRestante');
     Route::post('/post-pagar-adelanto','postAddAdelanto')->name('postAddAdelanto');
     Route::post('/post-add-pedido-especial','postAddPedido')->name('postAddPedido');
     Route::get('/get-detalles-apartado/{id?}','getDetalleApartado')->name('getDetalleApartado');
     Route::get('/get-data-editar-apartado/{id?}','getDataEditarApartado')->name('getDataEditarApartado');
     Route::post('/post-edit-apartado','postEditApartado')->name('postEditApartado');
+    Route::get('/get-filtros-a/{id?}','getFiltrosApartados')->name('getFiltrosApartados');
 });
 // rutas de ventas
 Route::middleware('auth')->controller(VentasController::class)->group(function(){
     Route::get('/get-ventas','getVentas')->name('getVentas');
-    Route::get('/get-data-salidas-all/{tienda?}','getDataSalidas')->name('getDataSalidas');
+    Route::post('/get-data-salidas-all','getDataSalidas')->name('getDataSalidas');
     Route::get('/get-choferes-catalogo/{tienda?}','getChoferesEnvio')->name('getChoferesEnvio');
     Route::get('/get-chofer-info-salida/{id?}','getDataToSalida')->name('getDataToSalida');
     Route::post('/post-agendar-salida','postAgendarSalida')->name('postAgendarSalida');
@@ -92,6 +93,7 @@ Route::middleware('auth')->controller(VentasController::class)->group(function()
     Route::post('/finalizar-venta','postFinalizarVenta')->name('postFinalizarVenta');
     Route::get('/get-detalles-venta/{id?}','getDetalleVenta')->name('getDetalleVenta');
     Route::get('/get-datos-garantia-venta/{id?}','getDatosGarantiaVenta')->name('getDatosGarantiaVenta');
+    Route::get('/get-filtros-v/{id?}','getFiltrosVentas')->name('getFiltrosVentas');
     
 });
 // rutas de catalogos

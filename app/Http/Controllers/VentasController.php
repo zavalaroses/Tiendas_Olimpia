@@ -25,10 +25,13 @@ class VentasController extends Controller
     public function getVentas(){
         return view('ventas.index');
     }
-    public function getDataSalidas($tienda = null){
+    public function getDataSalidas(Request $request){
         try {
-
-            $idTienda = $tienda ? $tienda : Auth::user()->tienda_id;
+            $idTienda = $request->tienda ? $request->tienda : Auth::user()->tienda_id;
+            $cliente = $request->cliente ?? null;
+            $mueble = $request->mueble ?? null; 
+            
+            
 
             $salidas = Salida::leftJoin('clientes as c','c.id','=','salidas.cliente_id')
                 ->leftJoin('apartados as a','a.id','=','salidas.apartado_id')
@@ -47,6 +50,15 @@ class VentasController extends Controller
                 )
                 ->when($idTienda, function($q) use($idTienda){
                     $q->where('a.tienda_id',$idTienda);
+                })
+                ->when($cliente, fn($q)=> $q->where('c.id',$cliente))
+                ->when($mueble, function($q) use ($mueble) {
+                    $q->whereExists(function($sub) use ($mueble) {
+                        $sub->select(DB::raw(1))
+                            ->from('apartado_muebles as am')
+                            ->whereColumn('am.id_apartado', 'a.id')
+                            ->where('am.id_mueble', $mueble);
+                    });
                 })
                 ->orderBy('a.id','desc')
             ->get();
@@ -384,6 +396,28 @@ class VentasController extends Controller
             ->where('salidas.apartado_id',$id)
         ->get();
         return response()->json($data,200);
+    }
+    public function getFiltrosVentas($id = null){
+        $idTienda = $id ? $id : Auth::user()->tienda_id;
+        $muebles = DB::table('salidas as s')->join('salida_producto as sp','sp.id_salida','=','s.id')
+            ->join('muebles as m','m.id','=','sp.id_mueble')
+            ->select('m.id','m.nombre')
+            ->distinct()
+            ->when($idTienda, fn($q) => $q->where('sp.id_tienda',$idTienda))
+            ->whereNull('s.deleted_at')
+        ->get();
+
+        $clientes = DB::table('salidas as s')->join('clientes as c','c.id','=','s.cliente_id')
+            ->select(
+                'c.id',
+                DB::raw("CONCAT(c.nombre, ' ',c.apellidos) as nombre")
+            )
+            ->distinct()
+            ->when($idTienda, fn($q) => $q->where('c.tienda_id',$idTienda))
+            ->whereNull('s.deleted_at')
+        ->get();
+
+        return response()->json(['clientes'=>$clientes,'muebles'=>$muebles],200);
     }
     
 }

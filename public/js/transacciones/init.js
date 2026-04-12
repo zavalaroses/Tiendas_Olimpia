@@ -13,7 +13,14 @@ var dao = {
                     const [year, month, day] = soloFecha.split("-");
                     return `${day}-${month}-${year}`;
                 },'sClass':'muted'},
-                {"targets":[1],"mData":'venta_id'},
+                {"targets":[1],"mData":function (o) {
+                    if (o.clave == null) {
+
+                        return o.venta_id ? 'OLD-'+o.venta_id : '';
+                    }else{
+                        return o.clave;
+                    }
+                }},
                 {"targets":[2],"mData":'tipo_pago'},
                 {"targets":[3],"mData":'descripcion'},
                 {"targets":[4],"mData":'cantidad'},

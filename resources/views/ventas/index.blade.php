@@ -7,14 +7,26 @@
 <div class="container">
  <!-- Content here -->
      <div class="row">
-         <div class="col-md-10">
+         <div class="col-md-10 d-flex">
             @if(Auth::user()->rol == 1)
                <div class="col-md-4">
                    <select name="tiendas" id="tiendas" class="form-control"></select> 
                </div>
            @endif
+           <div class="col-md-8 d-flex px-2">
+                <div class="col-md-6">
+                    <select name="muebles" id="muebles" class="form-control">
+                        <option value="">Selecciona un mueble</option>
+                    </select>
+                </div>
+                <div class="col-md-6 px-2">
+                    <select name="clientes" id="clientes" class="form-control">
+                        <option value="">Selecciona un cliente</option>
+                    </select>
+                </div>
+           </div>
          </div>
-         <div class="col-md-2">
+         <div class="col-md-2 d-flex">
              <button id="btnNuevaVenta" type="button" name="btnNuevaVenta" class="btnNuevoUsuario">Nueva Venta</button>
          </div>
      </div>
