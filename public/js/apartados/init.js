@@ -796,6 +796,8 @@ $(document).ready(function () {
         e.preventDefault();
         const tienda = this.options[this.selectedIndex].text;
         document.getElementById('tituto_tienda').innerText = tienda;
+        $('#clientes').val('');
+        $('#muebles').val('');
         dao.getCatFiltros();
         dao.getData(this.value);
     });
