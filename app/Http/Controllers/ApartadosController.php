@@ -692,10 +692,13 @@ class ApartadosController extends Controller
         
     }
     public function getFiltrosApartados($id = null){
+        $idTienda = $id ? $id : Auth::user()->tienda_id;
+
         $muebles = DB::table('apartados as a')->join('apartado_muebles as ap','ap.id_apartado','=','a.id')
             ->join('muebles as m','m.id','=','ap.id_mueble')
             ->select('m.id','m.nombre')
             ->distinct()
+            ->when($idTienda, fn($q) => $q->where('a.tienda_id',$idTienda))
             ->whereNull('a.deleted_at')
         ->get();
 
@@ -705,6 +708,7 @@ class ApartadosController extends Controller
                 DB::raw("CONCAT(c.nombre,' ',c.apellidos) as nombre"),
             )
             ->distinct()
+            ->when($idTienda, fn($q) => $q->where('c.tienda_id',$idTienda))
             ->whereNull('a.deleted_at')
         ->get();
         return response()->json(['clientes'=>$clientes,'muebles'=>$muebles],200);
