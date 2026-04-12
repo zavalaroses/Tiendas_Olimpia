@@ -26,11 +26,13 @@ class CajaController extends Controller
     public function getData($tienda = null){
         $idTienda = $tienda ? $tienda : Auth::user()->tienda_id;
         $data = Transaccion::join('users as u','u.id','=','user_id')
+            ->leftJoin('apartados as a','a.id','=','movimientos_tienda.venta_id')
             ->select(
                 'movimientos_tienda.id',
                 'movimientos_tienda.tienda_id',
+                'a.clave',
                 'venta_id',
-                'cantidad',
+                'movimientos_tienda.cantidad',
                 'tipo_pago',
                 'tipo_movimiento',
                 'descripcion',

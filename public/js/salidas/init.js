@@ -2,9 +2,12 @@ let totalMuebles = 0;
 let costoEnvio = 0;
 dao = {
     getDataSalidas: function (tienda) {
+        let cliente = $('#clientes').val();
+        let mueble = $('#muebles').val();
         $.ajax({
-            url:'/get-data-salidas-all/'+tienda,
-            type:'get',
+            url:'/get-data-salidas-all',
+            type:'post',
+            data:{'tienda':tienda,'cliente':cliente,'mueble':mueble},
             dataType:'json',
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
@@ -262,6 +265,33 @@ dao = {
                 }
             });
         })
+    },
+    getCatFiltros: function () {
+        let id = '';
+        const tienda = document.getElementById('tiendas');
+        if (tienda) {
+            id =  tienda.value;
+        }
+        $.ajax({
+            url:'/get-filtros-v/'+id,
+            type:'get',
+            dataType:'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            const {clientes,muebles} = response;
+            var filMuebles = $('#muebles');
+            var filClientes = $('#clientes');
+            filMuebles.html('');
+            filMuebles.append(new Option('Selecciona un mueble', ''));
+            muebles.map(function (val,i) {
+                filMuebles.append(new Option(muebles[i].nombre, muebles[i].id, false,false));
+            });
+            filClientes.html('');
+            filClientes.append(new Option('Selecciona un cliente', ''));
+            clientes.map(function (val,i) {
+                filClientes.append(new Option(clientes[i].nombre, clientes[i].id, false,false));
+            });
+        });
     },
     finalizarVenta: function (id) {
         const tienda = document.getElementById('tiendas');
@@ -548,6 +578,7 @@ function resetearVenta() {
 }
 $(document).ready(function () {
     dao.getDataSalidas('');
+    dao.getCatFiltros();
     $('#btn_agendar_salida').on('click',function (e) {
         e.preventDefault();
         init.validateDarSalida($('#frm_dar_salida'));
@@ -607,6 +638,7 @@ $(document).ready(function () {
         e.preventDefault();
         const tienda = this.options[this.selectedIndex].text;
         document.getElementById('tituto_tienda').innerText = tienda;
+        dao.getCatFiltros();
         dao.getDataSalidas(this.value);
     });
     $('#btn_ada_garantia_venta').on('click', function (e) {
@@ -620,5 +652,23 @@ $(document).ready(function () {
         costoEnvio = Number(this.value) || 0;
         recalcularTotalVenta();
     });
+    $('#muebles').on('change', function (e) {
+        e.preventDefault();
+        let tienda = '';
+        let inputTienda = document.getElementById('tiendas');
+        if (inputTienda) {
+            tienda = inputTienda.value;
+        }
+        dao.getDataSalidas(tienda);
+    });
+    $('#clientes').on('change', function (e) {
+        e.preventDefault();
+        let tienda = '';
+        let inputTienda = document.getElementById('tiendas');
+        if (inputTienda) {
+            tienda = inputTienda.value
+        }
+        dao.getDataSalidas(tienda);
+    })
 
 });

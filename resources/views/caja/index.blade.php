@@ -100,7 +100,7 @@
                         <thead>
                             <tr>
                                 <th>Fecha</th>
-                                <th># Venta</th>
+                                <th>ID Nota</th>
                                 <th>Forma</th>
                                 <th>Detalle</th>
                                 <th>Monto</th>

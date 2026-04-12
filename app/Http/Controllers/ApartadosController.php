@@ -182,9 +182,12 @@ class ApartadosController extends Controller
             return response()->json($response,500);
         }
     }
-    public function getDataApartados($tienda = null){
+    public function getDataApartados(Request $request){
         try {
-            $idTienda = $tienda ? $tienda : Auth::user()->tienda_id;
+            $idTienda = $request->tienda ? $request->tienda : Auth::user()->tienda_id;
+            $cliente = $request->cliente ?? null;
+            $mueble = $request->mueble ?? null; 
+
             $apartados = DB::table('apartados as a')
                 ->leftJoin('clientes as c','c.id','=','a.cliente_id')
                 ->select(
@@ -198,6 +201,15 @@ class ApartadosController extends Controller
                 ->whereNull('a.deleted_at')
                 ->when($idTienda, function($q)use($idTienda){
                     $q->where('a.tienda_id',$idTienda);
+                })
+                ->when($cliente, fn($q) => $q->where('c.id',$cliente))
+                ->when($mueble, function($q) use ($mueble) {
+                    $q->whereExists(function($sub) use ($mueble) {
+                        $sub->select(DB::raw(1))
+                            ->from('apartado_muebles as am')
+                            ->whereColumn('am.id_apartado', 'a.id')
+                            ->where('am.id_mueble', $mueble);
+                    });
                 })
                 ->orderBy('a.id','desc')
             ->get();
@@ -678,5 +690,23 @@ class ApartadosController extends Controller
             ], 500);
         }
         
+    }
+    public function getFiltrosApartados($id = null){
+        $muebles = DB::table('apartados as a')->join('apartado_muebles as ap','ap.id_apartado','=','a.id')
+            ->join('muebles as m','m.id','=','ap.id_mueble')
+            ->select('m.id','m.nombre')
+            ->distinct()
+            ->whereNull('a.deleted_at')
+        ->get();
+
+        $clientes = DB::table('apartados as a')->join('clientes as c','c.id','=','a.cliente_id')
+            ->select(
+                'c.id',
+                DB::raw("CONCAT(c.nombre,' ',c.apellidos) as nombre"),
+            )
+            ->distinct()
+            ->whereNull('a.deleted_at')
+        ->get();
+        return response()->json(['clientes'=>$clientes,'muebles'=>$muebles],200);
     }
 }
