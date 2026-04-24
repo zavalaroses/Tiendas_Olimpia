@@ -176,7 +176,8 @@ class VentasController extends Controller
 
             // tomamos el nuevo folio para el apartado...
             $folio = DB::transaction(function()use($idtienda){
-                return Apartado::where('tienda_id',$idtienda)
+                return Apartado::withTrashed()
+                    ->where('tienda_id',$idtienda)
                     ->lockForUpdate()
                     ->selectRaw('COALESCE(MAX(folio_tienda),0) as max')
                     ->value('max') + 1;
