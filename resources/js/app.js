@@ -24,6 +24,9 @@ import 'datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css';
 import 'datatables.net-buttons-bs5';
 import 'datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css';
 
+// fontawesome
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
 // Extensiones de Buttons
 import 'datatables.net-buttons/js/buttons.html5.js';
 import 'datatables.net-buttons/js/buttons.print.js';

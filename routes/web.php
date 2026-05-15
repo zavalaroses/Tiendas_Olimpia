@@ -10,7 +10,9 @@ use App\Http\Controllers\VentasController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CajaController;
 use App\Http\Controllers\ReportesController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\Auth\RegisteredUserController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/get-data-dashboard',[Controller::class, 'getDataDashboard'])->name('getDataDashboard');
 });
 // rutas de usuarios
 Route::middleware(['auth','role'])->controller(UsuariosController::class)->group(function () {

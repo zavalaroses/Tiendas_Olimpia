@@ -15,6 +15,7 @@ use App\Models\SalidaProducto;
 use App\Models\Transaccion;
 use App\Models\Cuenta;
 use App\Models\catalogos\Tiendas;
+use App\Helpers\BitacoraHelper;
 
 use Log;
 use Carbon\Carbon;
@@ -110,6 +111,17 @@ class ApartadosController extends Controller
                 'clave'=>$clave
             ]);
 
+            BitacoraHelper::registrar([
+                'tienda_id' => $idtienda,
+                'accion' => 'Crear apartado',
+                'modulo' => 'Apardatos',
+                'modelo' => 'Apartado',
+                'datos_nuevos' => json_encode($apartado),
+                'monto' => $request->anticipo,
+                'tipo_movimiento' => 'abono',
+                'descripcion' => 'Se creó un nuevo apartado con clave: '.$clave,
+            ]);
+
             for ($i=0; $i < count($request->id) ; $i++) { 
                 ApartadoMueble::create([
                     'id_apartado'=>$apartado->id,
@@ -129,10 +141,46 @@ class ApartadosController extends Controller
                         'estatus_id'=>1,
                         'cantidad_stock'=>0
                     ]);
+
+                    BitacoraHelper::registrar([
+                        'tienda_id' => $idtienda,
+                        'accion' => 'Crear inventario en tienda',
+                        'modulo' => 'Apardatos',
+                        'modelo' => 'InventarioTienda',
+                        'datos_nuevos' => json_encode($inventario),
+                        'descripcion' => 'Se creó un nuevo inventario en tienda para el mueble: '.$request->id[$i],
+                    ]);
                 }
                 # restamos inventario no importa si dan negativos si existe la sobreventa...
                 $inventario->decrement('cantidad_stock',$request->cantidad[$i]);
+                
+                BitacoraHelper::registrar([
+                    'tienda_id' => $idtienda,
+                    'accion' => 'Actualizar inventario en tienda',
+                    'modulo' => 'Apardatos',
+                    'modelo' => 'InventarioTienda',
+                    'datos_nuevos' => json_encode([
+                        'mueble_id' => $request->id[$i],
+                        'cantidad_stock' => $inventario->cantidad_stock,
+                        'cantidad_decrementada' => $request->cantidad[$i],
+                    ]),
+                    'descripcion' => 'Se decrementó el inventario para el mueble: '.$request->id[$i],
+                ]);
+
                 $inventario->increment('cantidad_apartados',$request->cantidad[$i]);
+
+                BitacoraHelper::registrar([
+                    'tienda_id' => $idtienda,
+                    'accion' => 'Actualizar inventario en tienda',
+                    'modulo' => 'Apardatos',
+                    'modelo' => 'InventarioTienda',
+                    'datos_nuevos' => json_encode([
+                        'mueble_id' => $request->id[$i],
+                        'cantidad_apartados' => $inventario->cantidad_apartados,
+                        'cantidad_incrementada' => $request->cantidad[$i],
+                    ]),
+                    'descripcion' => 'Se incrementó el inventario de apartados para el mueble: '.$request->id[$i],
+                ]);
                 
             }
             // registramos la transaccion en la caja
@@ -144,6 +192,16 @@ class ApartadosController extends Controller
                 'tipo_movimiento'=>'entrada',
                 'descripcion'=>'Monto de anticipo',
                 'user_id'=>Auth::user()->id,
+            ]);
+            bitacoraHelper::registrar([
+                'tienda_id' => $idtienda,
+                'accion' => 'Registrar transacción',
+                'modulo' => 'Apardatos',
+                'modelo' => 'Transaccion',
+                'datos_nuevos' => json_encode($transaccion),
+                'monto' => $request->anticipo,
+                'tipo_movimiento' => 'abono',
+                'descripcion' => 'Se registró una transacción de anticipo para el apartado con clave: '.$clave,
             ]);
             if ($request->forma_pago != 1) {
                 # agregamos el movimiento a la cuenta...
@@ -161,7 +219,22 @@ class ApartadosController extends Controller
                     'concepto'=>$transaccionRef,       
                     'referencia'=> $transaccion->id,     
                     'descripcion'=>'Monto de anticipo',           
-                ]); 
+                ]);
+
+                bitacoraHelper::registrar([
+                    'tienda_id' => $idtienda,
+                    'accion' => 'Registrar movimiento en cuenta',
+                    'modulo' => 'Apardatos',
+                    'modelo' => 'Cuenta',
+                    'datos_nuevos' => json_encode([
+                        'monto' => $request->anticipo,
+                        'concepto' => $transaccionRef,
+                        'referencia transaccion' => $transaccion->id,
+                    ]),
+                    'monto' => $request->anticipo,
+                    'tipo_movimiento' => 'abono',
+                    'descripcion' => 'Se registró un movimiento en cuenta por el anticipo del apartado con clave: '.$clave,
+                ]);
             }
 
 
@@ -175,6 +248,16 @@ class ApartadosController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::debug('exp '.$th->getMessage());
+            bitacoraHelper::registrar([
+                'tienda_id' => $idtienda,
+                'accion' => 'Error al agregar un apartado',
+                'modulo' => 'Apardatos',
+                'modelo' => 'Apartado',
+                'datos_nuevos' => json_encode($request->all()),
+                'monto' => $request->anticipo,
+                'tipo_movimiento' => 'abono',
+                'descripcion' => 'Ocurrio un erro el mensaje es: '.$th->getMessage(),
+            ]);
             $response = [
                 'icon'=>'error',
                 'title'=>'Oops.',
@@ -237,7 +320,6 @@ class ApartadosController extends Controller
             ]);
             DB::beginTransaction();
             // asignamos el id de la tienda
-            // $idtienda = $request->id_tienda ? $request->id_tienda : Auth::user()->tienda_id;
             $idtienda = Apartado::where('id',$request->id_apartado)->value('tienda_id');
 
             // validamos que la cantidad de pago no revase la cantidad restante
@@ -252,8 +334,39 @@ class ApartadosController extends Controller
             }
             // hacemos el update a los valores monetarios
             Apartado::where('id',$request->id_apartado)->decrement('monto_restante',floatval($request->adelanto));
+
+            BitacoraHelper::registrar([
+                'tienda_id' => $idtienda,
+                'accion' => 'Registrar adelanto',
+                'modulo' => 'Apartados',
+                'modelos' => 'Apartado',
+                'datos_anteriores' => json_encode([
+                    'monto_restante' => (float)$restante
+                ]),
+                'datos_nuevos' => json_encode([
+                    'monto_restante' => (float)$restante - (float)$request->adelanto
+                ]),
+                'monto' => $request->adelanto,
+                'tipo_movimiento' => 'entrada',
+                'descripcion' => 'Se registró un adelanto para el apartado con id: '.$request->id_apartado,
+            ]);
             Apartado::where('id', $request->id_apartado)->increment('monto_anticipo', floatval($request->adelanto));
 
+            BitacoraHelper::registrar([
+                'tienda_id' => $idtienda,
+                'accion' => 'Actualizar anticipo',
+                'modulo' => 'Apartados',
+                'modelos' => 'Apartado',
+                'datos_anteriores' => json_encode([
+                    'monto_anticipo' => (float)$request->adelanto
+                ]),
+                'datos_nuevos' => json_encode([
+                    'monto_anticipo' => (float)$request->adelanto + (float)Apartado::where('id', $request->id_apartado)->value('monto_anticipo')
+                ]),
+                'monto' => $request->adelanto,
+                'tipo_movimiento' => 'entrada',
+                'descripcion' => 'Se actualizó el anticipo para el apartado con id: '.$request->id_apartado,
+            ]);
             $newRestante = Apartado::where('id',$request->id_apartado)->value('monto_restante');
             
             // registramos la transaccion en la caja
@@ -265,6 +378,17 @@ class ApartadosController extends Controller
                 'tipo_movimiento'=>'entrada',
                 'descripcion'=>'Abono o adelanto',
                 'user_id'=>Auth::user()->id,
+            ]);
+
+            BitacoraHelper::registrar([
+                'tienda_id' => $idtienda,
+                'accion' => 'Registrar transacción de adelanto',
+                'modulo' => 'Apartados',
+                'modelo' => 'Transaccion',
+                'datos_nuevos' => json_encode($transaccion),
+                'monto' => $request->adelanto,
+                'tipo_movimiento' => 'entrada',
+                'descripcion' => 'Se registró una transacción de adelanto para el apartado con id: '.$request->id_apartado,
             ]);
 
             if ($request->forma_pago != 1) {
@@ -284,6 +408,21 @@ class ApartadosController extends Controller
                     'referencia'=> $transaccion->id,     
                     'descripcion'=>'Abono o adelanto',           
                 ]); 
+
+                BitacoraHelper::registrar([
+                    'tienda_id' => $idTienda,
+                    'accion' => 'Registrar movimiento en cuenta por adelanto',
+                    'modulo' => 'Apartados',
+                    'modelo' => 'Cuenta',
+                    'datos_nuevos' => json_encode([
+                        'monto' => $request->adelanto,
+                        'concepto' => $transaccionRef,
+                        'referencia transaccion' => $transaccion->id,
+                    ]),
+                    'monto' => $request->adelanto,
+                    'tipo_movimiento' => 'entrada',
+                    'descripcion' => 'Se registró un movimiento en cuenta por el adelanto del apartado con id: '.$request->id_apartado,
+                ]);
             }
 
             // si el restante queda en cero o se liquido movemos de apartado a venta.
@@ -314,6 +453,15 @@ class ApartadosController extends Controller
                     'pdf_entrega'=>null,
                     'estatus'=>'Por entregar'
                 ]);
+
+                BitacoraHelper::registrar([
+                    'tienda_id' => $idTienda,
+                    'accion' => 'Registrar salida por liquidación de apartado',
+                    'modulo' => 'Apartados',
+                    'modelo' => 'Salida',
+                    'datos_nuevos' => json_encode($salida),
+                    'descripcion' => 'Se registró una salida por la liquidación del apartado con id: '.$request->id_apartado,
+                ]);
                 foreach ($apartadoOld as  $apartado) {
                     SalidaProducto::create([
                         'id_salida'=>$salida->id,
@@ -327,9 +475,35 @@ class ApartadosController extends Controller
                     ->where('mueble_id',$apartado->id_mueble)
                     ->decrement('cantidad_apartados',$apartado->cantidad);
 
+                    BitacoraHelper::registrar([
+                        'tienda_id' => $idtienda,
+                        'accion' => 'Actualizar inventario en tienda por liquidación de apartado',
+                        'modulo' => 'Apartados',
+                        'modelo' => 'InventarioTienda',
+                        'datos_nuevos' => json_encode([
+                            'mueble_id' => $apartado->id_mueble,
+                            'cantidad_apartados' => InventarioTienda::where('tienda_id',$idtienda)->where('mueble_id',$apartado->id_mueble)->value('cantidad_apartados'),
+                            'cantidad_decrementada' => $apartado->cantidad,
+                        ]),
+                        'descripcion' => 'Se actualizó el inventario de apartados para el mueble: '.$apartado->id_mueble.' por la liquidación del apartado con id: '.$request->id_apartado,
+                    ]);
+
                     InventarioTienda::where('tienda_id',$idtienda)
                         ->where('mueble_id',$apartado->id_mueble)
                         ->increment('por_entregar',$apartado->cantidad);
+
+                    BitacoraHelper::registrar([
+                        'tienda_id' => $idtienda,
+                        'accion' => 'Actualizar inventario en tienda por liquidación de apartado',
+                        'modulo' => 'Apartados',
+                        'modelo' => 'InventarioTienda',
+                        'datos_nuevos' => json_encode([
+                            'mueble_id' => $apartado->id_mueble,
+                            'por_entregar' => InventarioTienda::where('tienda_id',$idtienda)->where('mueble_id',$apartado->id_mueble)->value('por_entregar'),
+                            'cantidad_incrementada' => $apartado->cantidad,
+                        ]),
+                        'descripcion' => 'Se actualizó el inventario de por entregar para el mueble: '.$apartado->id_mueble.' por la liquidación del apartado con id: '.$request->id_apartado,
+                    ]);
                 }
                 
                 $response = [
@@ -415,6 +589,15 @@ class ApartadosController extends Controller
                 'precio_compra'=>$request->compra ?? 0,
                 'estatus'=>'InActivo'
             ]);
+
+            BitacoraHelper::registrar([
+                'tienda_id' => $idTienda,
+                'accion' => 'Crear mueble por pedido especial',
+                'modulo' => 'Apartados',
+                'modelo' => 'Mueble',
+                'datos_nuevos' => json_encode($mueble),
+                'descripcion' => 'Se creó un nuevo mueble por pedido especial con id: '.$mueble->id,
+            ]);
             // tomamos el nuevo folio para el apartado...
             $folio = DB::transaction(function()use($idtienda){
                 return Apartado::withTrashed()
@@ -440,6 +623,17 @@ class ApartadosController extends Controller
                 'clave'=>$clave
             ]);
 
+            BitacoraHelper::registrar([
+                'tienda_id' => $idTienda,
+                'accion' => 'Crear apartado por pedido especial',
+                'modulo' => 'Apartados',
+                'modelo' => 'Apartado',
+                'datos_nuevos' => json_encode($apartado),
+                'monto' => $request->anticipo,
+                'tipo_movimiento' => 'entrada',
+                'descripcion' => 'Se creó un nuevo apartado por pedido especial con clave: '.$clave,
+            ]);
+
             ApartadoMueble::create([
                 'id_apartado'=>$apartado->id,
                 'id_mueble'=>$mueble->id,
@@ -457,6 +651,18 @@ class ApartadosController extends Controller
                 'descripcion'=>'Monto de anticipo',
                 'user_id'=>Auth::user()->id,
             ]);
+
+            BitacoraHelper::registrar([
+                'tienda_id' => $idTienda,
+                'accion' => 'Registrar transacción de anticipo por pedido especial',
+                'modulo' => 'Apartados',
+                'modelo' => 'Transaccion',
+                'datos_nuevos' => json_encode($transaccion),
+                'monto' => $request->anticipo,
+                'tipo_movimiento' => 'entrada',
+                'descripcion' => 'Se registró una transacción de anticipo para el apartado por pedido especial con clave: '.$clave,
+            ]);
+
             if ($request->forma_pago != 1) {
                 # agregamos el movimiento a la cuenta...
                 $transaccionRef = 2; // tarjeta
@@ -474,6 +680,21 @@ class ApartadosController extends Controller
                     'referencia'=> $transaccion->id,
                     'descripcion'=>'Monto de anticipo',           
                 ]); 
+
+                BitacoraHelper::registrar([
+                    'tienda_id' => $idTienda,
+                    'accion' => 'Registrar movimiento en cuenta por anticipo de pedido especial',
+                    'modulo' => 'Apartados',
+                    'modelo' => 'Cuenta',
+                    'datos_nuevos' => json_encode([
+                        'monto' => $request->anticipo,
+                        'concepto' => $transaccionRef,
+                        'referencia transaccion' => $transaccion->id,
+                    ]),
+                    'monto' => $request->anticipo,
+                    'tipo_movimiento' => 'entrada',
+                    'descripcion' => 'Se registró un movimiento en cuenta por el anticipo del apartado por pedido especial con clave: '.$clave,
+                ]);
             }
 
             DB::commit();
@@ -673,6 +894,15 @@ class ApartadosController extends Controller
                 'monto_restante'=>$nuevoTotal - $anticipo
             ]);
             DB::commit();
+            BitacoraHelper::registrar([
+                'tienda_id' => $apartado->tienda_id,
+                'accion' => 'Editar un Apartado',
+                'modulo' => 'Apartados',
+                'modelo' => 'Apartados',
+                'datos_nuevos' => json_encode($request),
+                'datos_anteriores' => json_encode($apartado),
+                'descripcion' => 'Se creó un nuevo mueble por pedido especial con id: '.$mueble->id,
+            ]);
 
             return response()->json([
                 'icon' => 'success',
@@ -702,6 +932,7 @@ class ApartadosController extends Controller
             ->distinct()
             ->when($idTienda, fn($q) => $q->where('a.tienda_id',$idTienda))
             ->whereNull('a.deleted_at')
+            ->orderBy('m.nombre', 'ASC')
         ->get();
 
         $clientes = DB::table('apartados as a')->join('clientes as c','c.id','=','a.cliente_id')
@@ -712,6 +943,7 @@ class ApartadosController extends Controller
             ->distinct()
             ->when($idTienda, fn($q) => $q->where('c.tienda_id',$idTienda))
             ->whereNull('a.deleted_at')
+            ->orderBy('nombre','ASC')
         ->get();
         return response()->json(['clientes'=>$clientes,'muebles'=>$muebles],200);
     }

@@ -253,7 +253,7 @@ class CatalogoController extends Controller
     }
     public function getDataMuebles(){
         try {
-            $muebles = Mueble::where('estatus','!=','InActivo')->get();
+            $muebles = Mueble::where('estatus','!=','InActivo')->orderBy('nombre','ASC')->get();
             $response = [
                 'muebles'=>$muebles,
                 'rol'=>Auth::user()->rol
