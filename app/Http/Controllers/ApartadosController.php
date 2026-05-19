@@ -410,7 +410,7 @@ class ApartadosController extends Controller
                 ]); 
 
                 BitacoraHelper::registrar([
-                    'tienda_id' => $idTienda,
+                    'tienda_id' => $idtienda,
                     'accion' => 'Registrar movimiento en cuenta por adelanto',
                     'modulo' => 'Apartados',
                     'modelo' => 'Cuenta',
@@ -455,7 +455,7 @@ class ApartadosController extends Controller
                 ]);
 
                 BitacoraHelper::registrar([
-                    'tienda_id' => $idTienda,
+                    'tienda_id' => $idtienda,
                     'accion' => 'Registrar salida por liquidación de apartado',
                     'modulo' => 'Apartados',
                     'modelo' => 'Salida',
@@ -591,7 +591,7 @@ class ApartadosController extends Controller
             ]);
 
             BitacoraHelper::registrar([
-                'tienda_id' => $idTienda,
+                'tienda_id' => $idtienda,
                 'accion' => 'Crear mueble por pedido especial',
                 'modulo' => 'Apartados',
                 'modelo' => 'Mueble',
@@ -624,7 +624,7 @@ class ApartadosController extends Controller
             ]);
 
             BitacoraHelper::registrar([
-                'tienda_id' => $idTienda,
+                'tienda_id' => $idtienda,
                 'accion' => 'Crear apartado por pedido especial',
                 'modulo' => 'Apartados',
                 'modelo' => 'Apartado',
@@ -653,7 +653,7 @@ class ApartadosController extends Controller
             ]);
 
             BitacoraHelper::registrar([
-                'tienda_id' => $idTienda,
+                'tienda_id' => $idtienda,
                 'accion' => 'Registrar transacción de anticipo por pedido especial',
                 'modulo' => 'Apartados',
                 'modelo' => 'Transaccion',
@@ -682,7 +682,7 @@ class ApartadosController extends Controller
                 ]); 
 
                 BitacoraHelper::registrar([
-                    'tienda_id' => $idTienda,
+                    'tienda_id' => $idtienda,
                     'accion' => 'Registrar movimiento en cuenta por anticipo de pedido especial',
                     'modulo' => 'Apartados',
                     'modelo' => 'Cuenta',

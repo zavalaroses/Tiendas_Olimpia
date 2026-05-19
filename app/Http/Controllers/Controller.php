@@ -9,7 +9,10 @@ use App\Models\InventarioTienda;
 use App\Models\Salida;
 use App\Models\Corte;
 use App\Models\Transaccion;
+use App\Models\ComisionVendedor;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use Illuminate\Routing\Controller as BaseController;
 
 class Controller extends BaseController
@@ -54,12 +57,25 @@ class Controller extends BaseController
             $totalEfectivo = $efectivo - $egresosEfectivo;
             $dineroEnCaja = $totalEfectivo + $efectivoApertura;
 
+            // calculo de comisiones por entregar
+            $inicioSemana = Carbon::now()->startOfWeek(Carbon::MONDAY);
+            $finSemana = Carbon::now()->next(Carbon::SATURDAY);
+
+            $comisiones = ComisionVendedor::when($idTienda, function($q) use ($idTienda){
+                    $q->where('tienda_id', $idTienda)
+                        ->where('usuario_id', Auth::id());
+                })
+                ->whereBetween('fecha_entrega', [$inicioSemana, $finSemana])
+                ->where('pagada', false)
+                ->SUM('monto_comision') ?? 0;
+
             return response()->json([
                 'vendido' => floatval($dinero),
                 'inventario' => $inventario,
                 'apartados' => $apartadosActivos,
                 'porEntregar' => $porEntregar,
                 'enCaja' => $dineroEnCaja,
+                'comisiones' => $comisiones
             ]);
         } catch (\Throwable $th) {
             throw $th;

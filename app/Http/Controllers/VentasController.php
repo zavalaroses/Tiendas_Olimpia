@@ -13,6 +13,7 @@ use App\Models\SalidaProducto;
 use App\Models\Cliente;
 use App\Models\Transaccion;
 use App\Models\Cuenta;
+use App\Models\ComisionVendedor;
 use App\Models\catalogos\Chofer;
 use App\Models\catalogos\Tiendas;
 
@@ -304,7 +305,7 @@ class VentasController extends Controller
             DB::beginTransaction();
             $salida = Salida::join('apartados as a','a.id','=','salidas.apartado_id')
                 ->join('apartado_muebles as ap','ap.id_apartado','=','a.id')
-                ->select('a.tienda_id','ap.id_mueble','ap.cantidad')
+                ->select('a.tienda_id','ap.id_mueble','ap.cantidad','a.id as apartado_id')
                 ->where('salidas.apartado_id',$request->id)
             ->get();
             
@@ -318,6 +319,24 @@ class VentasController extends Controller
             Salida::where('apartado_id',$request->id)->update([
                 'estatus'=>'Entregado',
             ]);
+            $apartado = Apartado::withTrashed()->find($request->id);
+            if ($apartado->liquidado_at != null && $apartado->monto_anticipo > 0) {
+                # creamos la comicion para el vendedor...
+                ComisionVendedor::create([
+                    'tienda_id'=>$apartado->tienda_id,
+                    'usuario_id'=>$apartado->usuario_id,
+                    'apartado_id' => $apartado->id,
+                    'salida_id' => Salida::where('apartado_id',$apartado->id)->value('id'),
+                    'monto_venta' => $apartado->monto_anticipo,
+                    'porcentaje' => 3, // porcentaje de comision
+                    'monto_comision' => round(
+                        $apartado->monto_anticipo * 0.03, 2
+                    ),
+                    'fecha_entrega' => Carbon::now()->toDateString(),
+                    'pagada' => false,
+                    'fecha_pago' => null,
+                ]);
+            }
             DB::commit();
             $response = [
                 'icon'=>'success',

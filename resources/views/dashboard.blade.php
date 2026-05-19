@@ -121,8 +121,8 @@
                             <i class="fa-solid fa-building-columns"></i>
                         </div>
                         <div>
-                            <small>Cuenta bancaria</small>
-                            <h3>$0.00</h3>
+                            <small>Comision semanal</small>
+                            <h3 id="comisiones">$0.00</h3>
                         </div>
                     </div>
                 </div>
