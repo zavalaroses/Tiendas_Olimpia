@@ -33,7 +33,8 @@ class Controller extends BaseController
             $apartadosActivos = Apartado::when($idTienda, fn($q)=> $q->where('tienda_id',$idTienda))->count();
 
             $porEntregar = Salida::where('estatus','Por entregar')
-                ->when($idTienda, fn($q)=> $q->where('tienda_id',$idTienda))
+                ->leftJoin('apartados as a','a.id','=','salidas.apartado_id')
+                ->when($idTienda, fn($q)=> $q->where('a.tienda_id',$idTienda))
                 ->count();
 
             $baseQuery = fn() => Transaccion::when($idTienda, function($q) use ($idTienda) {

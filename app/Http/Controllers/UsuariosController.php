@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\User;
-
+use App\Models\ComisionVendedor;
 use Log;
 
 class UsuariosController extends Controller
@@ -38,6 +38,159 @@ class UsuariosController extends Controller
             return response()->json($roles,200);
         } catch (\Throwable $th) {
             throw $th;
+        }
+    }
+    public function getDataComisionesActivas(){
+        try {
+            $inicioSemana = Carbon::now()->startOfWeek(Carbon::MONDAY)->toDateString();
+            $finSemana = Carbon::now()->endOfWeek(Carbon::SATURDAY)->toDateString();
+
+            $comisiones = ComisionVendedor::query()
+                ->join('users as u','u.id','=','comisiones_vendedores.usuario_id')
+                ->join('tiendas as t','t.id','=','comisiones_vendedores.tienda_id')
+                ->select(
+                    'usuario_id',
+                    'u.name as usuario',
+                    't.nombre as tienda',
+                    DB::raw('COUNT(comisiones_vendedores.id) as entregas'),
+                    DB::raw('SUM(comisiones_vendedores.monto_venta) as vendido'),
+                    DB::raw('SUM(comisiones_vendedores.monto_comision) as comision'),
+                    DB::raw("CASE WHEN SUM(
+                            CASE WHEN comisiones_vendedores.pagada = 0
+                                THEN 1
+                                ELSE 0
+                        END
+                        ) > 0 THEN 'Pendiente' ELSE 'Pagado' END as estatus
+                    ")
+                )->whereBetween('comisiones_vendedores.fecha_entrega',[$inicioSemana,$finSemana])
+                ->whereNull('fecha_pago')
+                ->groupBy('usuario_id','u.name','t.nombre')
+                ->orderByDesc('comision')
+                ->get();
+
+                return response()->json([
+                    'data' => $comisiones,
+                    'inicio_semana' => $inicioSemana,
+                    'fin_semana' => $finSemana,
+                ],200);
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+    public function getResumenComisiones(){
+        try {
+            $inicioSemana = Carbon::now()->startOfWeek(Carbon::MONDAY)->toDateString();
+            $finSemana = Carbon::now()->endOfWeek(Carbon::SATURDAY)->toDateString();
+
+            $query = ComisionVendedor::query()
+                ->whereBetween('fecha_entrega', [$inicioSemana, $finSemana])
+                ->selectRaw('
+                    COALESCE(SUM(monto_comision), 0) as comision_total,
+                    COUNT(DISTINCT usuario_id) as vendedores_activos,
+                    COALESCE(SUM(monto_venta), 0) as total_vendido,
+                    COALESCE(SUM(
+                        CASE 
+                            WHEN pagada = 0 THEN monto_comision
+                            ELSE 0
+                        END
+                    ), 0) as pago_pendiente
+                ')
+            ->first();
+            return response()->json([
+                'comision_total' => round($query->comision_total,2),
+                'vendedores_activos' => round($query->vendedores_activos,2),
+                'total_vendido' => round($query->total_vendido,2),
+                'pago_pendiente' => round($query->pago_pendiente,2),
+                'inicio_semana' => $inicioSemana,
+                'fin_semana' => $finSemana,
+            ]);
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+    public function postPagarComisionSemanal(Request $request){
+        try {
+            DB::beginTransaction();
+
+            $inicioSemana = Carbon::now()
+                ->startOfWeek(Carbon::MONDAY)
+                ->toDateString();
+
+            $finSemana = Carbon::now()
+                ->startOfWeek(Carbon::MONDAY)
+                ->addDays(5)
+                ->toDateString();
+            $query = ComisionVendedor::query()->where('usuario_id',$request->id)
+                ->whereBetween('fecha_entrega',[$inicioSemana,$finSemana]
+            )->where('pagada',0);
+
+            $cantidad = $query->count();
+
+            if($cantidad <= 0){
+                return response()->json([
+                    'icon' => 'warning',
+                    'title' => 'Advertencia',
+                    'text' =>'No existen comisiones pendientes para este usuario.'
+                ],200);
+            }
+            $query->update([
+                'pagada' => 1,
+                'fecha_pago' => now()
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'icon' => 'success',
+                'title' => 'Éxito',
+                'text' =>'Comisión pagada correctamente.'
+            ],200);
+            
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+    public function getDetalleComision(int | string $usuarioId)
+    {
+        try {
+            $detalle = ComisionVendedor::query()
+                ->join('apartados as a','a.id','=','comisiones_vendedores.apartado_id')
+                ->leftJoin('clientes as c','c.id','=','a.cliente_id')
+                ->leftJoin('tiendas as t','t.id','=','comisiones_vendedores.tienda_id')
+                ->leftJoin('users as u','u.id','=','comisiones_vendedores.usuario_id')
+                ->select(
+                    'comisiones_vendedores.id',
+                    'comisiones_vendedores.fecha_entrega',
+                    'comisiones_vendedores.monto_venta',
+                    'comisiones_vendedores.monto_comision',
+                    'a.id as apartado_id',
+                    'a.clave as folio',
+                    'c.nombre as cliente',
+                    't.nombre as tienda',
+                    'u.name as usuario',
+                )
+                ->where('comisiones_vendedores.usuario_id',$usuarioId)
+                ->where('comisiones_vendedores.pagada',0)
+                ->orderBy(
+                    'comisiones_vendedores.fecha_entrega',
+                    'asc'
+                )
+            ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $detalle
+            ]);
+
+        } catch (\Throwable $th) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ],500);
         }
     }
 }

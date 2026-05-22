@@ -431,3 +431,269 @@ body{
         font-size:2rem;
     }
 }
+
+/* ======== TABS ======== */
+
+.custom-tabs{
+    background: #fff;
+    padding: 12px;
+    border-radius: 22px;
+    box-shadow: 0 8px 30px rgba(15,23,42,.06);
+}
+
+.custom-tabs .nav-link{
+    border: none;
+    border-radius: 16px;
+    padding: 14px 22px;
+    font-weight: 600;
+    color: #786666;
+    transition: .25s ease;
+}
+
+.custom-tabs .nav-link:hover{
+    background: #786666;
+    color: white;
+}
+
+.custom-tabs .nav-link.active{
+    background: linear-gradient(
+        135deg,
+        #EDC9C9,
+        #786666
+    );
+    color: white !important;
+    box-shadow: 0 8px 20px rgba(30,41,59,.2);
+}
+
+/* ======== HEADER ======== */
+
+.commission-header-card{
+    background:
+        linear-gradient(
+            135deg,
+            #A18989,
+            #786666
+        );
+    border-radius: 30px;
+    padding: 35px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.commission-header-card::before{
+    content:'';
+    position:absolute;
+    top:-80px;
+    right:-80px;
+    width:240px;
+    height:240px;
+    border-radius:50%;
+    background:
+        rgba(255,255,255,.05);
+}
+
+.header-icon{
+    width:75px;
+    height:75px;
+    border-radius:22px;
+    background:
+        rgba(255,255,255,.08);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:1.8rem;
+    color:#f59e0b;
+    backdrop-filter: blur(10px);
+}
+
+.commission-title{
+    font-size:2rem;
+    font-weight:800;
+}
+
+.commission-header-card p,
+.commission-header-card small{
+    color: rgba(255,255,255,.75) !important;
+}
+
+/* ======== CARDS ======== */
+
+.summary-card{
+    background: white;
+    border-radius: 24px;
+    padding: 26px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    transition:.25s ease;
+    box-shadow:
+        0 8px 24px rgba(15,23,42,.06);
+    height:100%;
+}
+
+.summary-card:hover{
+    transform: translateY(-4px);
+}
+
+.summary-card small{
+    color:#64748b;
+}
+
+.summary-card h3{
+    margin:0;
+    font-size:1.8rem;
+    font-weight:800;
+    color:#0f172a;
+}
+
+/* ======== ICONS ======== */
+
+.summary-icon{
+    width:65px;
+    height:65px;
+    border-radius:20px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:1.4rem;
+}
+
+.bg-primary-soft{
+    background:#dbeafe;
+    color:#2563eb;
+}
+
+.bg-success-soft{
+    background:#dcfce7;
+    color:#16a34a;
+}
+
+.bg-warning-soft{
+    background:#fef3c7;
+    color:#d97706;
+}
+
+.bg-danger-soft{
+    background:#fee2e2;
+    color:#dc2626;
+}
+
+/* ======== TABLE ======== */
+
+#tbl_comisiones{
+    border-collapse: separate;
+    border-spacing: 0 12px;
+}
+
+#tbl_comisiones thead th{
+    border:none;
+    font-size:.9rem;
+    text-transform: uppercase;
+    letter-spacing:.5px;
+    color:#64748b;
+    font-weight:700;
+}
+
+#tbl_comisiones tbody tr{
+    background:white;
+    box-shadow:
+        0 4px 20px rgba(15,23,42,.05);
+    transition:.25s;
+}
+
+#tbl_comisiones tbody tr:hover{
+    transform:translateY(-2px);
+    box-shadow:
+        0 8px 30px rgba(15,23,42,.1);
+}
+
+#tbl_comisiones td{
+    padding:20px 18px;
+    border:none;
+    vertical-align: middle;
+}
+
+/* rounded row */
+#tbl_comisiones tbody tr td:first-child{
+    border-radius:18px 0 0 18px;
+}
+
+#tbl_comisiones tbody tr td:last-child{
+    border-radius:0 18px 18px 0;
+}
+
+/* ======== BADGES ======== */
+
+.badge-premium{
+    border-radius:999px;
+    padding:10px 14px;
+    font-size:.85rem;
+    font-weight:700;
+}
+
+.badge-pendiente{
+    background:#fff7ed;
+    color:#ea580c;
+}
+
+.badge-pagado{
+    background:#ecfdf5;
+    color:#15803d;
+}
+
+/* ======== BUTTONS ======== */
+
+.btn-premium{
+    border:none;
+    border-radius:14px;
+    padding:10px 16px;
+    font-weight:600;
+    transition:.2s ease;
+}
+
+.btn-detail{
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+.btn-pay{
+    background:#1e293b;
+    color:white;
+}
+
+.btn-premium:hover{
+    transform:translateY(-2px);
+}
+
+/* ======== HISTORY ======== */
+
+#historialTab .card{
+    border-radius:30px;
+}
+
+/* ======== RESPONSIVE ======== */
+
+@media(max-width:768px){
+
+    .commission-header-card{
+        padding:25px;
+    }
+
+    .commission-title{
+        font-size:1.5rem;
+    }
+
+    .summary-card{
+        padding:18px;
+    }
+
+    .summary-card h3{
+        font-size:1.4rem;
+    }
+
+    #tbl_comisiones td{
+        padding:14px;
+    }
+}
+

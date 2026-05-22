@@ -45,6 +45,10 @@ Route::middleware(['auth','role'])->controller(UsuariosController::class)->group
     Route::get('/get-users', 'getUsuarios')->name('getUsuarios');
     Route::get('/get-data-usuarios', 'getDataUsuarios')->name('getDataUsuarios');
     Route::get('/get-catalogo-roles','getCatalogoRoles')->name('getCatalogoRoles');
+    Route::get('/get-data-comisiones-activas','getDataComisionesActivas')->name('getDataComisionesActivas');
+    Route::get('/get-resumen-comisiones','getResumenComisiones')->name('getResumenComisiones');
+    Route::post('/pagar-comision-semanal','postPagarComisionSemanal')->name('postPagarComisionSemanal');
+    Route::get('/get-detalle-comision/{usuarioId}','getDetalleComision')->name('getDetalleComision');
 });
 Route::middleware(['auth','role'])->group(function(){
     Route::post('/register-user', [RegisteredUserController::class, 'store']);
