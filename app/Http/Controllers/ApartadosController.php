@@ -339,7 +339,7 @@ class ApartadosController extends Controller
                 'tienda_id' => $idtienda,
                 'accion' => 'Registrar adelanto',
                 'modulo' => 'Apartados',
-                'modelos' => 'Apartado',
+                'modelo' => 'Apartado',
                 'datos_anteriores' => json_encode([
                     'monto_restante' => (float)$restante
                 ]),
@@ -347,7 +347,7 @@ class ApartadosController extends Controller
                     'monto_restante' => (float)$restante - (float)$request->adelanto
                 ]),
                 'monto' => $request->adelanto,
-                'tipo_movimiento' => 'entrada',
+                'tipo_movimiento' => 'abono',
                 'descripcion' => 'Se registró un adelanto para el apartado con id: '.$request->id_apartado,
             ]);
             Apartado::where('id', $request->id_apartado)->increment('monto_anticipo', floatval($request->adelanto));
@@ -356,7 +356,7 @@ class ApartadosController extends Controller
                 'tienda_id' => $idtienda,
                 'accion' => 'Actualizar anticipo',
                 'modulo' => 'Apartados',
-                'modelos' => 'Apartado',
+                'modelo' => 'Apartado',
                 'datos_anteriores' => json_encode([
                     'monto_anticipo' => (float)$request->adelanto
                 ]),
@@ -364,7 +364,7 @@ class ApartadosController extends Controller
                     'monto_anticipo' => (float)$request->adelanto + (float)Apartado::where('id', $request->id_apartado)->value('monto_anticipo')
                 ]),
                 'monto' => $request->adelanto,
-                'tipo_movimiento' => 'entrada',
+                'tipo_movimiento' => 'abono',
                 'descripcion' => 'Se actualizó el anticipo para el apartado con id: '.$request->id_apartado,
             ]);
             $newRestante = Apartado::where('id',$request->id_apartado)->value('monto_restante');
@@ -387,7 +387,7 @@ class ApartadosController extends Controller
                 'modelo' => 'Transaccion',
                 'datos_nuevos' => json_encode($transaccion),
                 'monto' => $request->adelanto,
-                'tipo_movimiento' => 'entrada',
+                'tipo_movimiento' => 'abono',
                 'descripcion' => 'Se registró una transacción de adelanto para el apartado con id: '.$request->id_apartado,
             ]);
 
@@ -420,7 +420,7 @@ class ApartadosController extends Controller
                         'referencia transaccion' => $transaccion->id,
                     ]),
                     'monto' => $request->adelanto,
-                    'tipo_movimiento' => 'entrada',
+                    'tipo_movimiento' => 'abono',
                     'descripcion' => 'Se registró un movimiento en cuenta por el adelanto del apartado con id: '.$request->id_apartado,
                 ]);
             }
@@ -630,7 +630,7 @@ class ApartadosController extends Controller
                 'modelo' => 'Apartado',
                 'datos_nuevos' => json_encode($apartado),
                 'monto' => $request->anticipo,
-                'tipo_movimiento' => 'entrada',
+                'tipo_movimiento' => 'abono',
                 'descripcion' => 'Se creó un nuevo apartado por pedido especial con clave: '.$clave,
             ]);
 
@@ -659,7 +659,7 @@ class ApartadosController extends Controller
                 'modelo' => 'Transaccion',
                 'datos_nuevos' => json_encode($transaccion),
                 'monto' => $request->anticipo,
-                'tipo_movimiento' => 'entrada',
+                'tipo_movimiento' => 'abono',
                 'descripcion' => 'Se registró una transacción de anticipo para el apartado por pedido especial con clave: '.$clave,
             ]);
 
@@ -692,7 +692,7 @@ class ApartadosController extends Controller
                         'referencia transaccion' => $transaccion->id,
                     ]),
                     'monto' => $request->anticipo,
-                    'tipo_movimiento' => 'entrada',
+                    'tipo_movimiento' => 'abono',
                     'descripcion' => 'Se registró un movimiento en cuenta por el anticipo del apartado por pedido especial con clave: '.$clave,
                 ]);
             }
@@ -901,7 +901,7 @@ class ApartadosController extends Controller
                 'modelo' => 'Apartados',
                 'datos_nuevos' => json_encode($request),
                 'datos_anteriores' => json_encode($apartado),
-                'descripcion' => 'Se creó un nuevo mueble por pedido especial con id: '.$mueble->id,
+                'descripcion' => 'Se edito el apartado: '.$apartado->id,
             ]);
 
             return response()->json([

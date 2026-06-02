@@ -62,7 +62,8 @@ class UsuariosController extends Controller
                         END
                         ) > 0 THEN 'Pendiente' ELSE 'Pagado' END as estatus
                     ")
-                )->whereBetween('comisiones_vendedores.fecha_entrega',[$inicioSemana,$finSemana])
+                )
+                // ->whereBetween('comisiones_vendedores.fecha_entrega',[$inicioSemana,$finSemana])
                 ->whereNull('fecha_pago')
                 ->groupBy('usuario_id','u.name','t.nombre')
                 ->orderByDesc('comision')
@@ -84,7 +85,7 @@ class UsuariosController extends Controller
             $finSemana = Carbon::now()->endOfWeek(Carbon::SATURDAY)->toDateString();
 
             $query = ComisionVendedor::query()
-                ->whereBetween('fecha_entrega', [$inicioSemana, $finSemana])
+                // ->whereBetween('fecha_entrega', [$inicioSemana, $finSemana])
                 ->selectRaw('
                     COALESCE(SUM(monto_comision), 0) as comision_total,
                     COUNT(DISTINCT usuario_id) as vendedores_activos,
@@ -193,4 +194,90 @@ class UsuariosController extends Controller
             ],500);
         }
     }
+    public function getHistorialComisiones(Request $request)
+    {
+        try {
+            $query = ComisionVendedor::query()
+                ->join('users as u', 'u.id','=', 'comisiones_vendedores.usuario_id')
+                ->join('tiendas as t', 't.id','=' ,'comisiones_vendedores.tienda_id')
+                ->leftJoin('users as adm','adm.id','=','comisiones_vendedores.usuario_pago_id')
+                ->selectRaw("
+                    DATE(fecha_pago) as fecha_pago,
+                    usuario_id,
+                    u.name as vendedor,
+                    t.nombre as tienda,
+                    adm.name as pagado_por,
+                    COUNT(*) as entregas,
+                    SUM(monto_venta) as total_ventas,
+                    SUM(monto_comision) as total_comision
+                ")->where('pagada',1);
+
+                if($request->filled('fecha_inicio')){
+                    $query->whereDate('fecha_pago','>=',$request->fecha_inicio);
+                }
+                if($request->filled('fecha_fin')){
+                    $query->whereDate('fecha_pago','<=',$request->fecha_fin);
+                }
+                if($request->filled('usuario_id')){
+                    $query->where('usuario_id',$request->usuario_id);
+                }
+                if ($request->filled('tienda_id')){
+                    $query->where('comisiones_vendedores.tienda_id', $request->tienda_id);
+                }
+                $historial = $query->groupBy('fecha_pago','usuario_id','u.name','t.nombre','adm.name')
+                ->orderBy('fecha_pago','desc')
+                ->get();
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $historial
+                ]);
+        } catch (\Throwable $th) {
+            Log::debug('Error al obtener historial de comisiones: '.$th->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ],500);
+        }
+    }
+    public function getDetalleComisionPagada(Request $request)
+    {
+        try {
+            $detalle = ComisionVendedor::query()
+                ->join('apartados as a','a.id','=','comisiones_vendedores.apartado_id')
+                ->leftJoin('clientes as c','c.id','=','a.cliente_id')
+                ->leftJoin('tiendas as t','t.id','=','comisiones_vendedores.tienda_id')
+                ->leftJoin('users as u','u.id','=','comisiones_vendedores.usuario_id')
+                ->select(
+                    'comisiones_vendedores.id',
+                    'comisiones_vendedores.fecha_entrega',
+                    'comisiones_vendedores.fecha_pago',
+                    'comisiones_vendedores.monto_venta',
+                    'comisiones_vendedores.monto_comision',
+                    'u.name as usuario',
+                    't.nombre as tienda',
+                    'a.id as apartado_id',
+                    'a.clave as folio',
+                    'c.nombre as cliente'
+                )
+                ->where('comisiones_vendedores.usuario_id',$request->usuario_id)
+                ->whereDate('comisiones_vendedores.fecha_pago',$request->fecha_pago)
+                ->where('comisiones_vendedores.pagada',1)
+                ->orderBy('comisiones_vendedores.fecha_entrega')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $detalle
+            ]);
+
+        } catch (\Throwable $th) {
+            Log::debug('Error al obtener detalle de comisión pagada: '.$th->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ],500);
+        }
+    }
+    
 }

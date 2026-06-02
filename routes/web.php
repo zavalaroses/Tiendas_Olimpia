@@ -49,6 +49,8 @@ Route::middleware(['auth','role'])->controller(UsuariosController::class)->group
     Route::get('/get-resumen-comisiones','getResumenComisiones')->name('getResumenComisiones');
     Route::post('/pagar-comision-semanal','postPagarComisionSemanal')->name('postPagarComisionSemanal');
     Route::get('/get-detalle-comision/{usuarioId}','getDetalleComision')->name('getDetalleComision');
+    Route::get('/get-historial-comisiones','getHistorialComisiones')->name('getHistorialComisiones');
+    Route::get('/get-detalle-comision-pagada','getDetalleComisionPagada')->name('getDetalleComisionPagada');
 });
 Route::middleware(['auth','role'])->group(function(){
     Route::post('/register-user', [RegisteredUserController::class, 'store']);

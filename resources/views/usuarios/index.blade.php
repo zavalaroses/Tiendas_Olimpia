@@ -71,10 +71,10 @@
                         </div>
                     </div>
                     <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                        <button class="btn btn-dark rounded-pill px-4">
+                        {{-- <button class="btn btn-dark rounded-pill px-4">
                             <i class="fa-solid fa-file-pdf me-2"></i>
                             Exportar
-                        </button>
+                        </button> --}}
                     </div>
                 </div>
             </div>
@@ -170,7 +170,59 @@
                         Historial de comisiones
                     </h4>
                     <div class="alert alert-light border rounded-4">
-                        Próximamente historial de pagos.
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <label>Fecha inicio</label>
+                                <input
+                                    type="date"
+                                    id="hc_fecha_inicio"
+                                    class="form-control">
+                            </div>
+                            <div class="col-md-3">
+                                <label>Fecha fin</label>
+                                <input
+                                    type="date"
+                                    id="hc_fecha_fin"
+                                    class="form-control">
+                            </div>
+                            <div class="col-md-3">
+                                <label>Usuario</label>
+                                <select
+                                    id="hc_usuario"
+                                    class="form-select">
+
+                                    <option value="">
+                                        Todos
+                                    </option>
+
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button class="btn btn-dark w-100" onclick="dao.getHistorialComisiones()">
+                                    <i class="fa-solid fa-magnifying-glass me-2"></i>
+                                    Buscar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-borderless align-middle" id="tbl_historial_comisiones">
+                                <caption class="captionTbl"></caption>
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha pago</th>
+                                        <th>Usuario</th>
+                                        <th>Tienda</th>
+                                        <th>Entregas</th>
+                                        <th>Total vendido</th>
+                                        <th>Comisión</th>
+                                        <th>Pagado por</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -229,6 +281,7 @@
        dao.getData(); 
        dao.getDataComisionesActivas();
        dao.getResumenComisiones();
+       dao.getHistorialComisiones();
     });
 </script>
 @endsection

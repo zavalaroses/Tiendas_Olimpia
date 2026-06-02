@@ -26,6 +26,7 @@ return new class extends Migration
             $table->unique(['apartado_id']);
             $table->index(['usuario_id','fecha_entrega']);
             $table->index('pagada');
+            $table->unsignedBigInteger('usuario_pago_id')->nullable();
             $table->timestamps();
         });
     }
