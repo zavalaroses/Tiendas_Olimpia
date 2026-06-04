@@ -208,7 +208,7 @@
                         <div class="table-responsive">
                             <table class="table table-borderless align-middle" id="tbl_historial_comisiones">
                                 <caption class="captionTbl"></caption>
-                                <thead class="table-light">
+                                <thead>
                                     <tr>
                                         <th>Fecha pago</th>
                                         <th>Usuario</th>
@@ -231,38 +231,35 @@
         <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
             <div class="row">
                 <div class="card shadow-sm border-0 rounded-4">
-                    <br>
-                    <div class="row">
-                        <div class="col-md-10"></div>
-                        <div class="col-md-2">
-                            <button id="btnAddUser" type="button" name="btnAddUser" class="btnNuevoUsuario">Nuevo Usuario</button>
-                        </div>
-                    </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table id="tbl_users" style="width: 100%;" class="table table-borderless table-centered">
-                                <caption class="captionTbl">
-                                    <br>
-                                    <div class="row" style="align-items: center; justify-content: center;">
-                                        <div class="col-md-6 titleTUser1">USUARIOS</div>
-                                        <div class="col-md-6 titleTUser2">REGISTRADOS</div>
-                                    </div>
-                                </caption>
-                                <thead>
-                                    <tr>
-                                        <th scope="col">ID</th>
-                                        <th scope="col">Usuario</th>
-                                        <th scope="col">Tienda</th>
-                                        <th scope="col">Rol</th>
-                                        <th scope="col">Email</th>
-                                        <th scope="col">Fecha de ingreso</th>
-                                        <th scope="col">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
+                        <h4 class="mb-4">Usuarios Registrados</h4>
+                        <div class="alert alert-light border rounded-4">
+                            <div class="row" style="padding-bottom: 0.5rem;">
+                                <div class="col-md-10"></div>
+                                <div class="col-md-2 d-flex align-items-end justify-content-end">
+                                    <button id="btnAddUser" type="button" name="btnAddUser" class="btnNuevoUsuario">Nuevo Usuario</button>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table id="tbl_users" class="table table-borderless align-middle">
+                                    <caption class="captionTbl"></caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Usuario</th>
+                                            <th scope="col">Tienda</th>
+                                            <th scope="col">Rol</th>
+                                            <th scope="col">Email</th>
+                                            <th scope="col">Fecha de ingreso</th>
+                                            <th scope="col">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+                        
                     </div>
                 </div>
             </div>
@@ -282,6 +279,7 @@
        dao.getDataComisionesActivas();
        dao.getResumenComisiones();
        dao.getHistorialComisiones();
+       dao.getFiltroUsuarios();
     });
 </script>
 @endsection

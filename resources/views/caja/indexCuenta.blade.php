@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
 @extends('layouts.app')
 @section('content')
 <head>
@@ -82,55 +80,54 @@
 </head>
 <body>
     <div class="container">
-        <div class="row">
-                <div class="col-md-10">
-                    @if(Auth::user()->rol == 1)
-                    <div class="col-md-4">
-                        <select name="tiendas" id="tiendas" class="form-control"></select> 
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h4 class="mb-4">Cuenta</h4>
+                <div class="alert alert-light border rounded-4">
+                    <div class="row">
+                        <div class="col-md-10">
+                            @if(Auth::user()->rol == 1)
+                            <div class="col-md-4">
+                                <select name="tiendas" id="tiendas" class="form-control"></select> 
+                            </div>
+                        @endif
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end justify-content-end">
+                            <button id="btnNewIngreso" type="button" name="btnNewIngreso" class="btnNuevoUsuario">Ingreso</button>
+                            {{-- <button id="btnNewEgreso" type="button" name="btnNewEgreso" class="btnNuevoUsuario">Egreso</button> --}}
+                        </div>
                     </div>
-                @endif
-                </div>
-                <div class="col-md-2">
-                    <button id="btnNewIngreso" type="button" name="btnNewIngreso" class="btnNuevoUsuario">Ingreso</button>
-                    {{-- <button id="btnNewEgreso" type="button" name="btnNewEgreso" class="btnNuevoUsuario">Egreso</button> --}}
+                    <div class="main">
+                        <div class="left">
+                            <div class="table-wrap">
+                                <table id="tbl_transacciones_cuenta" class="table table-borderless table-centered">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Tienda</th>
+                                            <th>Tipo</th>
+                                            <th>Concepto</th>
+                                            <th>Monto</th>
+                                            <th>Detalle</th>
+                                            <th>Usuario</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="movimientos">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <aside class="right">
+                            <div class="summary">
+                                <h3>Resumen de cuenta</h3>
+                                <div class="summary-row"><span>Ingresos</span><span id="ingresos">$ 21,530.00</span></div>
+                                <div class="summary-row"><span>Egresos</span><span id="salidas">$ 1,400.00</span></div>
+                                <div class="summary-row total"><span>Total general</span><span id="saldoCuenta">$ 19,130.00</span></div>
+                            </div>
+                        </aside>
+                    </div>
                 </div>
             </div>
-        <div class="main">
-            <div class="left">
-                <div class="table-wrap">
-                    <table id="tbl_transacciones_cuenta" class="table table-borderless table-centered">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Tienda</th>
-                                <th>Tipo</th>
-                                <th>Concepto</th>
-                                <th>Monto</th>
-                                <th>Detalle</th>
-                                <th>Usuario</th>
-                            </tr>
-                        </thead>
-                        <tbody id="movimientos">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-
-            <aside class="right">
-                <div class="summary">
-                    <h3>Resumen de cuenta</h3>
-                    
-                    <div class="summary-row"><span>Ingresos</span><span id="ingresos">$ 21,530.00</span></div>
-                    <div class="summary-row"><span>Egresos</span><span id="salidas">$ 1,400.00</span></div>
-                    <div class="summary-row total"><span>Total general</span><span id="saldoCuenta">$ 19,130.00</span></div>
-
-
-                    {{-- <div style="margin-top:12px;display:flex;gap:8px">
-                        <button class="btn" id="btnCerrarCorte">Cerrar corte</button>
-                    </div> --}}
-                </div>
-            </aside>
         </div>
     </div>
 </body>

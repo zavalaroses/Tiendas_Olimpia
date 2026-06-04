@@ -660,6 +660,7 @@ class CatalogoController extends Controller
             ->when($request->tienda, fn($q)=> $q->where('tienda_id', $request->tienda))
             ->when($request->inicio, fn($q)=> $q->whereDate('fecha','>=', $request->inicio))
             ->when($request->fin, fn($q)=> $q->whereDate('fecha','<=', $request->fin))
+            ->whereNull('deleted_at')
         ->groupBy('proveedor_id');
         
         $data = DB::table('proveedores as p')

@@ -219,7 +219,6 @@ dao = {
             },
         })
             .done(function (response) {
-                console.log("🚀 ~ response:", response);
                 const {
                     comision_total,
                     vendedores_activos,
@@ -318,11 +317,95 @@ dao = {
             },
         }).done(function (response) {
           console.log("detalle comisión", response);
-          let rows = "";
+          dao.renderDetallecomision(response.data);
+      })
+      .fail(function (xhr) {
+          console.error(xhr);
+
+          Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: "No fue posible cargar el detalle.",
+          });
+      });
+    },
+    getHistorialComisiones: function () {
+        $.ajax({
+            url: "/get-historial-comisiones",
+            type: "GET",
+            dataType: "JSON",
+            data: {
+                fecha_inicio: $('#hc_fecha_inicio').val(),
+                fecha_fin: $('#hc_fecha_fin').val(),
+                usuario_id: $('#hc_usuario').val()
+            },
+        }).done(function (response){
+            let rows = "";
+            const formatter = new Intl.NumberFormat("es-MX", {style: "currency",currency: "MXN",});
+            const historial = response.data ?? [];
+            var table = $('#tbl_historial_comisiones');
+            const columns = [
+                { targets: [0], mData: "fecha_pago"},
+                { targets: [1], mData: "vendedor"},
+                { targets: [2], mData: "tienda"},
+                { targets: [3], mData: "entregas"},
+                { targets: [4], mData: function(o){
+                    return formatter.format(o.total_ventas);
+                }},
+                {targets: [5], mData: function(o){
+                    return formatter.format(o.total_comision);
+                }},
+                { targets: [6], mData: "pagado_por"},
+                {
+                    targets: [7],
+                    mData: function (o) {
+                        return `
+                        <button class="btn btnDetallePago" data-fecha="${o.fecha_pago}" data-usuario="${o.usuario_id}">
+                            <i class="fa fa-eye" style="color: #D48D8D"></i>
+                        </button>
+                        `;
+                    },
+                },
+            ];
+            _gen.setTableScrollEspecial2(table, columns, response.data);
+            
+        })
+    },
+    verDetallePago: function(usuarioId, fechaPago){
+        $.ajax({
+            url: "/get-detalle-comision-pagada",
+            type: "GET",
+            dataType: "JSON",
+            data: {
+                usuario_id: usuarioId,
+                fecha_pago: fechaPago
+            },
+            beforeSend: function () {
+              $("#dc_detalle").html(`
+                <tr>
+                    <td colspan="6"
+                        class="text-center py-4">
+
+                        <div class="spinner-border
+                            text-secondary">
+                        </div>
+
+                    </td>
+                </tr>
+              `);
+              const modal = new bootstrap.Modal(document.getElementById('modalVerComisiones'));
+              modal.show();
+            },
+        }).done(function(response){
+            dao.renderDetallecomision(response.data);
+        });
+    },
+    renderDetallecomision: function(data){
+        let rows = "";
           let totalComision = 0;
           const formatter = new Intl.NumberFormat("es-MX", {style: "currency",currency: "MXN",});
 
-          const detalle = response.data ?? [];
+          const detalle = data ?? [];
 
           if (detalle.length > 0) {
               $("#dc_usuario").text(detalle[0].usuario ?? "Sin usuario");
@@ -376,17 +459,22 @@ dao = {
           $("#dc_detalle").html(rows);
           $("#dc_total_comision").text(formatter.format(totalComision));
           $("#dc_footer_total").text(formatter.format(totalComision));
-      })
-      .fail(function (xhr) {
-          console.error(xhr);
-
-          Swal.fire({
-              icon: "error",
-              title: "Error",
-              text: "No fue posible cargar el detalle.",
-          });
-      });
     },
+    getFiltroUsuarios: function(){
+        $.ajax({
+            url: "/get-filtro-usuarios",
+            type: "GET",
+            dataType: "JSON",
+        }).done(function(response){
+            console.log('filtro usuarios', response);
+            var select = $('#hc_usuario');
+            select.html("");
+            select.append(new Option('Selecciona un usuario', ''));
+            response.map(function(val, i){
+                select.append(new Option(response[i].nombre, response[i].id, false, false));
+            });
+        })
+    }
 };
 function generarPassword(longitud) {
     // Define los caracteres permitidos en la contraseña /get-users
@@ -426,7 +514,6 @@ init = {
 
 };
 $(document).ready(function () {
-    console.log('init.js');
     $('#btnAddUser').on('click', function (e) {
         e.preventDefault();
         dao.getCatTiendas('tienda','');
@@ -446,5 +533,10 @@ $(document).ready(function () {
           
       }
     })
+    $(document).on('click', '.btnDetallePago', function(){
+        let usuarioId = $(this).data('usuario');
+        let fechaPago = $(this).data('fecha');
+        dao.verDetallePago(usuarioId,fechaPago);
+    });
     
 });

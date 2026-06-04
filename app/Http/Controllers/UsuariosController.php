@@ -97,6 +97,7 @@ class UsuariosController extends Controller
                         END
                     ), 0) as pago_pendiente
                 ')
+                ->where('pagada',0)
             ->first();
             return response()->json([
                 'comision_total' => round($query->comision_total,2),
@@ -278,6 +279,15 @@ class UsuariosController extends Controller
                 'message' => $th->getMessage()
             ],500);
         }
+    }
+    public function getFiltroUsuarios(){
+        $usuarios = ComisionVendedor::join('users as u','u.id','=','comisiones_vendedores.usuario_id')
+            ->select('comisiones_vendedores.usuario_id as id','u.name as nombre')
+            ->where('pagada',1)
+            ->distinct()
+        ->get();
+
+        return response()->json($usuarios,200);
     }
     
 }
