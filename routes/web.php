@@ -10,7 +10,9 @@ use App\Http\Controllers\VentasController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CajaController;
 use App\Http\Controllers\ReportesController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\Auth\RegisteredUserController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -36,12 +38,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/get-data-dashboard',[Controller::class, 'getDataDashboard'])->name('getDataDashboard');
 });
 // rutas de usuarios
 Route::middleware(['auth','role'])->controller(UsuariosController::class)->group(function () {
     Route::get('/get-users', 'getUsuarios')->name('getUsuarios');
     Route::get('/get-data-usuarios', 'getDataUsuarios')->name('getDataUsuarios');
     Route::get('/get-catalogo-roles','getCatalogoRoles')->name('getCatalogoRoles');
+    Route::get('/get-data-comisiones-activas','getDataComisionesActivas')->name('getDataComisionesActivas');
+    Route::get('/get-resumen-comisiones','getResumenComisiones')->name('getResumenComisiones');
+    Route::post('/pagar-comision-semanal','postPagarComisionSemanal')->name('postPagarComisionSemanal');
+    Route::get('/get-detalle-comision/{usuarioId}','getDetalleComision')->name('getDetalleComision');
+    Route::get('/get-historial-comisiones','getHistorialComisiones')->name('getHistorialComisiones');
+    Route::get('/get-detalle-comision-pagada','getDetalleComisionPagada')->name('getDetalleComisionPagada');
+    Route::get('/get-filtro-usuarios','getFiltroUsuarios')->name('getFiltroUsuarios');
 });
 Route::middleware(['auth','role'])->group(function(){
     Route::post('/register-user', [RegisteredUserController::class, 'store']);

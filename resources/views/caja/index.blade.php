@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
 @extends('layouts.app')
 @section('content')
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Corte de caja — Mockup</title>
+    <title>Corte de caja</title>
     <style>
         :root{--bg:#f6f7f9;--card:#fff;--muted:#6b7280;--accent:#10b981;--danger:#ef4444;--glass:rgba(0,0,0,0.04)}
         html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, 'Helvetica Neue', Arial;color:#111827;background:var(--bg)}
@@ -81,67 +79,69 @@
 </head>
 <body>
     <div class="container">
-        <div class="row">
-                <div class="col-md-10">
-                    @if(Auth::user()->rol == 1)
-                    <div class="col-md-4">
-                        <select name="tiendas" id="tiendas" class="form-control"></select> 
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h4 class="mb-4">Caja</h4>
+                <div class="alert alert-light border rounded-4">
+                    <div class="row">
+                        <div class="col-md-10">
+                            @if(Auth::user()->rol == 1)
+                            <div class="col-md-4">
+                                <select name="tiendas" id="tiendas" class="form-control"></select> 
+                            </div>
+                        @endif
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end justify-content-end">
+                            <button id="btnNewEgreso" type="button" name="btnNewEgreso" class="btnNuevoUsuario">Egreso</button>
+                        </div>
                     </div>
-                @endif
-                </div>
-                <div class="col-md-2">
-                    <button id="btnNewEgreso" type="button" name="btnNewEgreso" class="btnNuevoUsuario">Egreso</button>
+                    <div class="main">
+                        <div class="left">
+                            <div class="table-wrap">
+                                <table id="tbl_transacciones" class="table table-borderless table-centered">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>ID Nota</th>
+                                            <th>Forma</th>
+                                            <th>Detalle</th>
+                                            <th>Monto</th>
+                                            <th>Usuario</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="movimientos">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <aside class="right">
+                            <div class="summary">
+                                <h3>Resumen del corte</h3>
+                                <div class="summary-row"><span>Efectivo apertura</span><span id="apertura">$ 0.00</span></div>
+                                <div class="summary-row"><span>Ingresos (efectivo)</span><span id="efectivoI"></span></div>
+                                @if (Auth::user()->rol == 1)
+                                    <div class="summary-row"><span>Ingresos (cuenta)</span><span id="efectivoC"></span></div>
+                                @endif
+                                <div class="summary-row"><span>Egresos (efectivo)</span><span id="egresoE"></span></div>
+                                @if (Auth::user()->rol == 1)
+                                    <div class="summary-row"><span>Egresos (cuenta)</span><span id="egresoC"></span></div>
+                                @endif
+                                @if(Auth::user()->rol == 1)
+                                    <div class="summary-row"><span>Total ingresos</span><span id="ingresoT"></span></div>
+                                    <div class="summary-row"><span>Total egresos</span><span id="egresoT"></span></div>
+                                    <div class="summary-row total"><span>Total general</span><span id="totalG"></span></div>
+                                @endif
+                                <div style="margin-top:12px;display:flex;gap:8px">
+                                    <button class="btn btn1 btn-success" id="btnCerrarCorte"><i class="fas fa-times-circle"></i>&nbsp;Cerrar corte</button>
+                                    <button type="button" class="btn btn1 btn-success" id="btnDepositoCuenta">
+                                        <i class="fas fa-university"></i>&nbsp;Depositar a cuenta
+                                    </button>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
                 </div>
             </div>
-        <div class="main">
-            <div class="left">
-                <div class="table-wrap">
-                    <table id="tbl_transacciones" class="table table-borderless table-centered">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>ID Nota</th>
-                                <th>Forma</th>
-                                <th>Detalle</th>
-                                <th>Monto</th>
-                                <th>Usuario</th>
-                            </tr>
-                        </thead>
-                        <tbody id="movimientos">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-
-            <aside class="right">
-                <div class="summary">
-                    <h3>Resumen del corte</h3>
-                    <div class="summary-row"><span>Efectivo apertura</span><span id="apertura">$ 0.00</span></div>
-                    <div class="summary-row"><span>Ingresos (efectivo)</span><span id="efectivoI"></span></div>
-                    @if (Auth::user()->rol == 1)
-                        <div class="summary-row"><span>Ingresos (cuenta)</span><span id="efectivoC"></span></div>
-                    @endif
-                    <div class="summary-row"><span>Egresos (efectivo)</span><span id="egresoE"></span></div>
-                    @if (Auth::user()->rol == 1)
-                        <div class="summary-row"><span>Egresos (cuenta)</span><span id="egresoC"></span></div>
-                    @endif
-                    
-                    @if(Auth::user()->rol == 1)
-                        <div class="summary-row"><span>Total ingresos</span><span id="ingresoT"></span></div>
-                        <div class="summary-row"><span>Total egresos</span><span id="egresoT"></span></div>
-                        <div class="summary-row total"><span>Total general</span><span id="totalG"></span></div>
-                    @endif
-                    
-
-                    <div style="margin-top:12px;display:flex;gap:8px">
-                        <button class="btn btn1 btn-success" id="btnCerrarCorte"><i class="fas fa-times-circle"></i>&nbsp;Cerrar corte</button>
-                        <button type="button" class="btn btn1 btn-success" id="btnDepositoCuenta">
-                            <i class="fas fa-university"></i>&nbsp;Depositar a cuenta
-                        </button>
-                    </div>
-                </div>
-            </aside>
         </div>
     </div>
 </body>
