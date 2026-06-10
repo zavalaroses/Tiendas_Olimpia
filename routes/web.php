@@ -167,6 +167,8 @@ Route::middleware(['auth','role'])->controller(ReportesController::class)->group
     Route::get('/get-data-tabla-inventario','getInventario')->name('getInventarioResumen');
     Route::get('/get-data-resumen-proveedores','getProveedores')->name('getProveedoresResumen');
     Route::post('/reporte-descarga-pdf','pruebaPDF')->name('pruebaPDF');
+    // Nuevas rutas de reportes
+    Route::get('/get-reporte-ventas','getReportesVentas')->name('getReportesVentas');
 });
 
 require __DIR__.'/auth.php';

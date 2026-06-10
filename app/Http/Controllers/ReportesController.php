@@ -13,6 +13,7 @@ use App\Models\Cuenta;
 use App\Models\Entrada;
 use App\Models\Corte;
 use App\Models\PagoIngresoInventario;
+use App\Models\Salida;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportesController extends Controller
@@ -234,7 +235,6 @@ class ReportesController extends Controller
         );
 
     }
-    
     public function pruebaPDF(Request $request){
         ini_set('memory_limit', '256M');
         ini_set('max_execution_time', 300);
@@ -254,6 +254,138 @@ class ReportesController extends Controller
         $pdf = Pdf::loadView('reportes.reportePDF',$data);
 
         return $pdf->stream('reporte_resumen_financiero.pdf');
+    }
+    // funciones para nuevos reportes
+    public function getReportesVentas(){
+        return view('reportes.indexVentas');
+    }
+    public function getKpiPrincipal(Request $request){
+        $inicio = $request->fecha_inicio ? Carbon::parse($request->fecha_inicio) : null;
+        $fin = $request->fecha_fin ? Carbon::parse($request->fecha_fin) : null;
+        $dias = null;
+        $inicioComp = null;
+        $finComp = null;
+        if ($inicio && $fin) {
+            $dias = $inicio->diffInDays($fin) + 1;
+            $inicioComp = $inicio->copy()->subDays($dias);
+            $finComp = $inicio->copy()->subDay();
+        }
+        $vendido = Transaccion::withTrashed()
+            ->when($request->tienda,fn($q)=> $q->where('tienda_id',$request->tienda))
+            ->where(function($query) use($inicio,$fin){
+                if ($inicio && $fin) {
+                    $query->whereBetween('created_at',[$inicio, $fin]);
+                }else {
+                    $query->whereBetween('created_at',[
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth()
+                    ]);
+                }
+            })
+            ->where('tipo_movimiento', 'entrada')
+            ->whereNotNull('venta_id')
+        ->sum('cantidad');
+
+        $nApartados = Transaccion::withTrashed()
+            ->when($request->tienda, fn($q) => $q->where('tienda_id',$request->tienda))
+            ->where(function($query) use($inicio,$fin){
+                if ($inicio && $fin) {
+                    $query->whereBetween('created_at',[$inicio, $fin]);
+                }else {
+                    $query->whereBetween('created_at',[
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth()
+                    ]);
+                }
+            })
+            ->where('tipo_movimiento','entrada')
+            ->where('descripcion','Monto de anticipo')
+            ->whereNotNull('venta_id')
+        ->count();
+        $nVentas = Transaccion::withTrashed()
+            ->when($request->tienda, fn($q) => $q->where('tienda_id',$request->tienda))
+            ->where(function($query) use($inicio,$fin){
+                if ($inicio && $fin) {
+                    $query->whereBetween('created_at',[$inicio, $fin]);
+                }else {
+                    $query->whereBetween('created_at',[
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth()
+                    ]);
+                }
+            })
+            ->where('tipo_movimiento','entrada')
+            ->where('descripcion','Venta')
+            ->whereNotNull('venta_id')
+        ->count();
+
+        $totalNotas = Transaccion::withTrashed()
+            ->when($request->tienda, fn($q)=> $q->where('tienda_id',$request->tienda))
+            ->where(function($query) use($inicio,$fin){
+                if ($inicio && $fin) {
+                    $query->whereBetween('created_at',[$inicio, $fin]);
+                }else {
+                    $query->whereBetween('created_at',[
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth()
+                    ]);
+                }
+            })
+            ->whereNotNull('venta_id')
+            ->distinct('venta_id')
+        ->count('venta_id');
+        $ticketPromedio = $totalNotas > 0 ? $vendido / $totalNotas : 0;
+
+        $vendidoAnt = Transaccion::withTrashed()
+            ->when($request->tienda,fn($q)=> $q->where('tienda_id',$request->tienda))
+            ->where(function($query) use($inicioComp,$finComp){
+                if ($inicioComp && $finComp) {
+                    $query->whereBetween('created_at',[$inicioComp, $finComp]);
+                }else {
+                    $query->whereBetween('created_at',[
+                        Carbon::now()->subMonth()->startOfMonth(),
+                        Carbon::now()->subMonth()->endOfMonth()
+                    ]);
+                }
+            })
+            ->where('tipo_movimiento', 'entrada')
+            ->whereNotNull('venta_id')
+        ->sum('cantidad');
+
+        $nApartadosAnt = Transaccion::withTrashed()
+            ->when($request->tienda, fn($q) => $q->where('tienda_id',$request->tienda))
+            ->where(function($query) use($inicioComp,$finComp){
+                if ($inicioComp && $finComp) {
+                    $query->whereBetween('created_at',[$inicioComp, $finComp]);
+                }else {
+                    $query->whereBetween('created_at',[
+                        Carbon::now()->subMonth()->startOfMonth(),
+                        Carbon::now()->subMonth()->endOfMonth()
+                    ]);
+                }
+            })
+            ->where('tipo_movimiento','entrada')
+            ->where('descripcion','Monto de anticipo')
+            ->whereNotNull('venta_id')
+        ->count();
+
+        $nVentasAnt = Transaccion::withTrashed()
+            ->when($request->tienda, fn($q) => $q->where('tienda_id',$request->tienda))
+            ->where(function($query) use($inicioComp,$finComp){
+                if ($inicioComp && $finComp) {
+                    $query->whereBetween('created_at',[$inicioComp, $finComp]);
+                }else {
+                    $query->whereBetween('created_at',[
+                        Carbon::now()->subMonth()->startOfMonth(),
+                        Carbon::now()->subMonth()->endOfMonth()
+                    ]);
+                }
+            })
+            ->where('tipo_movimiento','entrada')
+            ->where('descripcion','Venta')
+            ->whereNotNull('venta_id')
+        ->count();
+
     }
 
 }
