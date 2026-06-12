@@ -169,6 +169,8 @@ Route::middleware(['auth','role'])->controller(ReportesController::class)->group
     Route::post('/reporte-descarga-pdf','pruebaPDF')->name('pruebaPDF');
     // Nuevas rutas de reportes
     Route::get('/get-reporte-ventas','getReportesVentas')->name('getReportesVentas');
+    Route::get('/get-data-kpis-ventas','getKpiPrincipal')->name('getKpiPrincipal');
+    Route::get('/get-data-tablas-tops','getTablasTops')->name('getTablasTops');
 });
 
 require __DIR__.'/auth.php';

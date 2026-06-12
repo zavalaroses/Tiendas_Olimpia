@@ -186,6 +186,83 @@ let dao = {
             });
         })
     },
+    getKpisPrincipales: function () {
+        let tienda = $('#tiendas').val() ?? null;
+        let inicio = $('#fecha_inicio').val() ?? null;
+        let fin = $('#fecha_fin').val() ?? null;
+        $.ajax({
+            url:'/get-data-kpis-ventas',
+            type:'get',
+            data: {'tienda':tienda,'inicio':inicio,'fin':fin},
+            contentType: 'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            const {
+                nApartados,
+                nApartadosAnt,
+                nVentas,
+                nVentasAnt,
+                ticketPromedio,
+                variacion,
+                vendido,
+                vendidoAnt
+            } = response;
+            $('#totalVentas').text(money(vendido));
+            $('#nVentas').text(nVentas);
+            $('#nApartados').text(nApartados);
+            $('#notaPromedio').text(money(ticketPromedio));
+            $('#totalVentasAnt').text(money(vendidoAnt));
+            $('#nVentasAnt').text(nVentasAnt);
+            $('#nApartadosAnt').text(nApartadosAnt);
+            $('#variacion').text('% ' + variacion);
+            if (variacion < 0 ) {
+                $('#variacionKpi').removeClass('bg-purple-soft');
+                $('#variacionKpi').removeClass('bg-success-soft');
+                $('#variacionKpi').addClass('bg-danger-soft');
+                $('#variacionArrow').removeClass('fa-arrow-trend-up');
+                $('#variacionArrow').addClass('fa-arrow-trend-down');
+            }else{
+                $('#variacionKpi').removeClass('bg-purple-soft');
+                $('#variacionKpi').removeClass('bg-danger-soft');
+                $('#variacionKpi').addClass('bg-success-soft');
+                $('#variacionArrow').removeClass('fa-arrow-trend-down');
+                $('#variacionArrow').addClass('fa-arrow-trend-up');
+            }
+        });
+    },
+    getTablasTops: function (response) {
+        let tienda = $('#tiendas').val() ?? null;
+        let inicio = $('#fecha_inicio').val() ?? null;
+        let fin = $('#fecha_fin').val() ?? null;
+        $.ajax({
+            url:'/get-data-tablas-tops',
+            type:'get',
+            data:{'tienda':tienda,'inicio':inicio,'fin':fin},
+            contentType: 'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            console.log("🚀 ~ response:", response)
+            const {tblVentas} = response;
+            const tVentas = $('#tbl_ventas');
+            const columnsVentas = [
+                {"targets":[0],"mData":'tienda'},
+                {"targets":[1],"mData":function (o) {
+                    return money(o.vendido);
+                }},
+                {"targets":[2],"mData":function (o) {
+                    return money(o.costo);
+                }},
+                {"targets":[3],"mData":function (o) {
+                    return money(o.utilidad);
+                    
+                }},
+            ]
+            _gen.setTableScrollEspecial3(tVentas,columnsVentas,tblVentas);
+            
+        });
+        
+    }
+    
 
 };
 let init = {
@@ -211,11 +288,7 @@ $(document).ready(function () {
     $('button[data-bs-target="#tabProveedores"]').on('shown.bs.tab', dao.cargarTablaProveedores);
     $('#tiendas').on('change', function (e) {
         e.preventDefault();
-        dao.getDataResumen();
-        dao.cargarTablaGastos();
-        dao.cargarTablaInventario();
-        dao.cargarTablaProveedores();
-        dao.cargarTablaVentas();
+        dao.getKpisPrincipales();
     });
     
     $('#fecha_inicio').on('change',function (e) {

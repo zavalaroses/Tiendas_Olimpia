@@ -260,8 +260,8 @@ class ReportesController extends Controller
         return view('reportes.indexVentas');
     }
     public function getKpiPrincipal(Request $request){
-        $inicio = $request->fecha_inicio ? Carbon::parse($request->fecha_inicio) : null;
-        $fin = $request->fecha_fin ? Carbon::parse($request->fecha_fin) : null;
+        $inicio = $request->inicio ? Carbon::parse($request->inicio) : null;
+        $fin = $request->fin ? Carbon::parse($request->fin) : null;
         $dias = null;
         $inicioComp = null;
         $finComp = null;
@@ -385,7 +385,104 @@ class ReportesController extends Controller
             ->where('descripcion','Venta')
             ->whereNotNull('venta_id')
         ->count();
+        
+        $variacion = $this->calcularVariacion($vendido,$vendidoAnt);
 
+        $response = [
+            'vendido' => $vendido,
+            'vendidoAnt' => $vendidoAnt,
+            'nApartados' => $nApartados,
+            'nApartadosAnt' => $nApartadosAnt,
+            'nVentas' => $nVentas,
+            'nVentasAnt' => $nVentasAnt,
+            'ticketPromedio' => $ticketPromedio,
+            'variacion' => $variacion
+        ];
+        return response()->json($response,200);
+
+    }
+    public function getTablasTops(Request $request){
+        Log::debug($request);
+        $inicio = $request->inicio ? Carbon::parse($request->inicio) : null;
+        $fin = $request->fin ? Carbon::parse($request->fin) : null;
+        $dias = null;
+        $inicioComp = null;
+        $finComp = null;
+        if ($inicio && $fin) {
+            $dias = $inicio->diffInDays($fin) + 1;
+            $inicioComp = $inicio->copy()->subDays($dias);
+            $finComp = $inicio->copy()->subDay();
+        }
+
+        $ventasPorTienda = DB::table('movimientos_tienda as mt')
+            ->join('apartados as a','a.id','=','mt.venta_id')
+            ->join('tiendas as t','t.id','=','a.tienda_id')
+            ->selectRaw('
+                a.tienda_id,
+                t.nombre as tienda,
+                SUM(mt.cantidad) as vendido
+            ')
+            ->when($request->tienda,fn($q)=> $q->where('tienda_id',$request->tienda))
+            ->where(function($query) use($inicio,$fin){
+                if ($inicio && $fin) {
+                    $query->whereBetween('mt.created_at',[$inicio, $fin]);
+                }else {
+                    $query->whereBetween('mt.created_at',[
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth()
+                    ]);
+                }
+            })
+            ->where('mt.tipo_movimiento','entrada')
+            ->whereNotNull('mt.venta_id')
+            ->groupBy('a.tienda_id','t.nombre')
+            ->get();
+        $costosPorTienda = DB::table('apartados as a')
+            ->join('apartado_muebles as am','am.id_apartado','=','a.id')
+            ->join('muebles as m','m.id','=','am.id_mueble')
+            ->selectRaw('
+                a.tienda_id,
+                SUM(
+                    am.cantidad * m.precio_compra
+                ) as costo
+            ')
+            ->when($request->tienda,fn($q)=> $q->where('tienda_id',$request->tienda))
+            ->where(function($query) use($inicio,$fin){
+                
+                if ($inicio && $fin) {
+                    $query->whereBetween('am.created_at',[$inicio, $fin]);
+                }else {
+                    $query->whereBetween('am.created_at',[
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth()
+                    ]);
+                }
+            })
+            ->groupBy('a.tienda_id')
+            ->pluck('costo','tienda_id');
+        $ventasPorTienda->transform(function ($item) use ($costosPorTienda){
+            $costo = $costosPorTienda[$item->tienda_id] ?? 0;
+            $item->costo = $costo;
+            $item->utilidad = $item->vendido - $costo;
+            return $item;
+        });
+
+        $response = [
+            'tblVentas' => $ventasPorTienda,
+        ];
+        return response()->json($response,200);
+
+    }
+    private function calcularVariacion($actual,$anterior){
+        if ($anterior == 0) {
+            return $actual > 0 ? 100 : 0;
+        }
+        return round(
+            (
+                ($actual - $anterior) / $anterior
+            ) * 100,
+            2
+        );
     }
 
 }

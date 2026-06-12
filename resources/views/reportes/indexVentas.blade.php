@@ -31,7 +31,7 @@
                             </div>
                             <div>
                                 <small>Ventas Totales</small>
-                                <h3 id="totalVentas">$240,000</h3>
+                                <h4 id="totalVentas"></h4>
                             </div>
                         </div>
                     </div>
@@ -43,7 +43,7 @@
                             </div>
                             <div>
                                 <small># Ventas</small>
-                                <h3 id="nVentas">73</h3>
+                                <h4 id="nVentas"></h4>
                             </div>
                         </div>
                     </div>
@@ -54,7 +54,7 @@
                             </div>
                             <div>
                                 <small># Apartados</small>
-                                <h3 id="nApartados">40</h3>
+                                <h4 id="nApartados"></h4>
                             </div>
                         </div>
                     </div>
@@ -66,7 +66,7 @@
                             </div>
                             <div>
                                 <small>Nota Promedio</small>
-                                <h3 id="notaPromedio">$5000</h3>
+                                <h4 id="notaPromedio"></h4>
                             </div>
                         </div>
                     </div>
@@ -78,7 +78,7 @@
                             </div>
                             <div>
                                 <small>Ventas Mes Anterior</small>
-                                <h3 id="totalVentasAnt">$220,000</h3>
+                                <h4 id="totalVentasAnt"></h4>
                             </div>
                         </div>
                     </div>
@@ -90,7 +90,7 @@
                             </div>
                             <div>
                                 <small># Ventas Mes anterior</small>
-                                <h3 id="nVentasAnt">70</h3>
+                                <h4 id="nVentasAnt"></h4>
                             </div>
                         </div>
                     </div>
@@ -101,19 +101,19 @@
                             </div>
                             <div>
                                 <small># Apartados Mes anterior</small>
-                                <h3 id="nApartadosAnt">35</h3>
+                                <h4 id="nApartadosAnt"></h4>
                             </div>
                         </div>
                     </div>
 
                     <div class="col-md-6 col-xl-3">
                         <div class="summary-card">
-                            <div class="summary-icon bg-purple-soft">
-                                <i class="fa-solid fa-arrow-trend-up"></i>
+                            <div  id="variacionKpi" class="summary-icon bg-purple-soft" >
+                                <i class="fa-solid fa-arrow-trend-up" id="variacionArrow"></i>
                             </div>
                             <div>
                                 <small>Variación</small>
-                                <h3 id="notaPromedio">12%</h3>
+                                <h4 id="variacion"></h4>
                             </div>
                         </div>
                     </div>
@@ -139,8 +139,8 @@
                                         <tr>
                                             <th>Tienda</th>
                                             <th>Vendido</th>
-                                            <th>Utilidad</th>
-                                            <th>% Participación</th>
+                                            <th>Costos</th>
+                                            <th>Diferencia</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -325,9 +325,15 @@
             </div>
         </div>
     </div>
-
-    
-
 </div>
+
+<script src="/js/utilerias.js"></script>
+<script src="/js/reportes/init.js"></script>
+<script>
+    $(document).ready(function () {
+        dao.getKpisPrincipales();
+        dao.getTablasTops();
+    })
+</script>
     
 @endsection
