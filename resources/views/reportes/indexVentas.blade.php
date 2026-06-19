@@ -163,8 +163,9 @@
                                     <thead>
                                         <tr>
                                             <th>Vendedor</th>
+                                            <th>Tienda</th>
                                             <th>Vendido</th>
-                                            <th>Comisión</th>
+                                            <th>#Notas</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -191,8 +192,8 @@
                                         <tr>
                                             <th>Tienda</th>
                                             <th>Mueble</th>
-                                            <th>Cantidad</th>
-                                            <th>Ventas</th>
+                                            <th>Vendidos</th>
+                                            <th>Recaudado</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -214,9 +215,8 @@
                                 >
                                     <thead>
                                         <tr>
-                                            <th>Vendedor</th>
-                                            <th>Vendido</th>
-                                            <th>Comisión</th>
+                                            <th>Método</th>
+                                            <th>Cantidad</th>
                                         </tr>
                                     </thead>
                                 </table>

@@ -241,8 +241,7 @@ let dao = {
             contentType: 'json',
             headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         }).done(function (response) {
-            console.log("🚀 ~ response:", response)
-            const {tblVentas} = response;
+            const {tblVentas,tblVendedores,tblFormasPago,tblMuebles} = response;
             const tVentas = $('#tbl_ventas');
             const columnsVentas = [
                 {"targets":[0],"mData":'tienda'},
@@ -256,8 +255,42 @@ let dao = {
                     return money(o.utilidad);
                     
                 }},
-            ]
+            ];
+            const tVendedores = $('#tbl_vendedores');
+            const columnsVendedores = [
+                {"targets":[0],"mData":'usuario'},
+                {"targets":[1],"mData":'tienda'},
+                {"targets":[2],"mData":function (o) {
+                    return money(o.vendido);
+                }},
+                {"targets":[2],"mData":function (o) {
+                    return money(o.costo);
+                }},
+                {"targets":[3],"mData":'notas'},
+            ];
+            const tPagos = $('#tbl_pagos');
+            const columnsPagos = [
+                {"targets":[0],"mData":'tipo_pago'},
+                {"targets":[1],"mData":function (o) {
+                    return money(o.vendido);
+                }},
+                
+            ];
+            const tMuebles = $('#tbl_muebles');
+            const columnsMuebles = [
+                {"targets":[0],"mData":'tienda'},
+                {"targets":[1],"mData":'mueble'},
+                {"targets":[2],"mData":'vendidos'},
+                {"targets":[3],"mData":function (o) {
+                    return money(o.recaudado);
+                }},
+                
+            ];
+
             _gen.setTableScrollEspecial3(tVentas,columnsVentas,tblVentas);
+            _gen.setTableScrollEspecial3(tVendedores,columnsVendedores,tblVendedores);
+            _gen.setTableScrollEspecial3(tPagos,columnsPagos,tblFormasPago);
+            _gen.setTableScrollEspecial3(tMuebles,columnsMuebles,tblMuebles);
             
         });
         
@@ -289,6 +322,7 @@ $(document).ready(function () {
     $('#tiendas').on('change', function (e) {
         e.preventDefault();
         dao.getKpisPrincipales();
+        dao.getTablasTops();
     });
     
     $('#fecha_inicio').on('change',function (e) {
@@ -297,11 +331,8 @@ $(document).ready(function () {
             finInput.min = this.value; // fin nunca menor que inicio
         }
         e.preventDefault();
-        dao.getDataResumen();
-        dao.cargarTablaGastos();
-        dao.cargarTablaInventario();
-        dao.cargarTablaProveedores();
-        dao.cargarTablaVentas();
+        dao.getKpisPrincipales();
+        dao.getTablasTops();
     });
     $('#fecha_fin').on('change',function (e) {
         const inicioInput = document.getElementById('fecha_inicio');
@@ -309,11 +340,7 @@ $(document).ready(function () {
             inicioInput.max = this.value; // inicio nunca mayor que fin
         }
         e.preventDefault();
-        dao.getDataResumen();
-        dao.cargarTablaGastos();
-        dao.cargarTablaInventario();
-        dao.cargarTablaProveedores();
-        dao.cargarTablaVentas();
+        dao.getTablasTops();
     });
     $('#btnGeneraReporte').on('click', function (e) {
         form = document.getElementById('formReporte');

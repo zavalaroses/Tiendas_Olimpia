@@ -14,6 +14,7 @@ use App\Models\Cliente;
 use App\Models\Transaccion;
 use App\Models\Cuenta;
 use App\Models\ComisionVendedor;
+use App\Models\MovimientoInventario;
 use App\Models\catalogos\Chofer;
 use App\Models\catalogos\Tiendas;
 

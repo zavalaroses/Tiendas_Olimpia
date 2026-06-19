@@ -11,6 +11,7 @@ use App\Models\InventarioTienda;
 use App\Models\PagoIngresoInventario;
 use App\Models\Transaccion;
 use App\Models\Cuenta;
+use App\Models\MovimientoInventario;
 use App\Models\catalogos\Mueble;
 use App\Http\Controllers\CajaController;
 use Carbon\Carbon;
@@ -102,6 +103,18 @@ class InventarioController extends Controller
                     'cantidad' => $request->cantidad[$index],
                     'precio_compra'=>$request->precio[$index],
                 ]);
+                // ccreamos el movimiento del inventario
+                    MovimientoInventario::create([
+                        'tienda_id' => $idTienda,
+                        'mueble_id' => $muebleId,
+                        'tipo' => 'compra',
+                        'cantidad' => $request->cantidad[$index],
+                        'costo_unitario' => $request->precio[$index],
+                        'referencia_tipo' => $entrada->id,
+                        'fecha_movimiento' => Carbon::parse($request->fecha_ingreso),
+
+                    ]);
+                // 
                 $inventarioExist = InventarioTienda::where('tienda_id',$idTienda)->where('mueble_id',$muebleId)->exists();
                 if ($inventarioExist) {
                     $afectedRow = InventarioTienda::where([
