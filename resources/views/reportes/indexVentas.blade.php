@@ -122,8 +122,98 @@
         </div>
     </div>
     <br>
-    
-    {{-- parte dos ventas por tienda y vendedores --}}
+    {{-- parte 2 resumen financiero --}}
+    <div class="alert alert-light border rounded-4 mt-3">
+
+        <div class="d-flex align-items-center mb-3">
+            <i class="fa-solid fa-scale-balanced me-2 text-primary"></i>
+            <h5 class="mb-0">Resumen Financiero</h5>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle text-center mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>
+                            <i class="fa-solid fa-boxes-stacked text-primary me-1"></i>
+                            Inventario
+                        </th>
+                        <th>
+                            <i class="fa-solid fa-cash-register text-success me-1"></i>
+                            Caja
+                        </th>
+                        <th>
+                            <i class="fa-solid fa-building-columns text-info me-1"></i>
+                            Cuenta
+                        </th>
+                        <th>
+                            <i class="fa-solid fa-bookmark text-warning me-1"></i>
+                            Apartados
+                        </th>
+                        <th>
+                            <i class="fa-solid fa-wallet text-success me-1"></i>
+                            Saldo Favor
+                        </th>
+                        <th>
+                            <i class="fa-solid fa-file-invoice-dollar text-danger me-1"></i>
+                            Adeudos
+                        </th>
+                        <th>
+                            <i class="fa-solid fa-scale-balanced text-primary me-1"></i>
+                            Balance
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <!-- Fecha actual -->
+                    <tr>
+                        <td>
+                            <strong id="fechaActual">
+                                
+                            </strong>
+                        </td>
+
+                        <td id="inventarioActual"></td>
+                        <td id="cajaActual"></td>
+                        <td id="cuentaActual"></td>
+                        <td id="apartadosActual"></td>
+                        <td id="saldoFavorActual"></td>
+                        <td id="adeudosActual"></td>
+
+                        <td class="fw-bold text-success" id="balanceActual">
+                            
+                        </td>
+                    </tr>
+
+                    <!-- Fecha comparativa -->
+                    <tr>
+                        <td>
+                            <strong id="fechaAnterior">
+                                
+                            </strong>
+                        </td>
+
+                        <td id="inventarioAnterior"></td>
+                        <td id="cajaAnterior"></td>
+                        <td id="cuentaAnterior"></td>
+                        <td id="apartadosAnterior"></td>
+                        <td id="saldoFavorAnterior"></td>
+                        <td id="adeudosAnterior"></td>
+
+                        <td class="fw-bold text-success" id="balanceAnterior">
+                            
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    {{-- parte 3 ventas por tienda y vendedores --}}
     <div class="row mb-4">
         <div class="col-md-6">
             <div class="row">
@@ -176,7 +266,8 @@
             </div>
         </div>
     </div>
-    {{-- parte 3 top muebles y formas de pago --}}
+
+    {{-- parte 4 top muebles y formas de pago --}}
     <div class="row mb-4">
         <div class="col-md-6">
             <div class="row">
@@ -227,8 +318,8 @@
             </div>
         </div>
     </div>
-    {{-- parte 4 Utilidad --}}
-    <div class="row mb-3">
+    {{-- parte 5 Utilidad --}}
+    {{-- <div class="row mb-3">
         <div class="col-md-6 col-xl-3">
             <div class="summary-card">
                 <div class="summary-icon bg-success-soft">
@@ -275,8 +366,8 @@
                 </div>
             </div>
         </div>
-    </div>
-    {{-- cobranza pendiente --}}
+    </div> --}}
+    {{-- paare 6 cobranza pendiente --}}
     <div class="row mb-3">
         <div class="col-md-6 col-xl-3">
             <div class="summary-card">
@@ -285,7 +376,7 @@
                 </div>
                 <div>
                     <small>Apartados activos</small>
-                    <h3 id="apartadosPendientes">$240,000</h3>
+                    <h3 id="apartadosPendientes"></h3>
                 </div>
             </div>
         </div>
@@ -297,7 +388,7 @@
                 </div>
                 <div>
                     <small>Saldo pendiente</small>
-                    <h3 id="saldoPendiente">73</h3>
+                    <h3 id="saldoPendiente"></h3>
                 </div>
             </div>
         </div>
@@ -308,7 +399,7 @@
                 </div>
                 <div>
                     <small>Entregas</small>
-                    <h3 id="entregas">40</h3>
+                    <h3 id="entregas"></h3>
                 </div>
             </div>
         </div>
@@ -320,7 +411,7 @@
                 </div>
                 <div>
                     <small>Entregas Pendientes</small>
-                    <h3 id="entregasPendientes">9</h3>
+                    <h3 id="entregasPendientes"></h3>
                 </div>
             </div>
         </div>
@@ -333,6 +424,8 @@
     $(document).ready(function () {
         dao.getKpisPrincipales();
         dao.getTablasTops();
+        dao.getKpis2();
+        dao.getDataBalances();
     })
 </script>
     

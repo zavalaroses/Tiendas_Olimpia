@@ -16,6 +16,7 @@ use App\Models\PagoIngresoInventario;
 use App\Models\Salida;
 use App\Models\Apartado;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\BalanceService;
 
 class ReportesController extends Controller
 {
@@ -597,9 +598,12 @@ class ReportesController extends Controller
             ->where('salidas.estatus','Por entregar')
         ->count();
 
-        
-
-        
+        return response()->json([
+            'apartadosActivos' => $apartadosActivos,
+            'saldoPendiente' => $saldoPendiente,
+            'entregas' => $entregas,
+            'entregasPendientes' => $entregasPendientes
+        ]);
     }
     private function calcularVariacion($actual,$anterior){
         if ($anterior == 0) {
@@ -611,6 +615,37 @@ class ReportesController extends Controller
             ) * 100,
             2
         );
+    }
+    public function getBalances(Request $request, BalanceService $balanceService){
+        $tiendaId = $request->tienda ?? null;
+        $inicio = $request->inicio ? Carbon::parse($request->inicio) : null;
+        $fin = $request->fin ? Carbon::parse($request->fin) : null;
+        $balanceActual = null;
+        $balanceAnterior = null;
+        if ($inicio && $fin) {
+            # Balance historico de cierres...
+            $balanceActual = DB::table('cierres_financieros')
+                ->whereDate('fecha', '<=', $fin)
+                ->orderByDesc('fecha')
+            ->first();
+
+            $balanceAnterior = DB::table('cierres_financieros')
+                ->whereDate('fecha', '<', $inicio)
+                ->orderByDesc('fecha')
+            ->first();
+        }else {
+            # balance en tiempo real vs ultimo cierre...
+            $balanceActual = $balanceService->calcular($tiendaId,Carbon::now());
+
+            $balanceAnterior = DB::table('cierres_financieros')
+                ->when($tiendaId, fn($q) => $q->where('tienda_id', $tiendaId))
+                ->orderByDesc('fecha')
+            ->first();
+        }
+        return response()->json([
+            'balanceActual' => $balanceActual,
+            'balanceAnterior' => $balanceAnterior
+        ],200);
     }
 
 }

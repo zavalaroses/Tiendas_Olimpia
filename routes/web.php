@@ -12,6 +12,7 @@ use App\Http\Controllers\CajaController;
 use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Services\BalanceService;
 
 
 /*
@@ -171,6 +172,11 @@ Route::middleware(['auth','role'])->controller(ReportesController::class)->group
     Route::get('/get-reporte-ventas','getReportesVentas')->name('getReportesVentas');
     Route::get('/get-data-kpis-ventas','getKpiPrincipal')->name('getKpiPrincipal');
     Route::get('/get-data-tablas-tops','getTablasTops')->name('getTablasTops');
+    Route::get('/get-data-kpis2-cobranza','getKpisParte2')->name('getKpisParte2');
+    Route::get('/get-data-balances','getBalances')->name('getBalances');
+    Route::get('/test-balance', function(BalanceService $service) {
+        return response()->json($service->calcular(3,now()));
+    });
 });
 
 require __DIR__.'/auth.php';

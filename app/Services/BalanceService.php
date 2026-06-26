@@ -7,14 +7,15 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Transaccion;
 use App\Models\Corte;
 use App\Models\Cuenta;
+use App\Models\InventarioTienda;
 
 class BalanceService
 {
-    public function calcular(int $tiendaId, string|Carbon $fecha): array
+    public function calcular($tiendaId = null, string|Carbon $fecha): array
     {
         $fecha = Carbon::parse($fecha)->endOfDay();
         $inventario = $this->calcularInventario($tiendaId, $fecha);
-        $caja = $this->calcularCajas($tiendaId,$fecha);
+        $caja = $this->calcularCaja($tiendaId,$fecha);
         $bancos = $this->calcularBancos($tiendaId, $fecha);
         $apartados = $this->calcularApartados($tiendaId);
         $saldoFavor = $this->calcularSaldoFavor($tiendaId, $fecha);
@@ -30,9 +31,10 @@ class BalanceService
             'saldo_favor' => round($saldoFavor,2),
             'adeudos' => round($adeudos,2),
             'balance' => round($balance,2),
+            'fecha' => $fecha,
         ];
     }
-    private function calcularCaja(int $tiendaId, Carbon $fecha): float
+    private function calcularCaja($tiendaId = null, Carbon $fecha): float
     {
         $efectivoApertura = $this->getSaldoInicialCaja($tiendaId);
         $movimientos = Transaccion::when($tiendaId, fn($q)=>$q->where('tienda_id',$tiendaId))
@@ -41,12 +43,12 @@ class BalanceService
                 SUM(CASE WHEN tipo_movimiento = 'salida' THEN cantidad ELSE 0 END )
             as total")
             ->where('tipo_pago','efectivo')
-            ->where('created_at','<=','$fecha')
+            ->where('created_at','<=',$fecha)
         ->value('total') ?? 0;
 
         return $efectivoApertura + $movimientos;
     }
-    private function calcularBancos(int $tiendaId, Carbon $fecha): float
+    private function calcularBancos($tiendaId = null, Carbon $fecha): float
     {
         $cuenta = Cuenta::when($tiendaId, fn($q)=>$q->where('tienda_id',$tiendaId))
             ->selectRaw("
@@ -58,7 +60,7 @@ class BalanceService
 
         return $cuenta;
     }
-    private function calcularSaldoFavor(int $tiendaId, Carbon $fecha): float
+    private function calcularSaldoFavor($tiendaId = null, Carbon $fecha): float
     {
         $saldo = DB::table('pagos_ingresos_inventario')
             ->when($tiendaId, fn($q) => $q->where('tienda_id',$tiendaId))
@@ -66,15 +68,14 @@ class BalanceService
             ->where('fecha','<=',$fecha->toDateString())
             ->select(
                 DB::raw("
-                    SUM(CASE WHEN tipo = 'cargo' THEN monto ELSE 0 END)-
-                    SUM(CASE WHEN tipo = 'abono' THEN monto ELSE 0 END) as total
+                    SUM(CASE WHEN tipo = 'cargo' THEN monto ELSE 0 END) as total
                 ")
             )
         ->value('total') ?? 0;
 
         return $saldo;
     }
-    private function calcularAdeudos(int $tiendaId, Carbon $fecha): float
+    private function calcularAdeudos($tiendaId = null, Carbon $fecha): float
     {
         return DB::table('ingresos_inventario')->when($tiendaId, fn($q) => $q->where('tienda_id',$tiendaId))
             ->whereNull('deleted_at')
@@ -83,20 +84,27 @@ class BalanceService
                 DB::raw('total_compra - total_pagado')
             );
     }
-    private function calcularApartados(int $tiendaId): float
+    private function calcularApartados($tiendaId = null): float
     {
         return DB::table('apartados')->when($tiendaId, fn($q) => $q->where('tienda_id',$tiendaId))
             ->whereNull('deleted_at')
             ->whereNull('liquidado_at')
             ->sum('monto_restante');
     }
-    private function calcularInventario(int $tiendaId, Carbon $fecha): float
+    private function calcularInventario( $tiendaId = null, Carbon $fecha): float
     {
-        return (float) DB::table('movimientos_inventario')
-            ->when($tiendaId, fn($q) => $q->where('tienda_id',$tiendaId))
-            ->where('fecha_movimiento','<=',$fecha)
-            ->selectRaw('COALESCE(SUM(cantidad_movimiento * costo_unitario), 0) as total')
-        ->value('total');
+        return InventarioTienda::join('muebles as m','m.id','=','inventario_tienda.mueble_id')
+            ->when($tiendaId, fn($q) => $q->where('inventario_tienda.tienda_id',$tiendaId))
+            ->selectRaw('
+                SUM(inventario_tienda.cantidad_stock *
+                    CASE WHEN m.precio_compra > 0 THEN m.precio_compra ELSE m.precio END
+                ) as total
+            ')->value('total');
+        // return (float) DB::table('movimientos_inventario')
+        //     ->when($tiendaId, fn($q) => $q->where('tienda_id',$tiendaId))
+        //     ->where('fecha_movimiento','<=',$fecha)
+        //     ->selectRaw('COALESCE(SUM(cantidad_movimiento * costo_unitario), 0) as total')
+        // ->value('total');
     }
 
 

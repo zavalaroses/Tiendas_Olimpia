@@ -292,8 +292,58 @@ let dao = {
             _gen.setTableScrollEspecial3(tPagos,columnsPagos,tblFormasPago);
             _gen.setTableScrollEspecial3(tMuebles,columnsMuebles,tblMuebles);
             
+        }); 
+    },
+    getKpis2: function () {
+        let tienda = $('#tiendas').val() ?? null;
+        let inicio = $('#fecha_inicio').val() ?? null;
+        let fin =  $('#fecha_fin').val() ?? null;
+        $.ajax({
+            url:'/get-data-kpis2-cobranza',
+            type:'get',
+            data:{'tienda':tienda,'inicio':inicio,'fin':fin},
+            contentType:'json',
+            headers:{ 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        }).done(function (response) {
+            const {apartadosActivos, saldoPendiente, entregas, entregasPendientes } = response;
+            $('#apartadosPendientes').text(apartadosActivos);
+            $('#saldoPendiente').text(money(saldoPendiente));
+            $('#entregas').text(entregas);
+            $('#entregasPendientes').text(entregasPendientes);
         });
-        
+    },
+    getDataBalances: function () {
+        let tienda = $('#tiendas').val() ?? null;
+        let inicio = $('#fecha_inicio').val() ?? null;
+        let fin = $('#fecha_fin').val() ?? null;
+        $.ajax({
+            url:'/get-data-balances',
+            type:'get',
+            data:{'tienda':tienda,'inicio':inicio,'fin':fin},
+            contentType:'json',
+            headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')}
+        }).done(function (response) {
+            const {balanceActual, balanceAnterior } = response;
+             $('#fechaActual').text(balanceActual.fecha);
+             $('#inventarioActual').text(money(balanceActual.inventario));
+             $('#cajaActual').text(money(balanceActual.caja));
+             $('#cuentaActual').text(money(balanceActual.bancos));
+             $('#apartadosActual').text(money(balanceActual.apartados));
+             $('#saldoFavorActual').text(money(balanceActual.saldo_favor));
+             $('#adeudosActual').text(money(balanceActual.adeudos));
+             $('#balanceActual').text(money(balanceActual.balance));
+
+             $('#fechaAnterior').text(balanceAnterior.fecha);
+             $('#inventarioAnterior').text(money(balanceAnterior.inventario));
+             $('#cajaAnterior').text(money(balanceAnterior.caja));
+             $('#cuentaAnterior').text(money(balanceAnterior.bancos));
+             $('#apartadosAnterior').text(money(balanceAnterior.apartados));
+             $('#saldoFavorAnterior').text(money(balanceAnterior.saldo_favor));
+             $('#adeudosAnterior').text(money(balanceAnterior.adeudos));
+             $('#balanceAnterior').text(money(balanceAnterior.balance));
+               
+        })
+
     }
     
 
@@ -319,10 +369,13 @@ $(document).ready(function () {
     $('button[data-bs-target="#tabGastos"]').on('shown.bs.tab', dao.cargarTablaGastos);
     $('button[data-bs-target="#tabInventario"]').on('shown.bs.tab', dao.cargarTablaInventario);
     $('button[data-bs-target="#tabProveedores"]').on('shown.bs.tab', dao.cargarTablaProveedores);
+
     $('#tiendas').on('change', function (e) {
         e.preventDefault();
         dao.getKpisPrincipales();
         dao.getTablasTops();
+        dao.getKpis2();
+        dao.getDataBalances();
     });
     
     $('#fecha_inicio').on('change',function (e) {
@@ -333,6 +386,8 @@ $(document).ready(function () {
         e.preventDefault();
         dao.getKpisPrincipales();
         dao.getTablasTops();
+        dao.getKpis2();
+        dao.getDataBalances();
     });
     $('#fecha_fin').on('change',function (e) {
         const inicioInput = document.getElementById('fecha_inicio');
@@ -341,6 +396,8 @@ $(document).ready(function () {
         }
         e.preventDefault();
         dao.getTablasTops();
+        dao.getKpis2();
+        dao.getDataBalances();
     });
     $('#btnGeneraReporte').on('click', function (e) {
         form = document.getElementById('formReporte');
