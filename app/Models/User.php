@@ -25,6 +25,7 @@ class User extends Authenticatable
         'password',
         'tienda_id',
         'rol',
+        'porcentaje_comision',
     ];
 
     /**

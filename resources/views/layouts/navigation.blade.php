@@ -78,7 +78,7 @@
                             <a href="{{ route('getReportesVentas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Ventas
                             </a>
-                            <a href="{{ route('getChoferes') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            {{-- <a href="{{ route('getChoferes') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Gastos
                             </a>
                             <a href="{{ route('getTiendas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
@@ -86,7 +86,7 @@
                             </a>
                             <a href="{{ route('getProveedores') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Proveedores
-                            </a>
+                            </a> --}}
                         </div>
                     </div>
                    

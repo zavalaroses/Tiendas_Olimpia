@@ -11,7 +11,7 @@ use App\Models\InventarioTienda;
 use App\Models\PagoIngresoInventario;
 use App\Models\Transaccion;
 use App\Models\Cuenta;
-use App\Models\MovimientoInventario;
+use App\Models\MovimientosInventario;
 use App\Models\catalogos\Mueble;
 use App\Http\Controllers\CajaController;
 use Carbon\Carbon;
@@ -104,7 +104,7 @@ class InventarioController extends Controller
                     'precio_compra'=>$request->precio[$index],
                 ]);
                 // ccreamos el movimiento del inventario
-                    MovimientoInventario::create([
+                    MovimientosInventario::create([
                         'tienda_id' => $idTienda,
                         'mueble_id' => $muebleId,
                         'tipo' => 'compra',

@@ -250,7 +250,7 @@
                                             <th scope="col">Tienda</th>
                                             <th scope="col">Rol</th>
                                             <th scope="col">Email</th>
-                                            <th scope="col">Fecha de ingreso</th>
+                                            <th scope="col">Comisión</th>
                                             <th scope="col">Acciones</th>
                                         </tr>
                                     </thead>
@@ -271,6 +271,7 @@
 </div>
 @include('usuarios.modalAddUsuario')
 @include('usuarios.modalVerComisiones')
+@include('usuarios.modalUpdateUser')
 <script src="/js/utilerias.js"></script>
 <script src="/js/usuarios/init.js"></script>
 <script>
