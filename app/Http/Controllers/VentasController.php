@@ -13,7 +13,9 @@ use App\Models\SalidaProducto;
 use App\Models\Cliente;
 use App\Models\Transaccion;
 use App\Models\Cuenta;
+use App\Models\User;
 use App\Models\ComisionVendedor;
+use App\Models\MovimientosInventario;
 use App\Models\catalogos\Chofer;
 use App\Models\catalogos\Tiendas;
 
@@ -305,7 +307,10 @@ class VentasController extends Controller
             DB::beginTransaction();
             $salida = Salida::join('apartados as a','a.id','=','salidas.apartado_id')
                 ->join('apartado_muebles as ap','ap.id_apartado','=','a.id')
-                ->select('a.tienda_id','ap.id_mueble','ap.cantidad','a.id as apartado_id')
+                ->join('muebles as m','m.id','=','ap.id_mueble')
+                ->select('a.tienda_id','ap.id_mueble','ap.cantidad','a.id as apartado_id',
+                    DB::raw('CASE WHEN precio_compra > 0 THEN precio_compra ELSE precio END as precio')
+                )
                 ->where('salidas.apartado_id',$request->id)
             ->get();
             
@@ -315,12 +320,29 @@ class VentasController extends Controller
                     'tienda_id'=>$mueble->tienda_id,
                     'mueble_id'=>$mueble->id_mueble,
                 ])->decrement('por_entregar',$mueble->cantidad);
+
+                #Registramos el movimiento del inventario...
+                MovimientosInventario::create([
+                    'tienda_id' => $mueble->tienda_id,
+                    'mueble_id' => $mueble->id_mueble,
+                    'tipo' => 'entrega',
+                    'cantidad' => $mueble->cantidad,
+                    'cantidad_movimiento' => -$mueble->cantidad,
+                    'costo_unitario' => $mueble->precio,
+                    'referencia_tipo' => $request->id,
+                    'fecha_movimiento' => Carbon::now()
+                ]);
             }
             Salida::where('apartado_id',$request->id)->update([
                 'estatus'=>'Entregado',
             ]);
             $apartado = Apartado::withTrashed()->find($request->id);
             if ($apartado->liquidado_at != null && $apartado->monto_anticipo > 0) {
+                $porcentaje = User::where('id',$apartado->usuario_id)->value('porcentaje_comision');
+                $totalSinEnvio = Apartado::withTrashed()->selectRaw('
+                    monto_anticipo - costo_envio as total
+                ')
+                ->whereNotNull('liquidado_at')->value('total');
                 # creamos la comicion para el vendedor...
                 ComisionVendedor::create([
                     'tienda_id'=>$apartado->tienda_id,
@@ -328,15 +350,16 @@ class VentasController extends Controller
                     'apartado_id' => $apartado->id,
                     'salida_id' => Salida::where('apartado_id',$apartado->id)->value('id'),
                     'monto_venta' => $apartado->monto_anticipo,
-                    'porcentaje' => 3, // porcentaje de comision
+                    'porcentaje' => $porcentaje, // porcentaje de comision
                     'monto_comision' => round(
-                        $apartado->monto_anticipo * 0.03, 2
+                        $totalSinEnvio * ($porcentaje / 100) 
                     ),
                     'fecha_entrega' => Carbon::now()->toDateString(),
                     'pagada' => false,
                     'fecha_pago' => null,
                 ]);
             }
+            
             DB::commit();
             $response = [
                 'icon'=>'success',

@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\ComisionVendedor;
+use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Validation\ValidationException;
 use Log;
 
 class UsuariosController extends Controller
@@ -17,7 +21,15 @@ class UsuariosController extends Controller
     }
     public function getDataUsuarios($tienda = null){
         try {
-            $users = User::select('users.id','t.nombre as tienda','name','apellidos','email','r.nombre as rol','users.created_at as ingreso')
+            $users = User::select(
+                'users.id',
+                't.nombre as tienda',
+                'name','apellidos',
+                'email',
+                'r.nombre as rol',
+                'users.created_at as ingreso',
+                'porcentaje_comision as comision'
+            )
             ->when($tienda, function($query)use($tienda){
                 $query->where('tienda_id',$tienda);
             })
@@ -125,8 +137,8 @@ class UsuariosController extends Controller
                 ->addDays(5)
                 ->toDateString();
             $query = ComisionVendedor::query()->where('usuario_id',$request->id)
-                ->whereBetween('fecha_entrega',[$inicioSemana,$finSemana]
-            )->where('pagada',0);
+                // ->whereBetween('fecha_entrega',[$inicioSemana,$finSemana]
+            ->where('pagada',0);
 
             $cantidad = $query->count();
 
@@ -288,6 +300,57 @@ class UsuariosController extends Controller
         ->get();
 
         return response()->json($usuarios,200);
+    }
+    public function getUserById($id){
+        $user = User::select(
+            'id',
+            'name',
+            'apellidos',
+            'email',
+            'porcentaje_comision',
+            'rol',
+            'tienda_id'
+        )->where('id',$id)->first();
+
+        return response()->json($user,200);
+    }
+    public function updateUser(Request $request){
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'apellidos' => 'required|string|max:255',
+            'email' => [
+                'required',
+                'email',
+                'string',
+                'max:255',
+                Rule::unique('users')->ignore($request->id)
+            ],
+            'comision' => 'required|numeric|min:1|max:100',
+        ]);
+        try {
+            DB::beginTransaction();    
+            User::where('id',$request->id)->update([
+                'name' => $request->name,
+                'apellidos' => $request->apellidos,
+                'email' => $request->email,
+                'porcentaje_comision' => $request->comision
+            ]);
+            DB::commit();
+            return response()->json([
+                'icon' => 'success',
+                'title' => 'Éxito',
+                'text' => 'Usuario actualizado con éxito'
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::debug($th->getMessage());
+            return response()->json([
+                'icon'=>'error',
+                'title'=>'Oops.',
+                'text'=>'A ocurrido un error al registrar.',
+            ],500);
+        }
+        
     }
     
 }

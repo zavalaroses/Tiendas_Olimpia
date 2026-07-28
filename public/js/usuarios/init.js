@@ -33,11 +33,11 @@ dao = {
                     },
                 },
                 { targets: [4], mData: "email" },
-                { targets: [5], mData: "ingreso" },
+                { targets: [5], mData: "comision" },
                 {
                     targets: [6],
                     mData: function (o) {
-                        return "Sin acciones";
+                        return '<button class="btn" onclick="dao.getDataEditar(' + o.id + ')"><i class="fas fa-pencil-alt" style="color: #1C85AA"></i></button>'
                     },
                 },
             ];
@@ -147,6 +147,31 @@ dao = {
                 }
             });
         });
+    },
+    updateUsuario: function () {
+        var form = $('#frm_upd_user')[0];
+        var data = new FormData(form);
+        $.ajax({
+            type:'post',
+            url:'/post-update-usuario',
+            data:data,
+            enctype:"multipart/form-data",
+            processData: false,
+            contentType:false,
+            cache:false,
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        }).done(function (response) {
+            Swal.fire({
+                icon:response.icon,
+                title:response.title,
+                text:response.text,
+            });
+            if (response.icon === 'success') {
+                dao.getData();
+            }
+        })
     },
     getDataComisionesActivas: function () {
         $.ajax({
@@ -474,6 +499,27 @@ dao = {
                 select.append(new Option(response[i].nombre, response[i].id, false, false));
             });
         })
+    },
+    getDataEditar: function (id) {
+        $.ajax({
+            url:'/get-data-to-edit/'+id,
+            type:'get',
+            dataType:'json',
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        }).done(function (response) {
+            $('#name_ed').val(response.name);
+            $('#apellidos_ed').val(response.apellidos);
+            $('#email_ed').val(response.email);
+            $('#comision_ed').val(response.porcentaje_comision);
+            $('#id_upd').val(response.id);
+            dao.getRoles('rol_ed',response.rol);
+            dao.getCatTiendas('tienda_ed',response.tienda_id);
+            const modal = new bootstrap.Modal(document.getElementById('modalUpdateUser'));
+            modal.show();
+            
+        });
     }
 };
 function generarPassword(longitud) {
@@ -499,6 +545,7 @@ init = {
             tienda : {required:true},
             email : {required:true},
             rol : {required:true},
+            comision: {required:true},
           
           },
           messages: {
@@ -507,7 +554,7 @@ init = {
             tienda: {required:'Este campo es requerido'},
             email: {required:'Este campo es requerido'},
             rol: {required:'Este campo es requerido'},
-            
+            comision: {required:'Este campo es requerido'}
           }
         })
     }
@@ -538,5 +585,13 @@ $(document).ready(function () {
         let fechaPago = $(this).data('fecha');
         dao.verDetallePago(usuarioId,fechaPago);
     });
+    $('#btn_update_user').on('click', function name(e) {
+        e.preventDefault();
+        init.validateUsuario($('#frm_upd_user'));
+        if ($('#frm_upd_user').valid()) {
+            dao.updateUsuario();    
+        }
+    });
+    
     
 });

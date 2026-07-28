@@ -59,9 +59,36 @@
                     </x-nav-link>
                    
                     {{-- link para reportes --}}
-                    <x-nav-link :href="route('getReportes')" :active="request()->routeIs('getReportes')">
+                    {{-- <x-nav-link :href="route('getReportes')" :active="request()->routeIs('getReportes')">
                         {{ 'Reportes' }}
-                    </x-nav-link>
+                    </x-nav-link> --}}
+                    <div x-data="{ openDropdown: false }" class="relative">
+                        <!-- Botón principal -->
+                        <button @click="openDropdown = !openDropdown"
+                            class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none transition duration-150 ease-in-out">
+                            Reportes
+                            <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <!-- Dropdown -->
+                        <div x-show="openDropdown" @click.outside="openDropdown = false"
+                            x-transition
+                            class="absolute z-50 mt-2 w-48 bg-white rounded-md shadow-lg">
+                            <a href="{{ route('getReportesVentas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Ventas
+                            </a>
+                            {{-- <a href="{{ route('getChoferes') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Gastos
+                            </a>
+                            <a href="{{ route('getTiendas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Inventario
+                            </a>
+                            <a href="{{ route('getProveedores') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Proveedores
+                            </a> --}}
+                        </div>
+                    </div>
                    
                     {{-- dropdown para catalogos --}}
                     <div x-data="{ openDropdown: false }" class="relative">

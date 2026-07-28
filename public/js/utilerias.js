@@ -439,55 +439,14 @@ var _gen = {
             tabla.DataTable().clear().rows.add(datelist).draw();
         } else {
             tabla.DataTable({
-                dom:
-                    "<'row'<'col-md-6'B><'col-md-6'f>>" +
-                    "<'row'<'col-12'tr>>" +
-                    "<'row'<'col-12 d-flex justify-content-between' i p>>",
-
-                // 🔥 Ajustes clave para que respete la altura
-                scrollY: height,
-                scrollCollapse: false,
-                scrollX: true,
-                responsive:false,
-                autoWidth:false,
-
-                buttons: [
-                    {
-                        extend: "excel",
-                        text: '<i class="fa fa-file-excel"></i> Excel',
-                        className: "btn btn-success btn-sm",
-                        filename: "reporte",
-                    },
-                    {
-                        extend: "pdf",
-                        text: '<i class="fa fa-file-pdf"></i> PDF',
-                        className: "btn btn-danger btn-sm",
-                        filename: "reporte",
-                    },
-                ],
-
-                language: {
-                    info: "Página _PAGE_ de _PAGES_",
-                    infoEmpty: "No hay registros disponibles",
-                    zeroRecords: "No hay registros disponibles",
-                    infoFiltered: "(filtrados de _MAX_ registros)",
-                    search: "Búsqueda:",
-                    infoThousands: ",",
-                    loadingRecords: "Cargando...",
-                    paginate: {
-                        first: "Primero",
-                        last: "Último",
-                        next: "Siguiente",
-                        previous: "Anterior",
-                    },
-                },
-
-                pageLength: pagination,
-                order: order,
+                dom:'t',
                 data: datelist,
                 columnDefs: columnDefs,
-
-
+                info:false,
+                searching:false,
+                ordering: false,
+                responsive:false,
+                autoWidth:false,
                 initComplete: function () {
                     let otable = tabla.DataTable().columns.adjust().draw();
 
