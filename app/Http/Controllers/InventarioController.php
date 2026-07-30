@@ -109,6 +109,7 @@ class InventarioController extends Controller
                         'mueble_id' => $muebleId,
                         'tipo' => 'compra',
                         'cantidad' => $request->cantidad[$index],
+                        'cantidad_movimiento' => $request->cantidad[$index],
                         'costo_unitario' => $request->precio[$index],
                         'referencia_tipo' => $entrada->id,
                         'fecha_movimiento' => Carbon::parse($request->fecha_ingreso),
