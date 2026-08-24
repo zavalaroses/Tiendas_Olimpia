@@ -64,27 +64,21 @@ dao = {
                         }
                     }
                 }},
-                {"aTargets": [6], "mData" : function(o){
+                {"aTargets":[6], "mData" : function(o){
                     if (o.estatus == 'Entregado') {
-                        return '<div class="dropdown">'+
-                            '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
-                                '<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu2">'+
-                                    '<li onclick="dao.modalGarantia(' + o.id + ', ' + o.id_salida + ','+o.id_tienda+')"><button class="dropdown-item"><i class="fas fa-shield-alt" style="color:#7C0A20"></i>&nbsp;Garantía</button></li>'+
-                                    '<li onclick="dao.verDetalles(' + o.id +')"><button class="dropdown-item"><i class="fa fa-eye" style="color: #7C0A20"></i>&nbsp;Detalles</button></li>'+
-                                '</ul>'+
-                            '</div>';
-                    }else{
-                        return '<div class="dropdown">'+
-                            '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
-                                '<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu2">'+
-                                    '<li onclick="dao.darSalida(' + o.id + ')"><button class="dropdown-item"><i class="fas fa-shipping-fast" style="color: #7C0A20"></i>&nbsp;Dar salida</button></li>'+
-                                    '<li onclick="dao.finalizarVenta(' + o.id +')"><button class="dropdown-item"><i class="fa-solid fa-house-circle-check" style="color: #7C0A20; opacity: 1;"></i>&nbsp;Entregado</button></li>'+
-                                    '<li onclick="dao.verDetalles(' + o.id +')"><button class="dropdown-item"><i class="fa fa-eye" style="color: #7C0A20"></i>&nbsp;Detalles</button></li>'+
-                                '</ul>'+
-                            '</div>';
+                        return '<div class="btn-group btn-group-sm" role="group">' +
+                            '<button class="btn btn-light" onclick="dao.modalGarantia(' + o.id + ', ' + o.id_salida + ','+o.id_tienda+')" title="Garantía"><i class="fas fa-shield-alt" style="color:#7C0A20"></i></button>' +
+                            '<button class="btn btn-light" onclick="dao.verDetalles(' + o.id +')" title="Detalles"><i class="fa fa-eye" style="color: #7C0A20"></i></button>' +
+                        '</div>';
+                    } else {
+                        return '<div class="btn-group btn-group-sm" role="group">' +
+                            '<button class="btn btn-light" onclick="dao.darSalida(' + o.id + ')" title="Dar salida"><i class="fas fa-shipping-fast" style="color: #7C0A20"></i></button>' +
+                            '<button class="btn btn-light" onclick="dao.finalizarVenta(' + o.id +')" title="Entregado"><i class="fa-solid fa-house-circle-check" style="color: #7C0A20"></i></button>' +
+                            '<button class="btn btn-light" onclick="dao.verDetalles(' + o.id +')" title="Detalles"><i class="fa fa-eye" style="color: #7C0A20"></i></button>' +
+                        '</div>';
                     }
-                    
-                }},
+                }}
+                
             ];
             _gen.setTableScrollEspecial2(table,columns,response);
         })
@@ -671,6 +665,5 @@ $(document).ready(function () {
             tienda = inputTienda.value
         }
         dao.getDataSalidas(tienda);
-    })
-
+    });
 });
