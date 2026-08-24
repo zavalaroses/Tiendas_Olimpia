@@ -401,7 +401,6 @@ var _gen = {
                 columnDefs: columnDefs,
             
                 responsive: true,
-                scrollX: true,
             
                 initComplete: function () {
                     let otable = tabla.DataTable().columns.adjust().draw();
@@ -431,7 +430,48 @@ var _gen = {
         pagination,
         order
     ) {
-        height = height || 600;
+        height = height || 800;
+        pagination = pagination || 50;
+        order = order || [];
+
+        if ($.fn.DataTable.isDataTable(tabla)) {
+            tabla.DataTable().clear().rows.add(datelist).draw();
+        } else {
+            tabla.DataTable({
+                dom:'t',
+                data: datelist,
+                columnDefs: columnDefs,
+                info:false,
+                searching:false,
+                ordering: false,
+                responsive:false,
+                autoWidth:false,
+                scrollY: height +'px',
+                initComplete: function () {
+                    let otable = tabla.DataTable().columns.adjust().draw();
+
+                    // Popovers
+                    otable.$('[data-bs-toggle="popover"]').each(function () {
+                        new Popover(this);
+                    });
+
+                    // Tooltips
+                    otable.$('[data-bs-toggle="tooltip"]').each(function () {
+                        new Tooltip(this);
+                    });
+                },
+            });
+        }
+    },
+    setTableScrollEspecial4: function (
+        tabla,
+        columnDefs,
+        datelist,
+        height,
+        pagination,
+        order
+    ) {
+        height = height || 800;
         pagination = pagination || 50;
         order = order || [];
 

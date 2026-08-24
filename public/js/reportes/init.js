@@ -287,10 +287,10 @@ let dao = {
                 
             ];
 
-            _gen.setTableScrollEspecial3(tVentas,columnsVentas,tblVentas);
-            _gen.setTableScrollEspecial3(tVendedores,columnsVendedores,tblVendedores);
-            _gen.setTableScrollEspecial3(tPagos,columnsPagos,tblFormasPago);
-            _gen.setTableScrollEspecial3(tMuebles,columnsMuebles,tblMuebles);
+            _gen.setTableScrollEspecial4(tVentas,columnsVentas,tblVentas);
+            _gen.setTableScrollEspecial4(tVendedores,columnsVendedores,tblVendedores);
+            _gen.setTableScrollEspecial4(tPagos,columnsPagos,tblFormasPago);
+            _gen.setTableScrollEspecial4(tMuebles,columnsMuebles,tblMuebles);
             
         }); 
     },

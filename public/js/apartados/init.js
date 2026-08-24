@@ -24,16 +24,25 @@ dao = {
                 {"targets":[2],"mData":'anticipo'},
                 {"targets":[3],"mData":'restante'},
                 {"targets":[4],"mData":'fecha_apartado'},
-                {"aTargets": [5], "mData" : function(o){
-                    return '<div class="dropdown">'+
-                    '<button type="button" class="btn btn-light" data-bs-toggle="dropdown"  aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>'+
-                        '<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu2">'+
-                            '<li onclick="dao.pagar(' + o.id + ')"><button class="dropdown-item"><i class="fa-solid fa-cash-register" style="color: #1C85AA"></i>&nbsp;Abonar</button></li>'+
-                            '<li onclick="dao.verDetalles(' + o.id +')"><button class="dropdown-item"><i class="fa fa-eye" style="color: #D48D8D"></i>&nbsp;Detalles</button></li>'+
-                            '<li onclick="dao.editar(' + o.id +')"><button class="dropdown-item"><i class="fa fa-edit" style="color: #1caa68"></i>&nbsp;Editar</button></li>'+
-                        '</ul>'+
+                {"aTargets":[5], "mData" : function(o){
+                    return '<div class="d-flex gap-1">' +
+                        // Botón Abonar
+                        '<button class="btn btn-sm btn-light" onclick="dao.pagar(' + o.id + ')" title="Abonar">' +
+                            '<i class="fa-solid fa-cash-register" style="color: #7C0A20"></i>' +
+                        '</button>' +
+                        
+                        // Botón Detalles
+                        '<button class="btn btn-sm btn-light" onclick="dao.verDetalles(' + o.id + ')" title="Ver Detalles">' +
+                            '<i class="fa fa-eye" style="color: #7C0A20"></i>' +
+                        '</button>' +
+                        
+                        // Botón Editar
+                        '<button class="btn btn-sm btn-light" onclick="dao.editar(' + o.id + ')" title="Editar">' +
+                            '<i class="fa fa-edit" style="color: #7C0A20"></i>' +
+                        '</button>' +
                     '</div>';
                 }},
+                
             ];
             _gen.setTableScrollEspecial2(table,columns,response);
         });

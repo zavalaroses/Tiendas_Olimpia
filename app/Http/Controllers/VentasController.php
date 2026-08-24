@@ -339,21 +339,18 @@ class VentasController extends Controller
             $apartado = Apartado::withTrashed()->find($request->id);
             if ($apartado->liquidado_at != null && $apartado->monto_anticipo > 0) {
                 $porcentaje = User::where('id',$apartado->usuario_id)->value('porcentaje_comision');
-                $totalSinEnvio = Apartado::withTrashed()->selectRaw('
-                    monto_anticipo - costo_envio as total
-                ')
-                ->whereNotNull('liquidado_at')->value('total');
+                $totalSinEnvio = $apartado->monto_anticipo - $apartado->costo_envio;
+                
+                $montoComision = round($totalSinEnvio * ($porcentaje / 100),2);
                 # creamos la comicion para el vendedor...
-                ComisionVendedor::create([
+                $comision_generada = ComisionVendedor::create([
                     'tienda_id'=>$apartado->tienda_id,
                     'usuario_id'=>$apartado->usuario_id,
                     'apartado_id' => $apartado->id,
                     'salida_id' => Salida::where('apartado_id',$apartado->id)->value('id'),
-                    'monto_venta' => $apartado->monto_anticipo,
+                    'monto_venta' => $totalSinEnvio,
                     'porcentaje' => $porcentaje, // porcentaje de comision
-                    'monto_comision' => round(
-                        $totalSinEnvio * ($porcentaje / 100) 
-                    ),
+                    'monto_comision' => $montoComision,
                     'fecha_entrega' => Carbon::now()->toDateString(),
                     'pagada' => false,
                     'fecha_pago' => null,
