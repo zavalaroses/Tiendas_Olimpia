@@ -179,6 +179,7 @@ Route::middleware(['auth','role'])->controller(ReportesController::class)->group
     Route::get('/test-balance', function(BalanceService $service) {
         return response()->json($service->calcular(3,now()));
     });
+    Route::get('/get-listado-ventas-index','getListadoVentasIndex')->name('getListadoVentasIndex');
 });
 
 require __DIR__.'/auth.php';

@@ -15,31 +15,31 @@
                     <form class="d-flex" id="formReporte" method="POST">
                         @csrf
                         <div class="col-md-3">
-                            <input type="date" id="fecha_inicio" name="inicio" class="form-control">
+                            <input type="date" id="fil_ini" name="inicio" class="form-control">
                         </div>
 
                         <div class="col-md-3">
-                            <input type="date" id="fecha_fin" name="fin" class="form-control">
+                            <input type="date" id="fil_fin" name="fin" class="form-control">
                         </div>
 
                         @if(Auth::user()->rol == 1)
                         <div class="col-md-3">
-                            <select id="tiendas" name="tiendas" class="form-control">
+                            <select id="fil_tiendas" name="tiendas" class="form-control">
                                 <option value="">Todas</option>
                                 {{-- llenar por AJAX o blade --}}
                             </select>
                         </div>
                         @endif
 
-                        <div class="col-md-3">
+                        {{-- <div class="col-md-3">
                             <button class="btn btn-primary w-100" type="button" id="btnGeneraReporte" >
                                 Generar reporte
                             </button>
-                        </div>
+                        </div> --}}
                     </form>
                 </div>
                  {{-- 💰 KPIs --}}
-                <div class="row g-3">
+                {{-- <div class="row g-3">
                     <div class="col-md-3">
                         <div class="card shadow-sm border-start border-success border-4">
                             <div class="card-body">
@@ -72,9 +72,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
                 {{-- 🏦 SEGUNDA FILA KPIs --}}
-                <div class="row g-3 mt-1">
+                {{-- <div class="row g-3 mt-1">
                     <div class="col-md-3">
                         <div class="card shadow-sm">
                             <div class="card-body">
@@ -107,7 +107,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
             </div>
             {{-- 📊 TABS DETALLE --}}
             <div>
@@ -118,7 +118,7 @@
                         </button>
                     </li>
 
-                    <li class="nav-item me-2" role="presentation">
+                    {{-- <li class="nav-item me-2" role="presentation">
                         <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabGastos">
                             Gastos
                         </button>
@@ -134,7 +134,7 @@
                         <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabProveedores">
                             Proveedores
                         </button>
-                    </li>
+                    </li> --}}
                 </ul>
                 <div class="alert alert-light border rounded-4">
                     <div class="tab-content mt-3">
@@ -143,10 +143,20 @@
                             <div id="tablaVentas">
                                 <table class="table table-sm table-striped" id="tbl_apartados">
                                     <thead>
-                                        <th>Fecha</th>
-                                        <th>Concepto</th>
-                                        <th>Pago</th>
-                                        <th>Monto</th>
+                                        <th>ID</th>
+                                        <th>Clave</th>
+                                        <th>Tienda</th>
+                                        <th>Total venta</th>
+                                        <th>Costo envío</th>
+                                        {{-- <th>Estatus</th> --}}
+                                        {{-- <th>Fecha apartado</th> --}}
+                                        <th>Fecha liquidación</th>
+                                        <th>Fecha entrega</th>
+                                        <th>Entregado por</th>
+                                        <th>Mueble</th>
+                                        <th>Precio</th>
+                                        <th>Cantidad</th>
+                                        <th>Subtotal</th>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
@@ -208,9 +218,9 @@
 
 <script src="/js/utilerias.js"></script>
 <script src="/js/reportes/init.js"></script>
-<script>
+{{-- <script>
     const rutaPruebaPDF = "{{ route('pruebaPDF') }}";
-</script>
+</script> --}}
 
 
 @endsection

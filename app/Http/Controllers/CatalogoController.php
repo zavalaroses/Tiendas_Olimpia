@@ -593,7 +593,7 @@ class CatalogoController extends Controller
                 'tienda_id' => $request->tienda ? $request->tienda : Auth::user()->tienda_id,
                 'usuario_id' => Auth::user()->id,
                 'monto' => $request->monto,
-                'metodo_pagp' => $request->metodo_pago,
+                'metodo_pago' => $request->metodo_pago,
                 'tipo' => 'cargo',
                 'descripcion' => $request->descripcion ? $request->descripcion : null,
                 'fecha' => now()
@@ -605,7 +605,8 @@ class CatalogoController extends Controller
                 'tipo_pago' => $request->metodo_pago,
                 'tipo_movimiento' => 'salida',
                 'descripcion' => 'Saldo a favor proveedor',
-                'user_id' => Auth::user()->id
+                'user_id' => Auth::user()->id,
+                'venta_id' => $proveedor->id ?? null,
             ]);
             // afectamos a la cuenta si es de cuenta
             if ($request->metodo_pago !== 'efectivo') {
