@@ -422,6 +422,10 @@
 <script src="/js/reportes/init.js"></script>
 <script>
     $(document).ready(function () {
+        const tienda = document.getElementById('tiendas');
+        if (tienda) {
+            dao.getCatTiendas('tiendas');
+        }
         dao.getKpisPrincipales();
         dao.getTablasTops();
         dao.getKpis2();
