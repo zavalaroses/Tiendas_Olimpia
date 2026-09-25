@@ -394,6 +394,13 @@ $(document).ready(function () {
         e.preventDefault();
         dao.cargarTablaVentas();
     });
+    $('#tiendas').on('change', function (e) {
+        e.preventDefault();
+        dao.getKpisPrincipales();
+        dao.getTablasTops();
+        dao.getKpis2();
+        dao.getDataBalances();
+    });
     
     $('#fil_ini').on('change',function (e) {
         const finInput = document.getElementById('fil_fin');
@@ -403,6 +410,17 @@ $(document).ready(function () {
         e.preventDefault();
         dao.cargarTablaVentas();
     });
+    $('#fecha_inicio').on('change',function (e) {
+        const finInput = document.getElementById('fecha_fin');
+        if(this.value){
+            finInput.min = this.value; // fin nunca menor que inicio
+        }
+        e.preventDefault();
+        dao.getKpisPrincipales();
+        dao.getTablasTops();
+        dao.getKpis2();
+        dao.getDataBalances();
+    });
     $('#fil_fin').on('change',function (e) {
         const inicioInput = document.getElementById('fil_ini');
         if(this.value){
@@ -410,6 +428,17 @@ $(document).ready(function () {
         }
         e.preventDefault();
         dao.cargarTablaVentas();
+    });
+    $('#fecha_fin').on('change',function (e) {
+        const inicioInput = document.getElementById('fecha_inicio');
+        if(this.value){
+            inicioInput.max = this.value; // inicio nunca mayor que fin
+        }
+        e.preventDefault();
+        dao.getKpisPrincipales();
+        dao.getTablasTops();
+        dao.getKpis2();
+        dao.getDataBalances();
     });
     $('#btnGeneraReporte').on('click', function (e) {
         form = document.getElementById('formReporte');
