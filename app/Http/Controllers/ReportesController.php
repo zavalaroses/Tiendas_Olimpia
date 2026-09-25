@@ -23,6 +23,9 @@ class ReportesController extends Controller
     public function getReportes(){
         return view('reportes.index');
     }
+    public function getListadoVentasIndex(){
+        return view('reportes.index');
+    }
 
     public function getDataResumen(Request $request){
         $tiendaId = $request->tienda ?: Auth::user()->tienda_id;
@@ -39,22 +42,82 @@ class ReportesController extends Controller
         $fin = $request->fin;
 
         // helper filtro fechas
-        $filtroFecha = function ($q, $col = 'created_at') use ($inicio, $fin){
+        $filtroFecha = function ($q, $col = 's.fecha_entrega') use ($inicio, $fin){
             if ($inicio) $q->whereDate($col, '>=', $inicio);
             if ($fin) $q->whereDate($col, '<=', $fin);
         };
 
-        $data = Transaccion::withTrashed()->where('tipo_movimiento','entrada')
-            ->select(
-                'created_at',
-                'descripcion',
-                'cantidad',
-                'tipo_pago',
-            )
-            ->when($tiendaId, fn($q)=>$q->where('tienda_id',$tiendaId))
+        $columnasVenta = [
+            'apartado_id',
+            'tienda',
+            'clave',
+            'total_de_venta',
+            'costo_envio',
+            'estatus',
+            'fecha_apartado',
+            'fecha_de_liquidacion',
+            'fecha_entrega',
+            'entregado_por',
+        ];
+         
+        $reporteBase = DB::table('salidas as s')
+            ->select([
+                's.apartado_id',
+                'a.clave',
+                't.nombre as tienda',
+                'a.monto_anticipo as total_de_venta',
+                'a.costo_envio',
+                's.estatus',
+                'a.fecha_apartado',
+                'a.liquidado_at as fecha_de_liquidacion',
+                's.fecha_entrega',
+                'm.nombre as mueble_nombre',
+                'm.precio as mueble_precio',
+                'am.cantidad as cantidad_por_mueble',
+                DB::raw('(am.cantidad * m.precio) as subtotal'),
+                'u.name as entregado_por',
+                DB::raw('
+                    ROW_NUMBER() OVER(
+                        PARTITION BY s.apartado_id
+                            ORDER BY m.id
+                    ) as fila_mueble
+                ')
+            ])
+            ->join('apartados as a', 'a.id', '=', 's.apartado_id')
+            ->join('users as u', 'u.id', '=', 's.usuario_id')
+            ->join('apartado_muebles as am', 'am.id_apartado', '=', 'a.id')
+            ->join('muebles as m', 'm.id', '=', 'am.id_mueble')
+            ->join('tiendas as t', 't.id', '=', 'a.tienda_id')
             ->when($inicio || $fin, fn($q) => $filtroFecha($q))
-            ->orderByDesc('id')
-        ->get();
+            ->where('s.estatus', 'Entregado')
+            ->whereNull('am.deleted_at')
+            ->when($tiendaId, fn($q) => $q->where('a.tienda_id', $tiendaId));
+
+            $selectVenta = collect($columnasVenta)
+                ->map(fn ($columna) => DB::raw("
+                    CASE 
+                        WHEN ReporteBase.fila_mueble = 1 
+                        THEN ReporteBase.{$columna}
+                        ELSE NULL
+                    END AS {$columna}
+                "))
+            ->toArray();
+            // dd($reporteBase->get());
+
+            $data = DB::query()
+                ->fromSub($reporteBase, 'ReporteBase')
+                ->select([
+                    ...$selectVenta,
+                    'ReporteBase.mueble_nombre',
+                    'ReporteBase.mueble_precio',
+                    'ReporteBase.cantidad_por_mueble',
+                    'ReporteBase.subtotal',
+                ])
+                ->orderBy('ReporteBase.fecha_entrega')
+                ->orderBy('ReporteBase.apartado_id')
+                ->orderBy('ReporteBase.fila_mueble')
+            ->get();
+
         return response()->json($data,200);
 
     }

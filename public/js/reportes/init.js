@@ -29,14 +29,14 @@ let dao = {
         
     },
     cargarTablaVentas : function () {
-        const tienda = document.getElementById('tiendas');
+        const tienda = document.getElementById('fil_tiendas');
         let idTienda = null;
         if (tienda) {
             idTienda = tienda.value;
         }
         const data = {
-            inicio: $('#fecha_inicio').val(),
-            fin: $('#fecha_fin').val(),
+            inicio: $('#fil_ini').val(),
+            fin: $('#fil_fin').val(),
             tienda: idTienda,
         };
         $.ajax({
@@ -47,20 +47,40 @@ let dao = {
             headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')}
         }).done(function (response) {
             const table = $('#tbl_apartados');
-            const columns = [
-                {"targets":[0],"mData": function(o){
-                    if(!o.created_at) return '-';
-            
-                    const fecha = new Date(o.created_at);
-                    return fecha.toLocaleDateString('es-MX'); 
+            const columns  = [
+                {"targets":[0],"mData":'apartado_id'},
+                {"targets":[1],"mData":function(o){
+                    return o.clave ?? '';
                 }},
-                {"targets":[1],"mData":'descripcion'},
-                {"targets":[2],"mData":'tipo_pago'},
-                {"targets":[3],"mData":function (o) {
-                    return money(o.cantidad);
+                {"targets":[2],"mData":function(o){
+                    return o.tienda ?? '';
+                }},
+                {"targets":[3],"mData":function(o){
+                    return o.total_de_venta ? money(o.total_de_venta) : '';
+                }},
+                {"targets":[4],"mData":function(o){
+                    return o.costo_envio ? money(o.costo_envio) : '';
+                }},
+                {"targets":[5],"mData":function(o){
+                    return o.fecha_de_liquidacion ?? '';
+                }},
+                {"targets":[6],"mData":function(o){
+                    return o.fecha_entrega ?? '';
+                }},
+                {"targets":[7],"mData":function(o){
+                    return o.entregado_por ?? '';
+                }},
+                {"targets":[8],"mData":'mueble_nombre'},
+                {"targets":[9],"mData":function(o){
+                    return o.mueble_precio ? money(o.mueble_precio) : '';
+                }},
+                {"targets":[10],"mData":'cantidad_por_mueble'},
+                {"targets":[11],"mData":function(o){
+                    return o.subtotal ? money(o.subtotal) : '';
                 }},
             ];
-            _gen.setTableScrollEspecial2(table,columns,response);    
+            
+            _gen.setTableVentas(table,columns,response);    
         });
     },
     cargarTablaGastos: function () {
@@ -359,45 +379,37 @@ function money(n) {
 }
 
 $(document).ready(function () {
-    const tienda = document.getElementById('tiendas');
+    const tienda = document.getElementById('fil_tiendas');
     dao.getDataResumen(); 
     dao.cargarTablaVentas();
     if (tienda) {
-        dao.getCatTiendas('tiendas');    
+        dao.getCatTiendas('fil_tiendas');    
     }
     $('button[data-bs-target="#tabVentas"]').on('shown.bs.tab', dao.cargarTablaVentas);
     $('button[data-bs-target="#tabGastos"]').on('shown.bs.tab', dao.cargarTablaGastos);
     $('button[data-bs-target="#tabInventario"]').on('shown.bs.tab', dao.cargarTablaInventario);
     $('button[data-bs-target="#tabProveedores"]').on('shown.bs.tab', dao.cargarTablaProveedores);
 
-    $('#tiendas').on('change', function (e) {
+    $('#fil_tiendas').on('change', function (e) {
         e.preventDefault();
-        dao.getKpisPrincipales();
-        dao.getTablasTops();
-        dao.getKpis2();
-        dao.getDataBalances();
+        dao.cargarTablaVentas();
     });
     
-    $('#fecha_inicio').on('change',function (e) {
-        const finInput = document.getElementById('fecha_fin');
+    $('#fil_ini').on('change',function (e) {
+        const finInput = document.getElementById('fil_fin');
         if(this.value){
             finInput.min = this.value; // fin nunca menor que inicio
         }
         e.preventDefault();
-        dao.getKpisPrincipales();
-        dao.getTablasTops();
-        dao.getKpis2();
-        dao.getDataBalances();
+        dao.cargarTablaVentas();
     });
-    $('#fecha_fin').on('change',function (e) {
-        const inicioInput = document.getElementById('fecha_inicio');
+    $('#fil_fin').on('change',function (e) {
+        const inicioInput = document.getElementById('fil_ini');
         if(this.value){
             inicioInput.max = this.value; // inicio nunca mayor que fin
         }
         e.preventDefault();
-        dao.getTablasTops();
-        dao.getKpis2();
-        dao.getDataBalances();
+        dao.cargarTablaVentas();
     });
     $('#btnGeneraReporte').on('click', function (e) {
         form = document.getElementById('formReporte');

@@ -76,11 +76,12 @@
                             x-transition
                             class="absolute z-50 mt-2 w-48 bg-white rounded-md shadow-lg">
                             <a href="{{ route('getReportesVentas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                General
+                            </a>
+                             <a href="{{ route('getListadoVentasIndex') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Ventas
                             </a>
-                            {{-- <a href="{{ route('getChoferes') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                Gastos
-                            </a>
+                            {{--
                             <a href="{{ route('getTiendas') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 Inventario
                             </a>
